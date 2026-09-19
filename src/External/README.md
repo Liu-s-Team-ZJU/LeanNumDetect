@@ -1,6 +1,6 @@
 # External
 
-This directory is the registration boundary for original theorems and formulas from external literature that have not yet been formalized. It currently contains no external-result Lean files; the project has no direct admissions.
+This directory is the registration boundary for original theorems and formulas from external literature that have not yet been formalized.
 
 ## Registration policy
 
@@ -12,8 +12,7 @@ Preserve the source's full statement, hypotheses, parameters, and normalization.
 
 | File | Original source | Original theorem or formula identifier | Lean declaration |
 | --- | --- | --- | --- |
-
-There are currently no entries. The empty registry and its rules are retained for future external results.
+| `SeparatedCubeFourier.lean` | Weilin Li, *Nonharmonic multivariate Fourier transforms and matrices: condition numbers and hyperplane geometry*, Applied and Computational Harmonic Analysis 79 (2025), 101791 | Theorem 2.3 | `External.separatedCubeFourier_frame` |
 
 ## Enforcement
 

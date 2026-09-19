@@ -5,15 +5,16 @@ segmented Vandermonde, and MUSIC results in the NumDetect manuscript.
 
 ## Current coverage
 
-The initial formalization imports the proved one-dimensional specialization of
-the manuscript's segmented Vandermonde bound (`thm:segmented-vandermonde`).
-Its primary entry point is
+[NumDetectMain](src/NumDetectMain/README.md) contains the definitions and
+principal theorem formalizations for generalized Hankel/Toeplitz matrices,
+source-number detection, contiguous and segmented Vandermonde bounds, random
+sampling, and MUSIC stability. Its aggregate import is
+`NumDetectMain.Main`.
+
+The repository also contains a proved one-dimensional specialization of the
+manuscript's segmented Vandermonde bound. Its primary entry point is
 `SegmentedVDM.small_clumps_singularValue` in
 [PaperTheorem.lean](src/SegmentedVDM/PaperTheorem.lean).
-
-This result is not the manuscript's arbitrary-dimensional theorem. The remaining
-GHM factorization, thresholding, randomized sampling, multidimensional
-Vandermonde, and MUSIC stability results are not yet formalized.
 
 The repository also carries the reusable dependency chain for this theorem and
 selected matrix and spectral tools likely to be needed next:
@@ -21,6 +22,7 @@ selected matrix and spectral tools likely to be needed next:
 | Directory | Purpose |
 | --- | --- |
 | [SegmentedVDM](src/SegmentedVDM/README.md) | One-dimensional segmented Vandermonde construction and singular-value bound |
+| [NumDetectMain](src/NumDetectMain/README.md) | Manuscript definitions and principal theorem statements |
 | [General/Fourier](src/General/Fourier/README.md) | Cosine-window, Parseval, and separated-sampling estimates |
 | [General/MatrixAnalysis](src/General/MatrixAnalysis/README.md) | Gram, singular-value, pseudoinverse, and variational tools |
 | [General/SpectralPerturbation](src/General/SpectralPerturbation/README.md) | Eigenvalue enumeration and perturbation matching |
@@ -44,5 +46,6 @@ python3 .github/ci/check.py
 ```
 
 The final command compiles every Lean source file and rejects proof admissions
-outside `src/External/` as well as project axioms. See
+outside `src/External/` as well as project axioms. Only registered original
+results may remain admitted under `src/External/`. See
 [the CI guide](.github/ci/README.md) and [AGENTS.md](AGENTS.md) for details.
