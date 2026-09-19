@@ -1,0 +1,54 @@
+name: Lean CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lean-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-audit:
+    name: Compile all Lean sources and audit admissions
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      LEAN_NUM_THREADS: "2"
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - name: Locate the shared mathlib installation
+        id: dependencies
+        run: python3 .github/ci/setup_mathlib.py --paths
+
+      - name: Cache Lean and pinned mathlib dependencies
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: |
+            ~/.elan
+            ${{ steps.dependencies.outputs.mathlib-directory }}
+          key: lean-dependencies-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain', 'lakefile.toml', 'lake-manifest.json', '.github/ci/mathlib-revision') }}
+
+      - name: Prepare the pinned mathlib checkout
+        run: python3 .github/ci/setup_mathlib.py
+
+      - name: Install Lean and obtain mathlib build artifacts
+        uses: leanprover/lean-action@50fcf42d2e460296f1a34b402e990d1b24f8b596 # v1
+        with:
+          auto-config: "false"
+          build: "false"
+          test: "false"
+          lint: "false"
+          use-mathlib-cache: "true"
+          use-github-cache: "false"
+
+      - name: Compile every source file and check the admission boundary
+        run: python3 .github/ci/check.py
