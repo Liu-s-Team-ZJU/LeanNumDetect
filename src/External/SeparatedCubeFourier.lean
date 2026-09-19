@@ -1,10 +1,16 @@
 import Mathlib
 
 /-!
-The separated-node cube estimates from Li's nonharmonic multivariate Fourier
-theorem, stated in the source normalization.  Nodes lie in the half-open unit
-cube, Fourier phases use `-2πi ω · x`, and the sampling cube has real radius
-`m`.  Both the continuous and integer-sampled frame bounds are retained.
+Definitions for separated-node cube Fourier estimates in Li's source
+normalization. Nodes lie in the half-open unit cube, Fourier phases use
+`-2πi ω · x`, and the sampling cube has real radius `m`.
+
+The former admitted statement of Li's Theorem 2.3 was removed after source
+audit: its continuous and discrete conclusions require different separation
+metrics, and the published proof's reduction from real to integer sampling
+radius does not preserve its separation hypothesis. The proved reductions
+toward corrected continuous and discrete statements live under
+`General.Fourier`.
 -/
 
 set_option autoImplicit false
@@ -59,41 +65,6 @@ noncomputable def discreteCubeFourierEnergy
     ‖∑ j, c j * Complex.exp
       (-2 * Real.pi * Complex.I *
         (∑ k, ((ω k : ℤ) : ℂ) * x j k))‖ ^ 2
-
-/-- Weilin Li, *Nonharmonic multivariate Fourier transforms and matrices:
-condition numbers and hyperplane geometry*, Applied and Computational Harmonic
-Analysis 79 (2025), 101791, Theorem 2.3.
-
-This is the theorem's equivalent quadratic-frame formulation.  It retains its
-real cube radius, full finite node family, unit-torus normalization, and both
-the continuous and discrete conclusions. -/
-theorem separatedCubeFourier_frame
-    {d : ℕ} {ι : Type*} [Fintype ι]
-    (m β : ℝ) (x : ι → UnitTorusPoint d)
-    (hd : 2 ≤ d) (hm : 1 ≤ m)
-    (hβ : 1 / (2 * Real.log 2) ≤ β)
-    (hx : ∀ j, InUnitHalfOpenCube (x j))
-    (hsep : ∀ i j, i ≠ j →
-      β * d / m ≤ unitPeriodicLInfDistance (x i) (x j)) :
-    (∀ c,
-      (2 - Real.exp (1 / (2 * β))) * (2 * m) ^ d *
-          coefficientEnergy c ≤
-        continuousCubeFourierEnergy m x c) ∧
-    (∀ c,
-      continuousCubeFourierEnergy m x c ≤
-        Real.exp (1 / (2 * β)) * (2 * m) ^ d *
-          coefficientEnergy c) ∧
-    (∀ c,
-      (2 - Real.exp (1 / (2 * β))) *
-          Fintype.card (CenteredCubeFrequency d m) *
-          coefficientEnergy c ≤
-        discreteCubeFourierEnergy m x c) ∧
-    ∀ c,
-      discreteCubeFourierEnergy m x c ≤
-        Real.exp (1 / (2 * β)) *
-          Fintype.card (CenteredCubeFrequency d m) *
-          coefficientEnergy c := by
-  sorry
 
 end
 

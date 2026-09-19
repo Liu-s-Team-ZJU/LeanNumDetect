@@ -12,7 +12,19 @@ Preserve the source's full statement, hypotheses, parameters, and normalization.
 
 | File | Original source | Original theorem or formula identifier | Lean declaration |
 | --- | --- | --- | --- |
-| `SeparatedCubeFourier.lean` | Weilin Li, *Nonharmonic multivariate Fourier transforms and matrices: condition numbers and hyperplane geometry*, Applied and Computational Harmonic Analysis 79 (2025), 101791 | Theorem 2.3 | `External.separatedCubeFourier_frame` |
+
+There are currently no admitted external results.
+
+`SeparatedCubeFourier.lean` retains only source-normalized definitions. The
+former registration of Li's Theorem 2.3 was removed after source audit found
+that the combined Lean statement used torus separation for both its continuous
+and discrete conclusions, whereas the source uses Euclidean separation for the
+continuous operator. The source's proof of the discrete statement for arbitrary
+real radius also replaces `m` by `⌊m⌋` without preserving the separation
+hypothesis. Fully proved algebraic and measure-theoretic reductions are recorded
+in `General/Fourier/SeparatedCubeFourierInternal.lean` and
+`General/Fourier/SeparatedCubeFourierContinuous.lean`; the missing
+Beurling--Selberg/Barton extremal-function construction is not admitted.
 
 ## Enforcement
 

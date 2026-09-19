@@ -54,13 +54,16 @@ fixed-rank perturbation estimate is proved in
 it is not an external admission.
 
 The manuscript-shaped segmented theorems use an explicit `HasFineCubeFrame`
-hypothesis. Automatic corollaries discharge it when $d\ge2$ and the
-localization cutoff is even, and a separate proved one-dimensional corollary
-covers the stated half-frame range. The manuscript instead applies Li's
-centered integer-cube theorem to a one-sided cube for every cutoff and to
-$d=1$; the cited theorem is stated only for $d\ge2$, and the required integer
-translation is available only for an even cutoff. The unrestricted manuscript
-range therefore remains an analytic gap in the paper's proof.
+hypothesis, and a proved one-dimensional corollary covers the stated
+half-frame range. The former automatic multivariate corollaries were removed:
+they depended on an admitted combined version of Li's centered-cube theorem.
+Source audit found that Li uses Euclidean separation for the continuous result
+and torus separation for the discrete result, while the former Lean statement
+used torus separation for both. The cited theorem is also stated only for
+$d\ge2$, and its published discrete proof for arbitrary real radius replaces
+$m$ by $\lfloor m\rfloor$ without preserving the separation hypothesis. The
+unrestricted manuscript range therefore remains an analytic gap rather than an
+admitted theorem.
 
 The constant-$2$ CRL lower bound, including the positive-amplitude case, is
 proved directly by a finite-difference construction. The Liu--Zhang result
@@ -71,7 +74,7 @@ constant-$2$ formula, but it does not rely on that citation.
 
 ## Proof status
 
-All declarations under `NumDetectMain` and `General` are proved without
-admissions. The one remaining admitted original result is isolated and
-registered under [`External`](../External/README.md); the repository proof
-policy and CI admission audit are unchanged.
+All declarations in the repository are proved without admissions. The
+separated-cube work records proved reductions to the missing Barton
+extremal-function and sharp off-diagonal estimates, but does not assert those
+inputs as axioms or admitted theorems.

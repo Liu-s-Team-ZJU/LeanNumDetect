@@ -30,7 +30,16 @@ argument at the critical separation.
 | Periodic orthogonality | [CosineWindowOrthogonality.lean](CosineWindowOrthogonality.lean), [ExponentialWindowOrthogonality.lean](ExponentialWindowOrthogonality.lean) |
 | Exact lower bounds | [SineTailProduct.lean](SineTailProduct.lean), [NormalizedCosineIntegral.lean](NormalizedCosineIntegral.lean), [CosineGammaIntegral.lean](CosineGammaIntegral.lean), [CosineWindowFourierLower.lean](CosineWindowFourierLower.lean), [CosineSquaredEnergy.lean](CosineSquaredEnergy.lean) |
 | Final sampling estimate | [SeparatedFourierEnergy.lean](SeparatedFourierEnergy.lean), [SeparatedSampling.lean](SeparatedSampling.lean) |
-| Centered-to-one-sided cube conversion | [FineCubeFrame.lean](FineCubeFrame.lean) |
+| Centered-cube algebra and signed-weight reduction | [SeparatedCubeFourierInternal.lean](SeparatedCubeFourierInternal.lean) |
+| Continuous cube minorant/majorant reduction | [SeparatedCubeFourierContinuous.lean](SeparatedCubeFourierContinuous.lean) |
+| Centered-to-one-sided cube conversion infrastructure | [FineCubeFrame.lean](FineCubeFrame.lean) |
 
 All frequencies in this chain are angular frequencies with period $2\pi$ and
 phase $e^{ikx_j}$.
+
+The separated-cube reduction modules do not assume Li's Theorem 2.3. They
+isolate its remaining analytic inputs as `HasSharpOffDiagonalBound` and
+`HasBartonCubeCertificates`. Neither proposition is asserted without proof.
+The required Beurling--Selberg/Barton extremal functions and multidimensional
+Poisson argument are not available in Mathlib or in a public Lean
+formalization.

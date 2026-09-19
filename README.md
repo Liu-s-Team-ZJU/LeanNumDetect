@@ -27,7 +27,7 @@ selected matrix and spectral tools likely to be needed next:
 | [General/MatrixAnalysis](src/General/MatrixAnalysis/README.md) | Gram, singular-value, pseudoinverse, and variational tools |
 | [General/SpectralPerturbation](src/General/SpectralPerturbation/README.md) | Eigenvalue enumeration and perturbation matching |
 | [General/Finite](src/General/Finite/README.md) | Finite sorting, sums, and periodic geometry |
-| [External](src/External/README.md) | Registry for original external results not yet formalized |
+| [External](src/External/README.md) | Source-normalized definitions and external-result registry |
 
 The imported formalization and repository infrastructure come from
 `LeanTwoScale` commit `5b1241a`. The manuscript inspected during initialization
@@ -47,5 +47,6 @@ python3 .github/ci/check.py
 
 The final command compiles every Lean source file and rejects proof admissions
 outside `src/External/` as well as project axioms. Only registered original
-results may remain admitted under `src/External/`. See
+results may remain admitted under `src/External/`; the current registry is
+empty. See
 [the CI guide](.github/ci/README.md) and [AGENTS.md](AGENTS.md) for details.

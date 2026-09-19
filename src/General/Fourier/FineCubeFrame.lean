@@ -1,10 +1,10 @@
 import External.SeparatedCubeFourier
 
 /-!
-Conversions from Li's centered integer-cube frame bound to a one-sided
-angular-frequency cube.  The conversion is exact when the largest one-sided
-frequency is even.  In that case the real source radius `(K + 1) / 2` has
-integer points `{-K/2, ..., K/2}`, which translate to `{0, ..., K}`.
+Algebraic conversions from a centered integer-frequency cube to a one-sided
+angular-frequency cube. The conversion is exact when the largest one-sided
+frequency is even. In that case the real radius `(K + 1) / 2` has integer
+points `{-K/2, ..., K/2}`, which translate to `{0, ..., K}`.
 -/
 
 set_option autoImplicit false
@@ -215,50 +215,6 @@ private theorem discreteEnergy_modulated_eq_fineCubeEnergy
   rw [hsourcePhase, hfrequency]
   push_cast
   ring
-
-/-- Li's registered centered-cube theorem gives the exact one-sided fine-cube
-lower frame bound when `K` is positive and even. -/
-theorem lowerFrame_of_separatedCubeFourier
-    {d K : ℕ} {ι : Type*} [Fintype ι]
-    (hd : 2 ≤ d) (hKpos : 0 < K) (hKeven : Even K)
-    (β : ℝ) (hβ : 1 / (2 * Real.log 2) ≤ β)
-    (x : ι → AngularPoint d) (hx : ∀ j, InAngularCube (x j))
-    (hsep : ∀ i j, i ≠ j →
-      4 * Real.pi * β * d / (K + 1) <
-        angularPeriodicLInfDistance (x i) (x j)) :
-    ∀ c,
-      (2 - Real.exp (1 / (2 * β))) *
-          (((K + 1) ^ d : ℕ) : ℝ) *
-          External.coefficientEnergy c ≤
-        fineCubeFourierEnergy K x c := by
-  obtain ⟨q, rfl⟩ := hKeven
-  have hq : 0 < q := by omega
-  let m : ℝ := ((2 * q + 1 : ℕ) : ℝ) / 2
-  let z : ι → External.UnitTorusPoint d :=
-    fun j k => -x j k / (2 * Real.pi)
-  have hm : 1 ≤ m := by
-    dsimp [m]
-    exact (le_div_iff₀ (by norm_num : (0 : ℝ) < 2)).2 (by exact_mod_cast (show 2 ≤ 2 * q + 1 by omega))
-  have hz : ∀ j, External.InUnitHalfOpenCube (z j) :=
-    fun j => normalized_mem_halfOpenCube (hx j)
-  have hsep' : ∀ i j, i ≠ j →
-      β * d / m ≤ External.unitPeriodicLInfDistance (z i) (z j) := by
-    intro i j hij
-    rw [normalized_lInfDistance (hx i) (hx j)]
-    have hs := (hsep i j hij).le
-    dsimp [m, z]
-    have hp : 0 < 2 * Real.pi := by positivity
-    apply (le_div_iff₀ hp).2
-    convert hs using 1 <;> push_cast <;> field_simp <;> ring
-  have hsource :=
-    (External.separatedCubeFourier_frame m β z hd hm hβ hz hsep').2.2.1
-  intro c
-  have h := hsource
-    (fun j => c j * Complex.exp
-      (Complex.I * (q * ∑ k, x j k : ℝ)))
-  rw [modulated_coefficient_energy, centered_card,
-    discreteEnergy_modulated_eq_fineCubeEnergy] at h
-  simpa [m, two_mul] using h
 
 end
 

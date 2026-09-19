@@ -1,4 +1,3 @@
-import General.Fourier.FineCubeFrame
 import NumDetectMain.Matrices
 import NumDetectMain.UniformProofSupport
 import SegmentedVDM.Interpolation
@@ -1160,53 +1159,6 @@ def HasFineCubeFrame (d K : ℕ) (η a : ℝ) : Prop :=
       a * (((K + 1) ^ d : ℕ) : ℝ) * SegmentedVDM.energy v ≤
         SegmentedVDM.energy (fineCubeEvaluation K x *ᵥ v)
 
-/-- The registered centered-cube estimate gives the fine-cube frame for a
-positive even cutoff in dimensions covered by the source. -/
-theorem fineCube_frame_of_separatedCubeFourier
-    {d K : ℕ} {ι : Type*} [Fintype ι]
-    (hd : 2 ≤ d) (hKpos : 0 < K) (hKeven : Even K)
-    (β : ℝ) (hβ : 1 / (2 * Real.log 2) ≤ β)
-    (x : ι → Point d) (hx : ∀ j, InAngularCube (x j))
-    (hsep : ∀ i j, i ≠ j →
-      4 * Real.pi * β * d / (K + 1) <
-        periodicLInfDistance (x i) (x j)) :
-    ∀ v,
-      (2 - Real.exp (1 / (2 * β))) *
-          (((K + 1) ^ d : ℕ) : ℝ) *
-          SegmentedVDM.energy v ≤
-        SegmentedVDM.energy (fineCubeEvaluation K x *ᵥ v) := by
-  intro v
-  have h :=
-    FineCubeFrame.lowerFrame_of_separatedCubeFourier
-      hd hKpos hKeven β hβ x
-      (by
-        intro j
-        simpa only [FineCubeFrame.InAngularCube, InAngularCube] using hx j)
-      (by
-        intro i j hij
-        simpa only [FineCubeFrame.angularPeriodicLInfDistance,
-          FineCubeFrame.angularPeriodicCoordinateDistance,
-          periodicLInfDistance, periodicCoordinateDistance] using
-            hsep i j hij)
-      v
-  have henergy :
-      FineCubeFrame.fineCubeFourierEnergy K x v =
-        SegmentedVDM.energy (fineCubeEvaluation K x *ᵥ v) := by
-    unfold FineCubeFrame.fineCubeFourierEnergy SegmentedVDM.energy
-      fineCubeEvaluation Matrix.mulVec dotProduct
-    apply Finset.sum_congr rfl
-    intro α _
-    congr 1
-    apply congrArg norm
-    apply Finset.sum_congr rfl
-    intro j _
-    rw [mul_comm]
-    congr 2
-    push_cast
-    rfl
-  rw [← henergy]
-  simpa only [SegmentedVDM.energy, External.coefficientEnergy] using h
-
 theorem periodicCoordinateDistance_le_pi
     {u v : ℝ}
     (hu : -Real.pi < u ∧ u ≤ Real.pi)
@@ -1370,59 +1322,6 @@ theorem fineCube_frame_oneDimensional_of_halfConstant
             (SegmentedVDM.energy_nonneg v)
         _ = (K + 1) / 2 * SegmentedVDM.energy v := by ring).trans
   exact fineCube_frame_half_oneDimensional hK x hx hsep v
-
-/-- Automatic fine-cube frame in the parity range exactly covered by the
-registered multivariate centered-cube theorem. -/
-theorem fineCube_frame_of_evenCutoff
-    {d K : ℕ} {ι : Type} [Fintype ι]
-    (hd : 2 ≤ d) (hKeven : Even K)
-    (β η : ℝ) (hβ : 1 / (2 * Real.log 2) < β)
-    (hη : 4 * Real.pi * β * d / (K + 1) ≤ η)
-    (x : ι → Point d) (hx : ∀ j, InAngularCube (x j))
-    (hsep : ∀ i j, i ≠ j →
-      η < periodicLInfDistance (x i) (x j)) :
-    ∀ v,
-      (2 - Real.exp (1 / (2 * β))) *
-          (((K + 1) ^ d : ℕ) : ℝ) *
-          SegmentedVDM.energy v ≤
-        SegmentedVDM.energy (fineCubeEvaluation K x *ᵥ v) := by
-  have hlogPos : 0 < Real.log 2 := Real.log_pos (by norm_num)
-  have hlogLt : Real.log 2 < 1 := by
-    nlinarith [Real.log_lt_sub_one_of_pos
-      (x := (2 : ℝ)) (by norm_num) (by norm_num)]
-  have hhalf :
-      (1 / 2 : ℝ) < 1 / (2 * Real.log 2) := by
-    exact one_div_lt_one_div_of_lt
-      (by positivity : (0 : ℝ) < 2 * Real.log 2) (by nlinarith)
-  have hβhalf : (1 / 2 : ℝ) < β := hhalf.trans hβ
-  have hβpos : 0 < β := (by positivity : (0 : ℝ) < 1 / 2).trans hβhalf
-  have ha :
-      2 - Real.exp (1 / (2 * β)) ≤ 1 := by
-    have he : 1 ≤ Real.exp (1 / (2 * β)) :=
-      Real.one_le_exp (by positivity)
-    linarith
-  by_cases hKzero : K = 0
-  · subst K
-    norm_num at hη
-    have hdR : (2 : ℝ) ≤ d := by exact_mod_cast hd
-    have hβd : 1 < β * (d : ℝ) := by
-      calc
-        1 = (1 / 2 : ℝ) * 2 := by norm_num
-        _ < β * 2 := mul_lt_mul_of_pos_right hβhalf (by norm_num)
-        _ ≤ β * d := mul_le_mul_of_nonneg_left hdR hβpos.le
-    have hlarge : Real.pi < 4 * Real.pi * β * d := by
-      nlinarith [Real.pi_pos]
-    have hsub : Subsingleton ι := ⟨fun i j => by
-        apply Classical.byContradiction
-        intro hij
-        have hu := periodicLInfDistance_le_pi (hx i) (hx j)
-        have hs := (lt_of_lt_of_le hlarge hη).trans (hsep i j hij)
-        exact (not_lt_of_ge hu) hs⟩
-    letI := hsub
-    exact fineCube_frame_zero_of_subsingleton x ha
-  · exact fineCube_frame_of_separatedCubeFourier hd
-      (Nat.pos_of_ne_zero hKzero) hKeven β hβ.le x hx
-      (fun i j hij => hη.trans_lt (hsep i j hij))
 
 /-- Automatic one-dimensional fine-cube frame in the parameter range covered
 by the proved `1/2` consecutive-sampling constant. -/
