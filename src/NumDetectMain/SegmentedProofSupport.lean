@@ -1149,11 +1149,12 @@ noncomputable def fineCubeEvaluation
   fun α j => Complex.exp
     (Complex.I * ((∑ k, (α k : ℝ) * x j k : ℝ) : ℂ))
 
-/-- The exact one-sided fine-cube frame input needed by localization.  This is
-kept explicit because the cited centered-cube theorem does not cover every
-parity of `K + 1`, and its published multivariate statement assumes `d ≥ 2`. -/
+/-- The exact one-sided fine-cube frame input needed by localization. Nodes
+are restricted to the manuscript's angular fundamental domain because the
+coordinate formula for `periodicLInfDistance` is valid only there. -/
 def HasFineCubeFrame (d K : ℕ) (η a : ℝ) : Prop :=
   ∀ (ι : Type) [Fintype ι] [DecidableEq ι] (x : ι → Point d),
+    (∀ j, InAngularCube (x j)) →
     (∀ i j, i ≠ j → η < periodicLInfDistance (x i) (x j)) →
     ∀ v,
       a * (((K + 1) ^ d : ℕ) : ℝ) * SegmentedVDM.energy v ≤
@@ -1209,6 +1210,50 @@ theorem fineCube_frame_zero_of_subsingleton
           dotProduct, Fintype.sum_unique]
       simpa [he] using
         mul_le_of_le_one_left (SegmentedVDM.energy_nonneg v) ha
+
+/-- At separation scale at least `π`, an angular-cube family satisfying the
+strict separation premise is a subsingleton, so the zero-width frame is exact. -/
+theorem hasFineCubeFrame_zero_of_pi_le
+    (d : ℕ) {η a : ℝ} (hη : Real.pi ≤ η) (ha : a ≤ 1) :
+    HasFineCubeFrame d 0 η a := by
+  unfold HasFineCubeFrame
+  intro ι _ _ x hx hsep v
+  letI : Subsingleton ι :=
+    ⟨fun i j => by
+      apply Classical.byContradiction
+      intro hij
+      have hdist := periodicLInfDistance_le_pi (hx i) (hx j)
+      exact (not_lt_of_ge hdist) (hη.trans_lt (hsep i j hij))⟩
+  exact fineCube_frame_zero_of_subsingleton x ha v
+
+/-- The manuscript's separation scale automatically discharges the zero-order
+fine-cube case in every positive dimension. -/
+theorem hasFineCubeFrame_zero_of_sourceRange
+    (d : ℕ) (hd : 1 ≤ d) (β η : ℝ)
+    (hβ : 1 / (2 * Real.log 2) < β)
+    (hη : 4 * Real.pi * β * d ≤ η) :
+    HasFineCubeFrame d 0 η (2 - Real.exp (1 / (2 * β))) := by
+  have hlog : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  have hquarter : (1 : ℝ) / 4 < 1 / (2 * Real.log 2) := by
+    rw [div_lt_div_iff₀ (by norm_num) (by positivity)]
+    nlinarith [Real.log_two_lt_d9]
+  have hβquarter : (1 : ℝ) / 4 < β := hquarter.trans hβ
+  have hdR : (1 : ℝ) ≤ d := by exact_mod_cast hd
+  have hfactor : (1 : ℝ) ≤ 4 * β * d := by
+    calc
+      (1 : ℝ) = 4 * ((1 : ℝ) / 4) * 1 := by ring
+      _ ≤ 4 * β * d := by gcongr
+  have hpi : Real.pi ≤ 4 * Real.pi * β * d := by
+    calc
+      Real.pi = Real.pi * 1 := by ring
+      _ ≤ Real.pi * (4 * β * d) :=
+        mul_le_mul_of_nonneg_left hfactor Real.pi_pos.le
+      _ = 4 * Real.pi * β * d := by ring
+  apply hasFineCubeFrame_zero_of_pi_le d (hpi.trans hη)
+  have hβpos : 0 < β := by linarith
+  have hexp : 1 ≤ Real.exp (1 / (2 * β)) :=
+    Real.one_le_exp (by positivity)
+  linarith
 
 theorem periodicCoordinateDistance_le_integerTranslate
     {u v : ℝ}

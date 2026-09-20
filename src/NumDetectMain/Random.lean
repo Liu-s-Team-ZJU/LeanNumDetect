@@ -233,12 +233,15 @@ theorem randomMeasurementMatrix_sub_fourier_entry_lt
   rw [hvalue, add_sub_cancel_left]
   exact hnoise
 
-/-- Manuscript Theorem `thm:resolutionrandghmnumber1`, in the deterministic
-form proved by lines 1544--1602 for fixed realized row and column frequencies.
+/-- Deterministic fixed-realization implication used in the proof of manuscript
+Theorem `thm:resolutionrandghmnumber1`.
 
 The signal hypothesis records exactly the quantitative premise used by the
-proof. The conclusions include the sharper perturbed signal lower bound and
-the resulting strict threshold gap. Singular-value indices are zero-based. -/
+matrix perturbation step. It is not the manuscript's random sampling claim:
+that claim uses an unjustified passage from parent-set spread to realized-set
+spread and leaves its closeness, noise, and probability quantifiers implicit.
+The conclusions here include the sharper perturbed signal lower bound and the
+resulting strict threshold gap. Singular-value indices are zero-based. -/
 theorem randomGHM_singularValueThreshold
     {n M₁ M₂ : ℕ}
     (rowFrequency : Fin M₁ → ℤ) (columnFrequency : Fin M₂ → ℤ)

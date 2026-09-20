@@ -57,9 +57,18 @@ theorem segmentedVandermonde_minimumSingularValue_of_fineCubeFrame
       (K := localizationOrder m nStar)
       μ hd hn hclumps hsplit hK hDpos hτ hβ hr hΔ hmin hscale
   intro C anchor _hsame hcross color v
-  apply hframe
-  intro i j hij
-  exact hcross i j (clumpColorClass_labels_ne C anchor color i j hij)
+  unfold HasFineCubeFrame at hframe
+  have hcubeColor :
+      ∀ j : ↥(clumpColorClass C anchor color), InAngularCube (μ.node j) :=
+    fun j => hclumps.2.2.2.1 j
+  have hsepColor :
+      ∀ i j : ↥(clumpColorClass C anchor color), i ≠ j →
+        η < periodicLInfDistance (μ.node i) (μ.node j) :=
+    fun i j hij =>
+      hcross i j (clumpColorClass_labels_ne C anchor color i j hij)
+  exact @hframe
+    (↥(clumpColorClass C anchor color)) inferInstance inferInstance
+    (fun j => μ.node j) hcubeColor hsepColor v
 
 /-- One-dimensional automatic range supplied by the proved consecutive-block
 frame bound: `β ≥ 1` and the requested source constant is at most `1/2`. -/

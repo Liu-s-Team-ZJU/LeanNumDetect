@@ -42,9 +42,15 @@ dimension and fixed realized frequency draws. The signal-threshold part is
 proved in one dimension under the explicit lower bound on the two realized
 Vandermonde factors that the manuscript proof actually uses. The manuscript's
 phrases “sufficiently close” and “sufficiently small” do not specify usable
-thresholds or a probability event. Its cited 2026 nonuniform-Vandermonde
-preprint also has no stable identifier in the bibliography and could not be
-located unambiguously, so no unverifiable external theorem is admitted here.
+thresholds or a probability event. More fundamentally, its spread hypothesis
+is imposed on the parent sets $\mathcal A,\mathcal B$, while the proof applies
+the spread to the randomly selected realized frequency sets; the former does
+not imply the latter. For example, with $n=2$, $L>2$, parent set
+$\{0,1,2,L\}$, and a three-point draw, the parent spread is $L$, while
+the positive-probability realization $\{0,1,2\}$ has spread only $2$.
+Its cited 2026 nonuniform-Vandermonde preprint also has no stable identifier
+in the bibliography and could not be located unambiguously, so no
+unverifiable external theorem is admitted here.
 
 For MUSIC, the perturbed noise space is the fixed-rank trailing left singular
 subspace. Using the kernel of the perturbed adjoint would make the manuscript
@@ -54,16 +60,23 @@ fixed-rank perturbation estimate is proved in
 it is not an external admission.
 
 The manuscript-shaped segmented theorems use an explicit `HasFineCubeFrame`
-hypothesis, and a proved one-dimensional corollary covers the stated
-half-frame range. The former automatic multivariate corollaries were removed:
-they depended on an admitted combined version of Li's centered-cube theorem.
-Source audit found that Li uses Euclidean separation for the continuous result
-and torus separation for the discrete result, while the former Lean statement
-used torus separation for both. The cited theorem is also stated only for
-$d\ge2$, and its published discrete proof for arbitrary real radius replaces
-$m$ by $\lfloor m\rfloor$ without preserving the separation hypothesis. The
-unrestricted manuscript range therefore remains an analytic gap rather than an
-admitted theorem.
+hypothesis, now correctly restricted to nodes in the manuscript's angular
+fundamental domain. A proved one-dimensional corollary covers the stated
+half-frame range, and the zero-order case is automatic in every positive
+dimension. The full one-dimensional range is reduced without admissions to the
+sharp periodic Montgomery--Vaughan Hilbert inequality. For $d\ge2$, the
+shifted-coset conversion now handles both parities of the one-sided cube
+exactly; the remaining input is Barton's multivariate extremal-function bound
+with shifted Fejer--Poisson convergence.
+
+The former automatic multivariate corollaries were removed because they
+depended on an admitted combined version of Li's centered-cube theorem. Source
+audit found that Li uses Euclidean separation for the continuous result and
+torus separation for the discrete result, while the former Lean statement used
+torus separation for both. Li's stated result also does not directly supply the
+half-integer frequency coset needed when `K + 1` is even. The unrestricted
+manuscript range therefore remains an explicit analytic dependency rather than
+an admitted theorem.
 
 The constant-$2$ CRL lower bound, including the positive-amplitude case, is
 proved directly by a finite-difference construction. The Liu--Zhang result
@@ -71,6 +84,12 @@ cited by the manuscript gives a different constant,
 $0.81e^{-3/2}$, for general complex amplitudes and does not establish the
 paper's stated attribution. The Lean conclusion matches the displayed
 constant-$2$ formula, but it does not rely on that citation.
+
+The CRL definitions use `sInf`, the infimum of all guaranteed separations. The
+manuscript says “smallest”, but its upper-bound proof establishes guarantees
+only for separations strictly above the displayed threshold and does not prove
+that the endpoint itself is admissible. Thus literal attainment of a smallest
+value is not currently justified by the manuscript.
 
 ## Proof status
 
