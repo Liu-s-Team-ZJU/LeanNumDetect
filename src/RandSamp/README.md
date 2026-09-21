@@ -12,14 +12,28 @@ the random-sampling section of the NumDetect manuscript. Import
 
 The theorem treats an arbitrary injective $M$-row frequency family and defines
 its order-$n$ sampling spread as the largest minimum spacing among all $n$-row
-selections. For a cluster satisfying $|y_j-y_0|\leq\tau\Delta/2$, the explicit
-remainder-control hypothesis yields
+selections. It gives an explicit $\varepsilon>0$ such that every cluster with
+$0<\Delta<\varepsilon$ and $|y_j-y_0|\leq\tau\Delta/2$ satisfies
 
 $$
 \sigma_{\min}(V) \geq \frac12 c(n)(\gamma\Delta)^{n-1},
 $$
 
 where `nonuniformVandermondeConstant n` is positive and depends only on $n$.
+Writing $\gamma$ for the order-$n$ sampling spread and $R_n$ for the proved
+exponential-remainder coefficient, Lean takes
+
+$$
+\varepsilon
+=\min\left\{
+\frac{2}{W\tau},
+\frac{\frac12 c(n)\gamma^{n-1}}
+{n(W\tau/2)^nR_n}
+\right\}.
+$$
+
+Thus the remainder estimate is discharged inside the proof rather than exposed
+as a hypothesis of the manuscript-facing theorem.
 
 ## Proof organization
 
