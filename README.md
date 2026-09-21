@@ -1,44 +1,42 @@
 # LeanNumDetect
 
-Lean formalization of the generalized Hankel/Toeplitz, source-number detection,
-segmented Vandermonde, and MUSIC results in the NumDetect manuscript.
+LeanNumDetect formalizes the theoretical results of the NumDetect manuscript on
+source-number detection in multidimensional spectral super-resolution. It
+covers generalized Hankel and Toeplitz factorizations, uniform and segmented
+Vandermonde lower bounds, singular-value detection thresholds, MUSIC stability,
+and computational resolution limits. Algorithms, complexity estimates, and
+numerical experiments are outside the current scope.
 
-## Current coverage
+Import `NumDetect.Main` for the manuscript-facing interface.
 
-[NumDetect](src/NumDetect/README.md) contains the definitions and
-principal theorem formalizations for generalized Hankel/Toeplitz matrices,
-source-number detection, contiguous and segmented Vandermonde bounds, random
-sampling, and MUSIC stability. Its aggregate import is
-`NumDetect.Main`.
+## Main theoretical results
 
-The repository also contains a proved one-dimensional specialization of the
-manuscript's segmented Vandermonde bound. Its primary entry point is
-`SegmentedVDM.small_clumps_singularValue` in
-[PaperTheorem.lean](src/SegmentedVDM/PaperTheorem.lean).
-
-The repository also carries the reusable dependency chain for this theorem and
-selected matrix and spectral tools:
-
-| Directory | Purpose |
+| Main result | Exact Lean location |
 | --- | --- |
-| [SegmentedVDM](src/SegmentedVDM/README.md) | One-dimensional segmented Vandermonde construction and singular-value bound |
-| [NumDetect](src/NumDetect/README.md) | Manuscript definitions and principal theorem statements, organized as flat, prefixed module groups |
-| [General/Fourier](src/General/Fourier/README.md) | Cosine-window, Parseval, and separated-sampling estimates |
-| [General/MatrixAnalysis](src/General/MatrixAnalysis/README.md) | Gram, singular-value, pseudoinverse, and variational tools |
-| [General/SpectralPerturbation](src/General/SpectralPerturbation/README.md) | Eigenvalue enumeration and perturbation matching |
-| [General/Finite](src/General/Finite/README.md) | Finite sorting, sums, and periodic geometry |
-| [External](src/External/README.md) | Admission policy and the single translated-cube Fourier-frame input |
+| Contiguous-grid VDM minimum-singular-value estimate (`lem:uniform-Vandermonde`) | [UniformVandermonde.lean](src/NumDetect/UniformVandermonde.lean): theorem `uniformVandermonde_minimumSingularValue` |
+| Multidimensional number-detection resolution (`thm:li-resolution`) | [Uniform.lean](src/NumDetect/Uniform.lean): theorem `noAdmissibleMeasureWithFewerSupports` |
+| Number-detection CRL upper bound (`eq:crl-number-upper`) | [CRL.lean](src/NumDetect/CRL.lean): theorem `numberDetectionCRL_le_numberDetectionSeparationThreshold` |
+| Segmented-grid VDM minimum-singular-value estimate (`thm:segmented-vandermonde`) | [Segmented.lean](src/NumDetect/Segmented.lean): theorem `segmentedVandermonde_minimumSingularValue` |
+| Segmented-grid number-detection singular-value threshold (`thm:segmented_threshold`) | [Segmented.lean](src/NumDetect/Segmented.lean): theorem `segmentedGHM_singularValueThreshold` |
+| General GHM-MUSIC stability (`lem:stability_ghm_music`) | [MUSIC.lean](src/NumDetect/MUSIC.lean): theorem `ghmMUSIC_correlation_stability` |
+| Segmented-grid MUSIC stability (`cor:stability_multidim_segmented`) | [MUSIC.lean](src/NumDetect/MUSIC.lean): theorem `segmentedMUSIC_correlation_stability` |
 
-The imported formalization and repository infrastructure come from
-`LeanTwoScale` commit `5b1241a`. The manuscript base currently audited by the
-formalization is NumDetect commit `42c1be5`, including the translated-cube
-correction in `main.tex`.
+The [NumDetect guide](src/NumDetect/README.md) gives the hypotheses, indexing
+conventions, proof organization, and formalization choices for these results.
+
+## Repository structure
+
+| Path | Purpose |
+| --- | --- |
+| [src/NumDetect](src/NumDetect/README.md) | Manuscript definitions and main results, grouped by flat module prefixes with aggregate import `NumDetect.Main` |
+| [src/SegmentedVDM](src/SegmentedVDM/README.md) | Independent one-dimensional segmented Vandermonde construction and singular-value theorem |
+| [src/General](src/General/README.md) | Reusable finite, Fourier, matrix-analysis, and spectral-perturbation results |
+| [src/External](src/External/README.md) | Admission policy and registry; currently contains no Lean files and no admitted results |
 
 ## Build and verify
 
-The project pins Lean 4.32.0 and mathlib commit
-`81a5d257c8e410db227a6665ed08f64fea08e997`. It reuses the shared mathlib
-checkout at `~/.local/share/lean/mathlib4-v4.32.0`.
+The project uses Lean 4.32.0 and a pinned mathlib checkout. With Python 3.11 or
+newer and the Lean environment available, run from the repository root:
 
 ```sh
 python3 .github/ci/setup_mathlib.py --verify
@@ -46,8 +44,9 @@ lake build
 python3 .github/ci/check.py
 ```
 
-The final command compiles every Lean source file and rejects proof admissions
-outside `src/External/` as well as project axioms. Only registered original
-results may remain admitted under `src/External/`; the current registry contains
-the translated-cube Fourier-frame estimate used by the segmented theorem. See
-[the CI guide](.github/ci/README.md) and [AGENTS.md](AGENTS.md) for details.
+The first command verifies the pinned dependency checkout, `lake build` builds
+the three source libraries, and the final check builds every source module and
+rejects proof admissions or project-defined axioms. If the shared mathlib
+checkout is absent, run `python3 .github/ci/setup_mathlib.py` once before these
+commands. See the [CI guide](.github/ci/README.md) for environment setup and
+cache details.

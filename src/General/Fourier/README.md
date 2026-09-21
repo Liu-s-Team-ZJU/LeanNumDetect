@@ -35,15 +35,16 @@ argument at the critical separation.
 | Continuous cube minorant/majorant reduction | [SeparatedCubeFourierContinuous.lean](SeparatedCubeFourierContinuous.lean) |
 | Centered-to-one-sided cube conversion infrastructure | [FineCubeFrame.lean](FineCubeFrame.lean) |
 | One-dimensional periodic-Hilbert reduction | [OneDimensionalFineCubeFrame.lean](OneDimensionalFineCubeFrame.lean) |
+| Vaaler--Selberg translated-cube lower frame | [TranslatedCubeFourier.lean](TranslatedCubeFourier.lean) |
 | Translated centered-cube conversion | [BartonCubeFrame.lean](BartonCubeFrame.lean) |
 
 All frequencies in this chain are angular frequencies with period $2\pi$ and
 phase $e^{ikx_j}$.
 
-`hasFineCubeFrame_of_translatedCube` converts the registered translated-cube
-Fourier-frame theorem into the manuscript's angular one-sided cube.  The real
+`hasFineCubeFrame_of_translatedCube` converts the proved translated-cube
+Fourier-frame theorem into the manuscript's angular one-sided cube. The real
 frequency cube is centered at `(N - 1) / 2` with radius `N / 2`, whose integer
-points are exactly `{0, ..., N - 1}` for both parities of `N`.  The
-normalization, periodic-distance scaling, and phase identity are proved here;
-only the Beurling--Selberg/Barton--Li frame estimate itself is admitted under
-`src/External/`.
+points are exactly `{0, ..., N - 1}` for both parities of `N`.
+`TranslatedCubeFourier.lean` proves the Barton minorant estimate from the
+vendored Vaaler--Selberg and Poisson-summation results; `BartonCubeFrame.lean`
+proves the normalization, periodic-distance scaling, and phase conversion.
