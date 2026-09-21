@@ -126,6 +126,27 @@ noncomputable def minimumSeparation1D {n : ℕ} (x : Fin n → ℝ)
     (hn : 2 ≤ n) : ℝ :=
   minimumOverDistinctPairs hn fun i j => |x i - x j|
 
+/-- The minimum one-dimensional separation of an injective finite family is
+positive. -/
+theorem minimumSeparation1D_pos {n : ℕ} (x : Fin n → ℝ)
+    (hn : 2 ≤ n) (hx : Function.Injective x) :
+    0 < minimumSeparation1D x hn := by
+  rw [minimumSeparation1D, minimumOverDistinctPairs,
+    Finset.lt_inf'_iff (distinctPairs_nonempty hn)]
+  intro ij hij
+  have hne : ij.1 ≠ ij.2 := by
+    simpa [distinctPairs] using hij
+  exact abs_pos.mpr (sub_ne_zero.mpr (fun h => hne (hx h)))
+
+/-- The one-dimensional minimum separation is bounded by every distinct pair
+distance. -/
+theorem minimumSeparation1D_le {n : ℕ} (x : Fin n → ℝ)
+    (hn : 2 ≤ n) {i j : Fin n} (hij : i ≠ j) :
+    minimumSeparation1D x hn ≤ |x i - x j| := by
+  rw [minimumSeparation1D, minimumOverDistinctPairs,
+    Finset.inf'_le_iff (distinctPairs_nonempty hn)]
+  exact ⟨(i, j), by simp [distinctPairs, hij], le_rfl⟩
+
 /-- Sampling spread of order `n` for a finite integer frequency set. The `sSup`
 form is equivalent to maximizing the minimum pairwise spacing over all `n`-subsets. -/
 noncomputable def samplingSpread (n : ℕ) (Λ : Finset ℤ) : ℝ :=

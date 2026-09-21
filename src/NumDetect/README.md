@@ -15,6 +15,7 @@ prefixes. Import [Main.lean](Main.lean) for the complete public interface.
 | Segmented-grid VDM minimum-singular-value estimate (`thm:segmented-vandermonde`) | [Segmented.lean](Segmented.lean): theorem `segmentedVandermonde_minimumSingularValue` |
 | Well-separated segmented VDM two-sided singular-value estimate (`thm:well_separated_segmented`) | [WellSeparatedSegmented.lean](WellSeparatedSegmented.lean): theorem `wellSeparatedSegmented_singularValue_bounds` |
 | Segmented-grid number-detection singular-value threshold (`thm:segmented_threshold`) | [Segmented.lean](Segmented.lean): theorem `segmentedGHM_singularValueThreshold` |
+| Random-GHM number-detection threshold (`thm:resolutionrandghmnumber1`) | [Random.lean](Random.lean): theorem `randomGHM_singularValueThreshold_of_separation` |
 | General GHM-MUSIC stability (`lem:stability_ghm_music`) | [MUSIC.lean](MUSIC.lean): theorem `ghmMUSIC_correlation_stability` |
 | Segmented-grid MUSIC stability (`cor:stability_multidim_segmented`) | [MUSIC.lean](MUSIC.lean): theorem `segmentedMUSIC_correlation_stability` |
 
@@ -74,7 +75,7 @@ manuscript denominator `K + 1` without rounding the radius.
 
 | Topic | Formalized statement |
 | --- | --- |
-| Random GHM | `realizedRandomGHM_tail_singularValue_lt` proves the noise-tail conclusion for arbitrary dimension and fixed draws. `randomGHM_singularValueThreshold` proves the one-dimensional signal conclusion under explicit lower bounds for the two realized Vandermonde factors. The required deterministic nonuniform Vandermonde bound is `RandSamp.nonuniformVandermonde_minimumSingularValue`. No probability theorem is asserted: the manuscript assumes spread of the parent frequency sets but uses spread of the realized draws, which does not follow. |
+| Random GHM | `randomGHM_singularValueThreshold_of_separation` uses the actual minimum source separation and existential positive constants `C₂(n)`, `C₃(n)`. Their quantifiers precede the realized draws, sources, and noise level, so they depend only on `n`; a positive small-cluster scale is chosen after the realized draws. The sampling-spread hypothesis is imposed on those realized draws, as in the manuscript theorem. |
 | MUSIC perturbation | The perturbed noise space is the trailing left singular subspace with the source rank fixed. Using the kernel of the perturbed adjoint would make the claimed stability false under arbitrarily small full-rank perturbations. The required perturbation theorem is proved in [MUSICSubspacePerturbation.lean](../General/MatrixAnalysis/MUSICSubspacePerturbation.lean). |
 | CRL lower constant | The constant-$2$ lower bound, including the positive-amplitude case, is proved directly by finite differences. The cited Liu--Zhang result has the different constant $0.81e^{-3/2}$ for general complex amplitudes and does not supply the displayed constant-$2$ formula. |
 | CRL endpoint | The CRL is defined with `sInf`. The upper-bound proof gives guarantees at every separation strictly above the displayed threshold, but does not prove that the endpoint is itself admissible; the manuscript's word “smallest” would require this additional attainment result. |
