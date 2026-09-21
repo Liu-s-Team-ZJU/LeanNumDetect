@@ -1,4 +1,4 @@
-import NumDetectMain.Matrices
+import NumDetect.Matrices
 import General.MatrixAnalysis.SingularValueBounds
 import Mathlib.LinearAlgebra.Matrix.Rank
 
@@ -50,6 +50,62 @@ theorem generalizedHankel_fourier_eq_hankelVandermondeFactor
   rw [dot_add_right, Complex.ofReal_add, mul_add, Complex.exp_add]
   rw [dot_comm (μ.node j) (rowFrequency i), dot_comm (μ.node j) (columnFrequency k)]
   ring
+
+/-- Exact generalized Toeplitz factorization of Fourier data sampled at
+differences of frequencies.  This is the Toeplitz counterpart of
+`generalizedHankel_fourier_eq_hankelVandermondeFactor`. -/
+theorem generalizedToeplitz_fourier_eq_toeplitzVandermondeFactor
+    {d n : ℕ} {ι κ : Type*}
+    (rowFrequency : ι → Point d) (columnFrequency : κ → Point d)
+    (μ : AtomicMeasure d n) :
+    generalizedToeplitz rowFrequency columnFrequency (fourier μ) =
+      toeplitzVandermondeFactor rowFrequency columnFrequency μ := by
+  classical
+  ext i k
+  rw [toeplitzVandermondeFactor, Matrix.mul_assoc]
+  simp only [generalizedToeplitz, fourier,
+    generalizedVandermonde, steeringVector, Matrix.mul_apply,
+    Matrix.diagonal_apply, Matrix.conjTranspose_apply]
+  simp only [ite_mul, zero_mul, Finset.sum_ite_eq, Finset.mem_univ, if_true]
+  refine Finset.sum_congr rfl (fun j _ => ?_)
+  rw [dot_sub_right, Complex.ofReal_sub, mul_sub, Complex.exp_sub]
+  rw [dot_comm (μ.node j) (rowFrequency i), dot_comm (μ.node j) (columnFrequency k)]
+  have hstar :
+      star (Complex.exp
+        (Complex.I * (dot (columnFrequency k) (μ.node j) : ℂ))) =
+        (Complex.exp
+          (Complex.I * (dot (columnFrequency k) (μ.node j) : ℂ)))⁻¹ := by
+    rw [Complex.star_def, ← Complex.exp_conj]
+    simp only [map_mul, Complex.conj_I, Complex.conj_ofReal]
+    rw [show -Complex.I * (dot (columnFrequency k) (μ.node j) : ℂ) =
+        -(Complex.I * (dot (columnFrequency k) (μ.node j) : ℂ)) by ring,
+      Complex.exp_neg]
+  rw [hstar, div_eq_mul_inv]
+  ring
+
+/-- A Fourier GHM admits the Hankel-type generalized Vandermonde
+decomposition from the manuscript. -/
+theorem generalizedHankel_fourier_admitsGeneralizedVandermondeDecomposition
+    {d n : ℕ} {ι κ : Type*}
+    (rowFrequency : ι → Point d) (columnFrequency : κ → Point d)
+    (μ : AtomicMeasure d n) :
+    AdmitsGeneralizedVandermondeDecomposition rowFrequency columnFrequency
+      (generalizedHankel rowFrequency columnFrequency (fourier μ)) :=
+  ⟨n, μ, Or.inl
+    (generalizedHankel_fourier_eq_hankelVandermondeFactor
+      rowFrequency columnFrequency μ)⟩
+
+/-- A Fourier GTM admits the Toeplitz-type generalized Vandermonde
+decomposition from the manuscript. -/
+theorem generalizedToeplitz_fourier_admitsGeneralizedVandermondeDecomposition
+    {d n : ℕ} {ι κ : Type*}
+    (rowFrequency : ι → Point d) (columnFrequency : κ → Point d)
+    (μ : AtomicMeasure d n) :
+    AdmitsGeneralizedVandermondeDecomposition rowFrequency columnFrequency
+      (generalizedToeplitz rowFrequency columnFrequency (fourier μ)) :=
+  ⟨n, μ, Or.inr
+    (generalizedToeplitz_fourier_eq_toeplitzVandermondeFactor
+      rowFrequency columnFrequency μ)⟩
 
 /-- Exact shifted generalized Hankel factorization. -/
 theorem generalizedHankel_shiftedFourier

@@ -1,4 +1,4 @@
-import NumDetectMain.Basic
+import NumDetect.Basic
 import General.MatrixAnalysis.RowDeletion
 import Mathlib.Analysis.CStarAlgebra.Matrix
 

@@ -1,4 +1,4 @@
-import NumDetectMain.RandomProofSupport
+import NumDetect.RandomMatrixBounds
 
 /-! Deterministic singular-value bounds for realized random GHMs. -/
 

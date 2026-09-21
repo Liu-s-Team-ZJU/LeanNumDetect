@@ -1,4 +1,4 @@
-import NumDetectMain.UniformDefinitions
+import NumDetect.UniformDefinitions
 import SegmentedVDM.NeighborFactors
 import SegmentedVDM.Smoothing
 

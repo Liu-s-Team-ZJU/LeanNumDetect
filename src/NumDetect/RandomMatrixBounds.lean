@@ -1,4 +1,4 @@
-import NumDetectMain.ProofSupport
+import NumDetect.MatrixFacts
 
 /-!
 Deterministic matrix estimates used by the realized-frequency random GHM theorem.

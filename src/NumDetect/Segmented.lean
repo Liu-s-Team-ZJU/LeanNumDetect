@@ -1,5 +1,6 @@
-import NumDetectMain.SegmentedProofSupport
-import NumDetectMain.SegmentedThresholdSupport
+import NumDetect.SegmentedVandermonde
+import NumDetect.SegmentedThreshold
+import General.Fourier.BartonCubeFrame
 
 /-! Segmented-frequency Vandermonde and thresholding results. -/
 
@@ -69,6 +70,31 @@ theorem segmentedVandermonde_minimumSingularValue_of_fineCubeFrame
   exact @hframe
     (↥(clumpColorClass C anchor color)) inferInstance inferInstance
     (fun j => μ.node j) hcubeColor hsepColor v
+
+/-- Manuscript Theorem `thm:segmented-vandermonde`.  The translated-cube
+Fourier theorem supplies the fine-cube frame for every positive dimension and
+both parities of the localization bandwidth. -/
+theorem segmentedVandermonde_minimumSingularValue
+    {d n A nStar m r D : ℕ} {τ η β : ℝ}
+    (μ : AtomicMeasure d n)
+    (hd : 1 ≤ d) (hn : 2 ≤ n)
+    (hclumps : IsAngularClumpStructure μ.node A nStar τ η)
+    (hm : 1 ≤ m) (hD : m < D)
+    (hτ : τ ≤ Real.pi / (2 * D * d))
+    (hβ : 1 / (2 * Real.log 2) < β)
+    (hη : 4 * Real.pi * β * d / (localizationOrder m nStar + 1) ≤ η)
+    (hr : 2 * nStar ≤ r)
+    (hlocal :
+      periodicMinimumL1Separation μ.node hn ≤
+        Real.pi * nStar / ((r * D : ℕ) : ℝ)) :
+    segmentedVandermondeLowerBound d n nStar m r D β
+        (periodicMinimumL1Separation μ.node hn) ≤
+      matrixSingularValue (segmentedVandermonde m r D μ.node) (n - 1) := by
+  apply segmentedVandermonde_minimumSingularValue_of_fineCubeFrame
+    μ hd hn hclumps hm hD hτ hβ hη
+  · exact BartonCubeFrame.hasFineCubeFrame_of_translatedCube hd hβ hη
+  · exact hr
+  · exact hlocal
 
 /-- One-dimensional automatic range supplied by the proved consecutive-block
 frame bound: `β ≥ 1` and the requested source constant is at most `1/2`. -/
@@ -170,6 +196,41 @@ theorem segmentedGHM_singularValueThreshold_of_fineCubeFrame
       (segmentedGHM_singularValueThreshold_of_segmentedLowerBound
         μ Y hd hn hclumps hm hD hτ hβ hη hr hσ hmMin hnoise hmeasurement
         (B := B) le_rfl hB).2 hlocal hseparation
+
+/-- Manuscript Theorem `thm:segmented_threshold`, with no additional frame
+hypothesis.  Singular-value indices are zero-based. -/
+theorem segmentedGHM_singularValueThreshold
+    {d n A nStar m r D : ℕ} {τ η β σ mMin : ℝ}
+    (μ : AtomicMeasure d n) (Y : Point d → ℂ)
+    (hd : 1 ≤ d) (hn : 2 ≤ n)
+    (hclumps : IsAngularClumpStructure μ.node A nStar τ η)
+    (hm : 1 ≤ m) (hD : m < D)
+    (hτ : τ ≤ Real.pi / (2 * D * d))
+    (hβ : 1 / (2 * Real.log 2) < β)
+    (hη : 4 * Real.pi * β * d / (localizationOrder m nStar + 1) ≤ η)
+    (hr : 2 * nStar ≤ r)
+    (hσ : 0 < σ)
+    (hmMin : minAmplitude μ (Nat.zero_lt_of_lt hn) = mMin)
+    (hnoise : σ < mMin)
+    (hmeasurement :
+      IsBandMeasurement μ (segmentedCutoff m r D) σ Y) :
+    (∀ j, n ≤ j → j < (segmentedLength m r) ^ d →
+      matrixSingularValue (segmentedMeasurementMatrix m r D Y) j ≤
+        ((segmentedLength m r : ℕ) : ℝ) ^ d * σ) ∧
+    (periodicMinimumL1Separation μ.node hn ≤
+        Real.pi * nStar / ((r * D : ℕ) : ℝ) →
+      segmentedDetectionSeparationThreshold d n nStar m r D β σ mMin <
+          periodicMinimumL1Separation μ.node hn →
+      ((segmentedLength m r : ℕ) : ℝ) ^ d * σ <
+        matrixSingularValue (segmentedMeasurementMatrix m r D Y) (n - 1)) := by
+  apply segmentedGHM_singularValueThreshold_of_fineCubeFrame
+    μ Y hd hn hclumps hm hD hτ hβ hη
+  · exact BartonCubeFrame.hasFineCubeFrame_of_translatedCube hd hβ hη
+  · exact hr
+  · exact hσ
+  · exact hmMin
+  · exact hnoise
+  · exact hmeasurement
 
 /-- One-dimensional segmented threshold theorem in the range supplied by the
 proved `1/2` consecutive-block frame bound. -/

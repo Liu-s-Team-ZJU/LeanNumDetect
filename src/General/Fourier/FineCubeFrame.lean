@@ -1,4 +1,4 @@
-import External.SeparatedCubeFourier
+import General.Fourier.SeparatedCubeFourier
 
 /-!
 Algebraic conversions from a centered integer-frequency cube to a one-sided

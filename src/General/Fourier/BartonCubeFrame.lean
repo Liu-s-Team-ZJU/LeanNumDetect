@@ -1,11 +1,12 @@
 import General.Fourier.FineCubeFrame
-import NumDetectMain.SegmentedProofSupport
+import External.TranslatedCubeFourier
+import NumDetect.SegmentedVandermonde
 
 /-!
 Parity-free algebraic reduction for the discrete cube estimate.
 
-For a one-sided cutoff `K`, the correct centered sampling set is not always an
-integer cube.  It is the affine lattice block
+For a one-sided cutoff `K`, the centered sampling set can be represented by the
+affine lattice block
 
 `(-K / 2 + ℤ)^d ∩ [-K / 2, K / 2]^d`.
 
@@ -14,12 +15,10 @@ It has the parametrization `α ↦ α - K / 2`, with
 of each coefficient by the corresponding center phase is unitary and changes
 the shifted-coset Fourier energy exactly into the one-sided cube energy.
 
-The remaining analytic input is isolated in
-`HasBartonShiftedCosetLowerFrame`.  It is precisely the lower-frame consequence
-of Barton's multivariate cube minorant together with shifted Fejer--Poisson
-summation.  Mathlib currently provides one-dimensional Poisson summation and
-multidimensional Fourier/Parseval APIs, but not this Fejer convergence theorem
-under the weak regularity of Barton's functions.
+The literature input is the translated real-cube estimate registered as
+`External.translatedCubeFourier_lowerFrame`.  The results below prove the
+normalization, separation scaling, energy identity, and the exact
+`HasFineCubeFrame` interface used by the segmented Vandermonde theorem.
 -/
 
 set_option autoImplicit false
@@ -31,6 +30,142 @@ namespace LeanNumDetect
 namespace BartonCubeFrame
 
 noncomputable section
+
+/-- An integer belongs to the translated interval centered at `K / 2` with
+radius `(K + 1) / 2` exactly when it is one of `0, ..., K`. -/
+theorem integer_mem_translatedInterval_iff (K : ℕ) (z : ℤ) :
+    |(z : ℝ) - (K : ℝ) / 2| ≤ ((K + 1 : ℕ) : ℝ) / 2 ↔
+      0 ≤ z ∧ z ≤ K := by
+  rw [abs_le]
+  constructor
+  · rintro ⟨hlower, hupper⟩
+    have hzLower : -(1 : ℝ) / 2 ≤ (z : ℝ) := by
+      push_cast at hlower
+      linarith
+    have hzUpper : (z : ℝ) ≤ (K : ℝ) + 1 / 2 := by
+      push_cast at hupper
+      linarith
+    constructor
+    · by_contra hz
+      have hzInt : z ≤ -1 := by omega
+      have hzReal : (z : ℝ) ≤ -1 := by exact_mod_cast hzInt
+      linarith
+    · by_contra hz
+      have hzInt : (K : ℤ) + 1 ≤ z := by omega
+      have hzReal : (K : ℝ) + 1 ≤ (z : ℝ) := by exact_mod_cast hzInt
+      linarith
+  · rintro ⟨hlower, hupper⟩
+    have hlowerReal : 0 ≤ (z : ℝ) := by exact_mod_cast hlower
+    have hupperReal : (z : ℝ) ≤ (K : ℝ) := by exact_mod_cast hupper
+    constructor <;> push_cast <;> linarith
+
+/-- The integer points of the translated `d`-cube centered at `K / 2` with
+radius `(K + 1) / 2` are exactly `{0, ..., K}^d`. -/
+theorem integerPoint_mem_translatedCube_iff
+    {d : ℕ} (K : ℕ) (ω : Fin d → ℤ) :
+    (∀ k,
+      |(ω k : ℝ) - (K : ℝ) / 2| ≤ ((K + 1 : ℕ) : ℝ) / 2) ↔
+      ∀ k, 0 ≤ ω k ∧ ω k ≤ K := by
+  constructor <;> intro h k
+  · exact (integer_mem_translatedInterval_iff K (ω k)).mp (h k)
+  · exact (integer_mem_translatedInterval_iff K (ω k)).mpr (h k)
+
+/-- Convert angular representatives in `(-π, π]` to Li's representatives in
+`[-1/2, 1/2)`.  The minus sign matches Li's Fourier phase convention. -/
+def normalizedAngularPoint {d : ℕ}
+    (x : FineCubeFrame.AngularPoint d) : External.UnitTorusPoint d :=
+  fun k => -x k / (2 * Real.pi)
+
+theorem normalizedAngularPoint_mem_halfOpenCube
+    {d : ℕ} {x : FineCubeFrame.AngularPoint d}
+    (hx : FineCubeFrame.InAngularCube x) :
+    External.InUnitHalfOpenCube (normalizedAngularPoint x) := by
+  intro k
+  constructor
+  · apply (le_div_iff₀ (by positivity : 0 < 2 * Real.pi)).2
+    nlinarith [Real.pi_pos, (hx k).2]
+  · apply (div_lt_iff₀ (by positivity : 0 < 2 * Real.pi)).2
+    nlinarith [Real.pi_pos, (hx k).1]
+
+theorem normalizedAngularPoint_coordinateDistance
+    {u v : ℝ}
+    (hu : -Real.pi < u ∧ u ≤ Real.pi)
+    (hv : -Real.pi < v ∧ v ≤ Real.pi) :
+    External.unitPeriodicCoordinateDistance
+        (-u / (2 * Real.pi)) (-v / (2 * Real.pi)) =
+      FineCubeFrame.angularPeriodicCoordinateDistance u v /
+        (2 * Real.pi) := by
+  unfold External.unitPeriodicCoordinateDistance
+    FineCubeFrame.angularPeriodicCoordinateDistance
+  have hp : 0 < 2 * Real.pi := by positivity
+  have habs : |u - v| ≤ 2 * Real.pi := by
+    rw [abs_le]
+    constructor <;> linarith
+  rw [show -u / (2 * Real.pi) - -v / (2 * Real.pi) =
+      -(u - v) / (2 * Real.pi) by ring,
+    abs_div, abs_neg, abs_of_pos hp]
+  rw [show 1 - |u - v| / (2 * Real.pi) =
+      (2 * Real.pi - |u - v|) / (2 * Real.pi) by field_simp]
+  rw [min_div_div_right hp.le]
+
+theorem normalizedAngularPoint_lInfDistance
+    {d : ℕ} {u v : FineCubeFrame.AngularPoint d}
+    (hu : FineCubeFrame.InAngularCube u)
+    (hv : FineCubeFrame.InAngularCube v) :
+    External.unitPeriodicLInfDistance
+        (normalizedAngularPoint u) (normalizedAngularPoint v) =
+      FineCubeFrame.angularPeriodicLInfDistance u v /
+        (2 * Real.pi) := by
+  unfold External.unitPeriodicLInfDistance
+    FineCubeFrame.angularPeriodicLInfDistance normalizedAngularPoint
+  simp_rw [normalizedAngularPoint_coordinateDistance (hu _) (hv _)]
+  rw [show (fun k => FineCubeFrame.angularPeriodicCoordinateDistance
+      (u k) (v k) / (2 * Real.pi)) =
+      (2 * Real.pi)⁻¹ •
+        (fun k => FineCubeFrame.angularPeriodicCoordinateDistance
+          (u k) (v k)) by
+      funext k
+      simp [div_eq_inv_mul]]
+  rw [norm_smul, Real.norm_eq_abs, abs_of_pos (inv_pos.mpr (by positivity))]
+  field_simp
+
+/-- Li's translated-cube energy becomes the one-sided angular cube energy
+after normalization of the nodes. -/
+theorem translatedCubeFourierEnergy_normalizedAngularPoint
+    {d K : ℕ} {ι : Type*} [Fintype ι]
+    (x : ι → FineCubeFrame.AngularPoint d) (c : ι → ℂ) :
+    External.translatedCubeFourierEnergy (K + 1)
+        (fun j => normalizedAngularPoint (x j)) c =
+      FineCubeFrame.fineCubeFourierEnergy K x c := by
+  classical
+  unfold External.translatedCubeFourierEnergy
+    FineCubeFrame.fineCubeFourierEnergy
+  apply Finset.sum_congr rfl
+  intro ω _
+  congr 1
+  apply congrArg norm
+  apply Finset.sum_congr rfl
+  intro j _
+  congr 1
+  apply congrArg Complex.exp
+  have hsum :
+      (∑ k,
+          (((ω k : Fin (K + 1)) : ℕ) : ℂ) *
+            normalizedAngularPoint (x j) k) =
+        -(∑ k, (((ω k : Fin (K + 1)) : ℕ) : ℂ) * x j k) /
+          (2 * (Real.pi : ℂ)) := by
+    calc
+      _ = ∑ k,
+          -((((ω k : Fin (K + 1)) : ℕ) : ℂ) * x j k) /
+            (2 * (Real.pi : ℂ)) := by
+          apply Finset.sum_congr rfl
+          intro k _
+          unfold normalizedAngularPoint
+          push_cast
+          field_simp [Real.pi_ne_zero]
+      _ = _ := by rw [← Finset.sum_div, Finset.sum_neg_distrib]
+  rw [hsum]
+  field_simp [Real.pi_ne_zero]
 
 /-- One coordinate of the finite affine-lattice block
 `-K / 2 + {0, ..., K}`. -/
@@ -328,53 +463,57 @@ theorem hasFineCubeFrame_of_oneSidedLowerFrame
     NumDetect.fineCubeEvaluation,
     Matrix.mulVec, dotProduct, SegmentedVDM.energy, mul_comm] using hc
 
-/-- The minimal remaining analytic statement from the shifted Fejer proof.
-
-For `d ≥ 2`, Barton's Theorem 2.2 supplies compactly supported multivariate
-minorants.  A multidimensional shifted Fejer--Poisson theorem must then sample
-them on `(-K / 2 + ℤ)^d` and eliminate cross terms at the stated torus
-separation.  Everything after that analytic assertion is algebraic. -/
-def HasBartonShiftedCosetLowerFrame
-    (d K : ℕ) (β : ℝ) : Prop :=
-  HasShiftedCosetLowerFrame d K
-    (4 * Real.pi * β * d / (K + 1))
-    (2 - Real.exp (1 / (2 * β)))
-
-/-- The Barton--Fejer shifted-coset statement implies the desired one-sided
-frame bound for every cutoff `K`, with no parity condition. -/
-theorem oneSidedLowerFrame_of_bartonShiftedCoset
-    {d K : ℕ} {β : ℝ}
-    (h : HasBartonShiftedCosetLowerFrame d K β) :
-    HasOneSidedLowerFrame d K
-      (4 * Real.pi * β * d / (K + 1))
-      (2 - Real.exp (1 / (2 * β))) :=
-  (hasShiftedCosetLowerFrame_iff_oneSided d K
-    (4 * Real.pi * β * d / (K + 1))
-    (2 - Real.exp (1 / (2 * β)))).mp h
-
-/-- A stronger actual separation parameter can be used without changing the
-frame constant. -/
-theorem oneSidedLowerFrame_of_bartonShiftedCoset_of_le
+/-- The translated-cube theorem supplies the manuscript fine-cube frame in
+every positive dimension, for both parities of `K + 1`. -/
+theorem hasFineCubeFrame_of_translatedCube
     {d K : ℕ} {β η : ℝ}
-    (hη : 4 * Real.pi * β * d / (K + 1) ≤ η)
-    (h : HasBartonShiftedCosetLowerFrame d K β) :
-    HasOneSidedLowerFrame d K η
-      (2 - Real.exp (1 / (2 * β))) := by
-  intro ι _ x hx hsep
-  apply oneSidedLowerFrame_of_bartonShiftedCoset h ι x hx
-  intro i j hij
-  exact hη.trans_lt (hsep i j hij)
-
-/-- The Barton shifted-coset estimate, at the manuscript separation scale,
-supplies exactly the fine-cube frame consumed by the segmented proof. -/
-theorem hasFineCubeFrame_of_bartonShiftedCoset
-    {d K : ℕ} {β η : ℝ}
-    (hη : 4 * Real.pi * β * d / (K + 1) ≤ η)
-    (h : HasBartonShiftedCosetLowerFrame d K β) :
+    (hd : 1 ≤ d)
+    (hβ : 1 / (2 * Real.log 2) < β)
+    (hη : 4 * Real.pi * β * d / (K + 1) ≤ η) :
     NumDetect.HasFineCubeFrame d K η
-      (2 - Real.exp (1 / (2 * β))) :=
-  hasFineCubeFrame_of_oneSidedLowerFrame
-    (oneSidedLowerFrame_of_bartonShiftedCoset_of_le hη h)
+      (2 - Real.exp (1 / (2 * β))) := by
+  by_cases hK : K = 0
+  · subst K
+    apply NumDetect.hasFineCubeFrame_zero_of_sourceRange d (by omega) β η hβ
+    simpa using hη
+  · unfold NumDetect.HasFineCubeFrame
+    intro ι _ _ x hx hsep c
+    have hN : 2 ≤ K + 1 := by omega
+    have hx' :
+        ∀ j, External.InUnitHalfOpenCube
+          (normalizedAngularPoint (x j)) :=
+      fun j => normalizedAngularPoint_mem_halfOpenCube (hx j)
+    have hsep' :
+        ∀ i j, i ≠ j →
+          2 * β * d / (K + 1) ≤
+            External.unitPeriodicLInfDistance
+              (normalizedAngularPoint (x i))
+              (normalizedAngularPoint (x j)) := by
+      intro i j hij
+      rw [normalizedAngularPoint_lInfDistance (hx i) (hx j)]
+      apply (le_div_iff₀ (by positivity : 0 < 2 * Real.pi)).2
+      have hangular :
+          4 * Real.pi * β * d / (K + 1) <
+            FineCubeFrame.angularPeriodicLInfDistance (x i) (x j) :=
+        hη.trans_lt (by
+          simpa [FineCubeFrame.angularPeriodicLInfDistance,
+            FineCubeFrame.angularPeriodicCoordinateDistance,
+            NumDetect.periodicLInfDistance,
+            NumDetect.periodicCoordinateDistance] using hsep i j hij)
+      calc
+        (2 * β * d / (K + 1)) * (2 * Real.pi) =
+            4 * Real.pi * β * d / (K + 1) := by ring
+        _ ≤ FineCubeFrame.angularPeriodicLInfDistance (x i) (x j) :=
+          hangular.le
+    have hframe :=
+      External.translatedCubeFourier_lowerFrame β
+        (fun j => normalizedAngularPoint (x j)) hd hN hβ.le hx'
+          (by simpa only [Nat.cast_add, Nat.cast_one] using hsep') c
+    rw [translatedCubeFourierEnergy_normalizedAngularPoint] at hframe
+    simpa [External.coefficientEnergy,
+      FineCubeFrame.fineCubeFourierEnergy,
+      NumDetect.fineCubeEvaluation, Matrix.mulVec, dotProduct,
+      SegmentedVDM.energy, mul_comm] using hframe
 
 end
 

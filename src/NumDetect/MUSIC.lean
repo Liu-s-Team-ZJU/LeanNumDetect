@@ -1,14 +1,56 @@
-import NumDetectMain.MUSICProofSupport
+import NumDetect.MUSICPerturbation
 
 /-! MUSIC noise-space correlation stability for generalized Hankel matrices. -/
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
+open WithLp
+
 namespace LeanNumDetect
 namespace NumDetect
 
 noncomputable section
+
+/-- The manuscript's MUSIC identifiability condition: normalized steering
+vectors lie in the exact signal space precisely at source locations. -/
+def IsMUSICIdentifiable
+    {d n : ℕ} {ι κ : Type*}
+    [Fintype ι] [Fintype κ] [DecidableEq ι] [DecidableEq κ]
+    (rowFrequency : ι → Point d) (A : Matrix ι κ ℂ)
+    (node : Fin n → Point d) : Prop :=
+  ∀ y, toLp 2 (normalizedSteering rowFrequency y) ∈ A.toEuclideanLin.range ↔
+    ∃ j, y = node j
+
+/-- For an exact rank-`n` matrix, the fixed-rank MUSIC correlation vanishes
+exactly when the normalized steering vector belongs to the signal space. -/
+theorem rankNoiseSpaceCorrelation_eq_zero_iff_mem_signalSpace
+    {d : ℕ} {ι κ : Type*}
+    [Fintype ι] [Fintype κ] [DecidableEq ι] [DecidableEq κ]
+    (rowFrequency : ι → Point d) (A : Matrix ι κ ℂ)
+    (n : ℕ) (hrows : n < Fintype.card ι) (hrank : A.rank = n)
+    (y : Point d) :
+    rankNoiseSpaceCorrelation rowFrequency A n y = 0 ↔
+      toLp 2 (normalizedSteering rowFrequency y) ∈ A.toEuclideanLin.range := by
+  unfold rankNoiseSpaceCorrelation
+  rw [norm_eq_zero, Submodule.starProjection_apply_eq_zero_iff]
+  rw [trailingLeftSingularSubspace_eq_range_orthogonal A n hrows hrank]
+  simp
+
+/-- Under the manuscript's identifiability condition, the zero set of the
+noise-space correlation is exactly the set of source locations.  Equivalently,
+the reciprocal MUSIC imaging function has poles exactly at those locations. -/
+theorem noiselessMUSIC_correlation_eq_zero_iff_source
+    {d n : ℕ} {ι κ : Type*}
+    [Fintype ι] [Fintype κ] [DecidableEq ι] [DecidableEq κ]
+    (rowFrequency : ι → Point d) (A : Matrix ι κ ℂ)
+    (node : Fin n → Point d)
+    (hrows : n < Fintype.card ι) (hrank : A.rank = n)
+    (hidentifiable : IsMUSICIdentifiable rowFrequency A node)
+    (y : Point d) :
+    rankNoiseSpaceCorrelation rowFrequency A n y = 0 ↔ ∃ j, y = node j := by
+  exact (rankNoiseSpaceCorrelation_eq_zero_iff_mem_signalSpace
+    rowFrequency A n hrows hrank y).trans (hidentifiable y)
 
 /-- Denominator in the GHM MUSIC perturbation bound. -/
 def musicSignalGap {d n : ℕ} {ι κ : Type*}
@@ -94,9 +136,6 @@ theorem segmentedMUSIC_correlation_stability
     (hτ : τ ≤ Real.pi / (2 * D * d))
     (hβ : 1 / (2 * Real.log 2) < β)
     (hη : 4 * Real.pi * β * d / (localizationOrder m nStar + 1) ≤ η)
-    (hframe :
-      HasFineCubeFrame d (localizationOrder m nStar) η
-        (2 - Real.exp (1 / (2 * β))))
     (hr : 2 * nStar ≤ r)
     (hlocal :
       periodicMinimumL1Separation μ.node hn ≤
@@ -129,8 +168,8 @@ theorem segmentedMUSIC_correlation_stability
           (periodicMinimumL1Separation μ.node hn) ≤
         matrixSingularValue
           (segmentedVandermonde m r D μ.node) (n - 1) := by
-    exact segmentedVandermonde_minimumSingularValue_of_fineCubeFrame
-      μ hd hn hclumps hm hD hτ hβ hη hframe hr hlocal
+    exact segmentedVandermonde_minimumSingularValue
+      μ hd hn hclumps hm hD hτ hβ hη hr hlocal
   have heq :
       matrixSingularValue (segmentedVandermonde m r D μ.node) (n - 1) =
         matrixSingularValue

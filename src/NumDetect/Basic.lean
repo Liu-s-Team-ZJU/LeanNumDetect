@@ -198,6 +198,46 @@ def IsAngularClumpStructure {d n : ℕ} (x : Fin n → Point d)
     (∀ i j, label i = label j → periodicLInfDistance (x i) (x j) ≤ τ) ∧
     ∀ i j, label i ≠ label j → η < periodicLInfDistance (x i) (x j)
 
+/-- For manuscript clumps, the local sparsity at the clump diameter is exactly
+the largest clump size. -/
+theorem localSparsity_eq_of_angularClumpStructure
+    {d n A nStar : ℕ} {x : Fin n → Point d} {τ η : ℝ}
+    (hn : 0 < n) (hclumps : IsAngularClumpStructure x A nStar τ η) :
+    localSparsity x τ hn = nStar := by
+  rcases hclumps with
+    ⟨_hnStar, _hτ, hτη, _hangular, label, _hsurj, hcard, hmax,
+      hwithin, hcross⟩
+  have hneighborhood (j : Fin n) :
+      localNeighborhood x j τ = Finset.univ.filter fun k => label k = label j := by
+    ext k
+    simp only [localNeighborhood, Finset.mem_filter, Finset.mem_univ, true_and]
+    constructor
+    · intro hdist
+      by_contra hlabel
+      have hfar := hcross j k (fun h => hlabel h.symm)
+      linarith
+    · intro hlabel
+      exact hwithin j k hlabel.symm
+  apply le_antisymm
+  · unfold localSparsity
+    apply Finset.sup'_le
+    intro j _
+    rw [hneighborhood]
+    exact hcard (label j)
+  · rcases hmax with ⟨a, ha⟩
+    have hnonempty : (Finset.univ.filter fun j => label j = a).Nonempty := by
+      rw [← Finset.card_pos]
+      omega
+    obtain ⟨j, hj⟩ := hnonempty
+    have hjlabel : label j = a := by simpa using hj
+    unfold localSparsity
+    calc
+      nStar = (Finset.univ.filter fun k => label k = a).card := ha.symm
+      _ = (localNeighborhood x j τ).card := by rw [hneighborhood j, hjlabel]
+      _ ≤ Finset.univ.sup' (fin_univ_nonempty hn)
+          fun k => (localNeighborhood x k τ).card :=
+        Finset.le_sup' (fun k => (localNeighborhood x k τ).card) (Finset.mem_univ j)
+
 /-- A separation threshold guarantees number detection if every admissible measure has at least
 the true number of supports. -/
 def NumberDetectionGuarantee (d n : ℕ) (p : LpIndex) (Ω σ mMin D : ℝ)

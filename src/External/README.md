@@ -1,33 +1,22 @@
-# External
+# External admission registry
 
-This directory is the registration boundary for original theorems and formulas from external literature that have not yet been formalized.
+`src/External/` is reserved for original theorems or formulas from external
+literature whose proofs have not yet been formalized. Only Lean files in this
+directory may use `sorry`; proved definitions, lemmas, and conversions belong
+under `src/General/` or the directory for the theorem that uses them.
 
-## Registration policy
-
-Only Lean files under `src/External/` may use `sorry`. Every such original result must appear in the table below with its exact source and theorem or formula identifier. For an unnumbered result, give a section, page, or nearby numbered formula instead of inventing a number.
-
-Preserve the source's full statement, hypotheses, parameters, and normalization. Prove adaptations to this project outside this directory: reusable conversions belong in `src/General/` and theorem-specific conversions in their respective directories. Update this registry, imports, and audits together whenever an external result changes.
-
-## Source registry
+Every admitted result must be registered below with its exact source, theorem
+or formula identifier, and Lean declaration. Preserve the source's full
+statement, hypotheses, parameters, and normalization. For an unnumbered result,
+record a section, page, or nearby numbered formula instead of inventing a
+number. Update the registry, imports, and repository audits together whenever
+an external result is added, changed, proved, or removed.
 
 | File | Original source | Original theorem or formula identifier | Lean declaration |
 | --- | --- | --- | --- |
+| `TranslatedCubeFourier.lean` | Weilin Li, *Nonharmonic multivariate Fourier transforms and matrices: condition numbers and hyperplane geometry*, ACHA 79 (2025), 101791 | Beurling--Selberg discussion preceding Theorem 2.2, Theorem 2.2, and the translated discrete argument in the proof of Theorem 2.3, Section 5.1 | `External.translatedCubeFourier_lowerFrame` |
 
-There are currently no admitted external results.
-
-`SeparatedCubeFourier.lean` retains only source-normalized definitions. The
-former registration of Li's Theorem 2.3 was removed after source audit found
-that the combined Lean statement used torus separation for both its continuous
-and discrete conclusions, whereas the source uses Euclidean separation for the
-continuous operator. The source's proof of the discrete statement for arbitrary
-real radius also replaces `m` by `⌊m⌋` without preserving the separation
-hypothesis. Fully proved algebraic and measure-theoretic reductions are recorded
-in `General/Fourier/SeparatedCubeFourierInternal.lean` and
-`General/Fourier/SeparatedCubeFourierContinuous.lean`; the missing
-Beurling--Selberg/Barton extremal-function construction is not admitted.
-
-## Enforcement
-
-[Repository-wide CI](../../.github/ci/README.md) checks admissions by source
-module rather than namespace and rejects project axioms. The complete proof and
-attribution rules are in [AGENTS.md](../../AGENTS.md).
+The translated-cube bound above is the only admitted external result.
+[Repository-wide CI](../../.github/ci/README.md) enforces the admission policy
+and rejects project axioms; the complete proof and attribution rules are in
+[AGENTS.md](../../AGENTS.md).

@@ -1,4 +1,4 @@
-import NumDetectMain.UniformProofSupport
+import NumDetect.UniformInterpolation
 
 /-! The contiguous-grid Vandermonde lower bound from the NumDetect manuscript. -/
 

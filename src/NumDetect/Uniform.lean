@@ -1,4 +1,4 @@
-import NumDetectMain.UniformThresholdSupport
+import NumDetect.UniformThreshold
 
 /-! Contiguous-grid source-number detection results from the NumDetect manuscript. -/
 

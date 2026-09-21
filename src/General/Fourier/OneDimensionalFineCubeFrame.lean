@@ -1,4 +1,4 @@
-import NumDetectMain.SegmentedProofSupport
+import NumDetect.SegmentedVandermonde
 
 /-!
 The one-dimensional fine-cube frame from the periodic Hilbert inequality.

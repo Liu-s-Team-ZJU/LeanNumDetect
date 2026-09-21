@@ -1,5 +1,5 @@
-import NumDetectMain.Uniform
-import NumDetectMain.CRLLowerBoundSupport
+import NumDetect.Uniform
+import NumDetect.CRLLowerBound
 
 /-! Computational resolution limit bounds from the NumDetect manuscript. -/
 

@@ -1,9 +1,9 @@
-import NumDetectMain.CRL
+import NumDetect.CRL
 import General.Fourier.BartonCubeFrame
 import General.Fourier.OneDimensionalFineCubeFrame
-import NumDetectMain.MUSIC
-import NumDetectMain.Random
-import NumDetectMain.Segmented
-import NumDetectMain.Uniform
+import NumDetect.MUSIC
+import NumDetect.Random
+import NumDetect.Segmented
+import NumDetect.Uniform
 
 /-! Public import for the principal definitions and theorem statements in NumDetect. -/

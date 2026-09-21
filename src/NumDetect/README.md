@@ -1,21 +1,23 @@
-# NumDetect main statements
+# NumDetect definitions and main results
 
 This directory formalizes the definitions and principal theorem statements of
-the NumDetect manuscript at commit `a5046fc`. Import `NumDetectMain.Main` for
+the NumDetect manuscript based at commit `a5046fc`, together with the local
+translated-cube correction in `main.tex`. All modules are kept directly in
+this directory. Related files share a descriptive prefix, while each relatively
+independent main result has one public entry module. Import `NumDetect.Main` for
 the complete interface.
 
-## Files
+## Module groups
 
-| File | Contents |
+| Files | Contents |
 | --- | --- |
-| `Basic.lean` | Points, finite-dimensional norms, reduced atomic measures, Fourier measurements, admissibility, periodic geometry, clumps, sampling spread, and the CRLs |
-| `Matrices.lean` | GHM/GTM, steering vectors, generalized Vandermonde decompositions, contiguous and segmented matrices, spectral norm, and MUSIC correlations |
-| `Uniform.lean` | `lem:uniform-Vandermonde`, `liuthm5.1v2`, and `thm:li-resolution` |
-| `CRL.lean` | `eq:crl-number-upper`, `eq:crl-number-twosided`, and their positive-amplitude counterparts |
-| `Segmented.lean` | The proved ranges of `thm:segmented-vandermonde` and `thm:segmented_threshold` |
-| `Random.lean` | Fixed-realization implications used in `thm:resolutionrandghmnumber1` |
-| `MUSIC.lean` | `lem:stability_ghm_music` and `cor:stability_multidim_segmented` |
-| `Main.lean` | Public aggregate import |
+| [`Basic.lean`](Basic.lean), [`Matrices.lean`](Matrices.lean), [`MatrixFacts.lean`](MatrixFacts.lean) | Observation-model definitions, matrix constructions, exact GHM/GTM Fourier factorizations, and shared matrix estimates |
+| `Uniform*.lean` | Contiguous-grid interpolation, `lem:uniform-Vandermonde`, `liuthm5.1v2`, and `thm:li-resolution`; entry module: [`Uniform.lean`](Uniform.lean) |
+| `Segmented*.lean` | Segmented interpolation, the proved ranges of `thm:segmented-vandermonde`, and `thm:segmented_threshold`; entry module: [`Segmented.lean`](Segmented.lean) |
+| `Random*.lean` | Matrix estimates and fixed-realization implications used in `thm:resolutionrandghmnumber1`; entry module: [`Random.lean`](Random.lean) |
+| `MUSIC*.lean` | Exact noiseless signal/noise-space characterization, fixed-rank perturbation adapters, `lem:stability_ghm_music`, and `cor:stability_multidim_segmented`; entry module: [`MUSIC.lean`](MUSIC.lean) |
+| `CRL*.lean` | Finite-difference lower bounds, `eq:crl-number-upper`, `eq:crl-number-twosided`, and their positive-amplitude counterparts; entry module: [`CRL.lean`](CRL.lean) |
+| [`Main.lean`](Main.lean) | Public aggregate import |
 
 The Lean declarations use stable descriptive names; manuscript labels are
 recorded in declaration comments. Paper singular values are one-based, whereas
@@ -36,6 +38,8 @@ including a separate infinity case for the two CRL definitions.
 Every cluster is nonempty, has at most $n^\star$ nodes, some cluster has exactly
 $n^\star$ nodes, same-cluster periodic $\ell^\infty$ diameter is at most $\tau$,
 and different clusters are separated by more than $\eta$.
+`localSparsity_eq_of_angularClumpStructure` proves the manuscript's stated
+consequence $\nu_\infty(\tau,\mathcal X)=n^\star$.
 
 The first, noise-tail part of the random-GHM theorem is proved for arbitrary
 dimension and fixed realized frequency draws. The signal-threshold part is
@@ -57,26 +61,23 @@ subspace. Using the kernel of the perturbed adjoint would make the manuscript
 claim false for arbitrarily small full-rank perturbations. The required
 fixed-rank perturbation estimate is proved in
 [`General/MatrixAnalysis/MUSICSubspacePerturbation.lean`](../General/MatrixAnalysis/MUSICSubspacePerturbation.lean);
-it is not an external admission.
+it is not an external admission. For an exact rank-$n$ matrix,
+`rankNoiseSpaceCorrelation_eq_zero_iff_mem_signalSpace` proves that the MUSIC
+correlation vanishes exactly on steering vectors in the signal space, and
+`noiselessMUSIC_correlation_eq_zero_iff_source` obtains the manuscript's exact
+source-location statement from its identifiability hypothesis.
 
-The manuscript-shaped segmented theorems use an explicit `HasFineCubeFrame`
-hypothesis, now correctly restricted to nodes in the manuscript's angular
-fundamental domain. A proved one-dimensional corollary covers the stated
-half-frame range, and the zero-order case is automatic in every positive
-dimension. The full one-dimensional range is reduced without admissions to the
-sharp periodic Montgomery--Vaughan Hilbert inequality. For $d\ge2$, the
-shifted-coset conversion now handles both parities of the one-sided cube
-exactly; the remaining input is Barton's multivariate extremal-function bound
-with shifted Fejer--Poisson convergence.
-
-The former automatic multivariate corollaries were removed because they
-depended on an admitted combined version of Li's centered-cube theorem. Source
-audit found that Li uses Euclidean separation for the continuous result and
-torus separation for the discrete result, while the former Lean statement used
-torus separation for both. Li's stated result also does not directly supply the
-half-integer frequency coset needed when `K + 1` is even. The unrestricted
-manuscript range therefore remains an explicit analytic dependency rather than
-an admitted theorem.
+The manuscript-shaped segmented Vandermonde, threshold, and MUSIC theorems no
+longer expose a `HasFineCubeFrame` hypothesis.  The discrete centered-cube
+argument is stated in its translation-invariant form: the real frequency cube
+is centered at `K / 2` with radius `(K + 1) / 2`, so its integer points are
+exactly `{0, ..., K}^d`.  This preserves the manuscript denominator `K + 1`
+and handles both parities without taking a floor of the cube radius.  The angular-to-unit
+torus normalization, distance scaling, phase conversion, and all downstream
+uses are proved in
+[`General/Fourier/BartonCubeFrame.lean`](../General/Fourier/BartonCubeFrame.lean).
+The underlying translated-cube Fourier-frame estimate is the single registered
+external input.
 
 The constant-$2$ CRL lower bound, including the positive-amplitude case, is
 proved directly by a finite-difference construction. The Liu--Zhang result
@@ -93,7 +94,7 @@ value is not currently justified by the manuscript.
 
 ## Proof status
 
-All declarations in the repository are proved without admissions. The
-separated-cube work records proved reductions to the missing Barton
-extremal-function and sharp off-diagonal estimates, but does not assert those
-inputs as axioms or admitted theorems.
+All project-specific conversions and manuscript results are proved.  The sole
+admission is the registered translated-cube Fourier-frame theorem from the
+Beurling--Selberg/Barton--Li argument; see
+[`External/README.md`](../External/README.md).

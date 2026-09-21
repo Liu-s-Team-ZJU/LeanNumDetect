@@ -1,5 +1,5 @@
-import NumDetectMain.SegmentedDefinitions
-import NumDetectMain.ProofSupport
+import NumDetect.SegmentedDefinitions
+import NumDetect.MatrixFacts
 import General.MatrixAnalysis.SingularValueBounds
 
 /-!

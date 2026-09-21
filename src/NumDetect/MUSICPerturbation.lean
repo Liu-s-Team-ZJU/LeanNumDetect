@@ -1,6 +1,6 @@
 import General.MatrixAnalysis.MUSICSubspacePerturbation
-import NumDetectMain.ProofSupport
-import NumDetectMain.Segmented
+import NumDetect.MatrixFacts
+import NumDetect.Segmented
 
 /-! Proved adapters for the fixed-rank MUSIC perturbation argument. -/
 

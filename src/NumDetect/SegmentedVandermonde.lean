@@ -1,5 +1,5 @@
-import NumDetectMain.Matrices
-import NumDetectMain.UniformProofSupport
+import NumDetect.Matrices
+import NumDetect.UniformInterpolation
 import SegmentedVDM.Interpolation
 import SegmentedVDM.UniformFrame
 import SegmentedVDM.UniformInterpolation

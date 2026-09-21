@@ -1,4 +1,4 @@
-import External.SeparatedCubeFourier
+import General.Fourier.SeparatedCubeFourier
 import General.Fourier.WeightedOrthogonality
 
 /-!

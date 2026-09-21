@@ -1,7 +1,7 @@
 name = "LeanNumDetect"
 version = "0.1.0"
 srcDir = "src"
-defaultTargets = ["External", "General", "SegmentedVDM", "NumDetectMain"]
+defaultTargets = ["General", "SegmentedVDM", "NumDetect"]
 
 # Reuse the existing user-level dependencies, including their compiled caches.
 packagesDir = "../../.local/share/lean/mathlib4-v4.32.0/.lake/packages"
@@ -11,17 +11,17 @@ name = "mathlib"
 path = "../../.local/share/lean/mathlib4-v4.32.0"
 
 [[lean_lib]]
-name = "External"
-globs = ["External.+"]
-
-[[lean_lib]]
 name = "General"
 globs = ["General.+"]
+
+[[lean_lib]]
+name = "External"
+globs = ["External.+"]
 
 [[lean_lib]]
 name = "SegmentedVDM"
 globs = ["SegmentedVDM.+"]
 
 [[lean_lib]]
-name = "NumDetectMain"
-globs = ["NumDetectMain.+"]
+name = "NumDetect"
+globs = ["NumDetect.+"]

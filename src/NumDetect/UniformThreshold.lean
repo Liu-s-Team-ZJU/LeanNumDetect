@@ -1,8 +1,8 @@
-import NumDetectMain.UniformVandermonde
-import NumDetectMain.ProofSupport
+import NumDetect.UniformVandermonde
+import NumDetect.MatrixFacts
 
 /-!
-Complete support lemmas for the two threshold results in `NumDetectMain.Uniform`.
+Complete support lemmas for the two threshold results in `NumDetect.Uniform`.
 
 The final two theorems below deliberately use distinct names.  This file can
 therefore check their complete proofs without changing the manuscript-facing

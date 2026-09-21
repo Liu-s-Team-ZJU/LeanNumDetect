@@ -1,4 +1,4 @@
-import NumDetectMain.Matrices
+import NumDetect.Matrices
 
 /-! Definitions used by both segmented Vandermonde and threshold proofs. -/
 

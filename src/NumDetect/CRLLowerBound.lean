@@ -1,4 +1,4 @@
-import NumDetectMain.Basic
+import NumDetect.Basic
 
 /-! Finite-difference counterexamples for computational resolution lower bounds. -/
 

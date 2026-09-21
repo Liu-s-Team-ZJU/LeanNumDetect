@@ -1,5 +1,5 @@
 import General.MatrixAnalysis.SingularValueBounds
-import NumDetectMain.Matrices
+import NumDetect.Matrices
 
 /-!
 Fixed-rank perturbation bounds for the trailing left singular subspace.
@@ -353,6 +353,30 @@ private theorem projection_difference_le_of_cross_bounds
     norm_nonneg (Nᗮ.starProjection x), norm_nonneg (N.starProjection x)]
 
 namespace NumDetect
+
+/-- For an exact rank-`n` matrix, the trailing left singular subspace is the
+orthogonal complement of its column space. -/
+theorem trailingLeftSingularSubspace_eq_range_orthogonal
+    {ι κ : Type*} [Fintype ι] [Fintype κ]
+    [DecidableEq ι] [DecidableEq κ]
+    (A : Matrix ι κ ℂ) (n : ℕ)
+    (hrows : n < Fintype.card ι) (hrank : A.rank = n) :
+    trailingLeftSingularSubspace A n = A.toEuclideanLin.rangeᗮ := by
+  let T := A.toEuclideanLin
+  let L := T.adjoint
+  have hTrank : Module.finrank ℂ T.range = n := by
+    change Module.finrank ℂ (LinearMap.range
+      ((Matrix.toLin (EuclideanSpace.basisFun κ ℂ).toBasis
+        (EuclideanSpace.basisFun ι ℂ).toBasis) A)) = n
+    rw [← A.rank_eq_finrank_range_toLin
+      (EuclideanSpace.basisFun ι ℂ).toBasis
+      (EuclideanSpace.basisFun κ ℂ).toBasis, hrank]
+  have hLrank : Module.finrank ℂ L.range = n := by
+    simpa only [L, T] using T.finrank_range_adjoint.trans hTrank
+  calc
+    trailingLeftSingularSubspace A n = trailingSingularSubspace L n := rfl
+    _ = L.ker := trailingSingularSubspace_eq_ker L (by simpa using hrows) hLrank
+    _ = T.rangeᗮ := by simpa only [L] using T.orthogonal_range.symm
 
 /-- Fixed-rank perturbation estimate for the trailing left singular subspace.
 
