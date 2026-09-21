@@ -7,7 +7,8 @@ Vandermonde lower bounds, singular-value detection thresholds, MUSIC stability,
 and computational resolution limits. Algorithms, complexity estimates, and
 numerical experiments are outside the current scope.
 
-Import `NumDetect.Main` for the manuscript-facing interface.
+Import `NumDetect.Main` for the NumDetect results and `RandSamp.Main` for the
+nonuniform Fourier--Vandermonde estimate.
 
 ## Main theoretical results
 
@@ -17,6 +18,8 @@ Import `NumDetect.Main` for the manuscript-facing interface.
 | Multidimensional number-detection resolution (`thm:li-resolution`) | [Uniform.lean](src/NumDetect/Uniform.lean): theorem `noAdmissibleMeasureWithFewerSupports` |
 | Number-detection CRL upper bound (`eq:crl-number-upper`) | [CRL.lean](src/NumDetect/CRL.lean): theorem `numberDetectionCRL_le_numberDetectionSeparationThreshold` |
 | Segmented-grid VDM minimum-singular-value estimate (`thm:segmented-vandermonde`) | [Segmented.lean](src/NumDetect/Segmented.lean): theorem `segmentedVandermonde_minimumSingularValue` |
+| Well-separated segmented VDM two-sided singular-value estimate (`thm:well_separated_segmented`) | [WellSeparatedSegmented.lean](src/NumDetect/WellSeparatedSegmented.lean): theorem `wellSeparatedSegmented_singularValue_bounds` |
+| Nonuniform VDM scaling (`thm:nonuniform_vdm_scaling`) | [NonuniformVandermonde.lean](src/RandSamp/NonuniformVandermonde.lean): theorem `nonuniformVandermonde_minimumSingularValue` |
 | Segmented-grid number-detection singular-value threshold (`thm:segmented_threshold`) | [Segmented.lean](src/NumDetect/Segmented.lean): theorem `segmentedGHM_singularValueThreshold` |
 | General GHM-MUSIC stability (`lem:stability_ghm_music`) | [MUSIC.lean](src/NumDetect/MUSIC.lean): theorem `ghmMUSIC_correlation_stability` |
 | Segmented-grid MUSIC stability (`cor:stability_multidim_segmented`) | [MUSIC.lean](src/NumDetect/MUSIC.lean): theorem `segmentedMUSIC_correlation_stability` |
@@ -29,6 +32,7 @@ conventions, proof organization, and formalization choices for these results.
 | Path | Purpose |
 | --- | --- |
 | [src/NumDetect](src/NumDetect/README.md) | Manuscript definitions and main results, grouped by flat module prefixes with aggregate import `NumDetect.Main` |
+| [src/RandSamp](src/RandSamp/README.md) | Nonuniform Fourier--Vandermonde scaling via Lagrange interpolation and Taylor factorization |
 | [src/SegmentedVDM](src/SegmentedVDM/README.md) | Independent one-dimensional segmented Vandermonde construction and singular-value theorem |
 | [src/General](src/General/README.md) | Reusable finite, Fourier, matrix-analysis, and spectral-perturbation results |
 | [src/External](src/External/README.md) | Admission policy and registry; currently contains no Lean files and no admitted results |
@@ -45,7 +49,7 @@ python3 .github/ci/check.py
 ```
 
 The first command verifies the pinned dependency checkout, `lake build` builds
-the three source libraries, and the final check builds every source module and
+the source libraries, and the final check builds every source module and
 rejects proof admissions or project-defined axioms. If the shared mathlib
 checkout is absent, run `python3 .github/ci/setup_mathlib.py` once before these
 commands. See the [CI guide](.github/ci/README.md) for environment setup and

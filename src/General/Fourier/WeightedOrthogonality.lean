@@ -40,4 +40,19 @@ theorem weighted_series_le_block {κ : Type*} (S : Finset κ) (w E : κ → ℝ)
   rw [hsum.neg.tsum_eq, Finset.sum_neg_distrib] at hh
   have he : W ≤ ∑ k ∈ S, w k*E k := by linarith
   exact he.trans (Finset.sum_le_sum (fun k hk => mul_le_of_le_one_left (hE k) (hin k hk)))
+
+/-- A nonnegative full-lattice majorant which is at least one on a finite
+block gives an upper bound for the unweighted block energy. -/
+theorem block_le_weighted_series {κ : Type*} (S : Finset κ)
+    (w E : κ → ℝ) (W : ℝ)
+    (hE : ∀ k, 0 ≤ E k) (hin : ∀ k ∈ S, 1 ≤ w k)
+    (hw : ∀ k, 0 ≤ w k) (hsum : HasSum (fun k => w k * E k) W) :
+    ∑ k ∈ S, E k ≤ W := by
+  have hfinite : ∑ k ∈ S, E k ≤ ∑ k ∈ S, w k * E k :=
+    Finset.sum_le_sum fun k hk =>
+      le_mul_of_one_le_left (hE k) (hin k hk)
+  have htail := hsum.summable.sum_le_tsum S fun k _ =>
+    mul_nonneg (hw k) (hE k)
+  rw [hsum.tsum_eq] at htail
+  exact hfinite.trans htail
 end LeanNumDetect

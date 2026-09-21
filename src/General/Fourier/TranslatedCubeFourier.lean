@@ -312,6 +312,31 @@ def bartonMinorant {d : ℕ} (a b δ : ℝ) (t : Fin d → ℝ) : ℝ :=
   2 * ∏ k, intervalCenter a b δ (t k) -
     ∏ k, selbergIntervalMajorant a b δ (t k)
 
+/-- The tensor-product Selberg majorant for a rectangular integer block. -/
+def bartonMajorant {d : ℕ} (a b δ : ℝ) (t : Fin d → ℝ) : ℝ :=
+  ∏ k, selbergIntervalMajorant a b δ (t k)
+
+theorem bartonMajorant_nonneg
+    {d : ℕ} {a b δ : ℝ} (hab : a ≤ b) (hδ : 0 < δ)
+    (t : Fin d → ℝ) : 0 ≤ bartonMajorant a b δ t := by
+  exact Finset.prod_nonneg fun k _ =>
+    selbergIntervalMajorant_nonneg hab hδ (t k)
+
+theorem boxIndicator_le_bartonMajorant
+    {d : ℕ} {a b δ : ℝ} (hab : a ≤ b) (hδ : 0 < δ)
+    (t : Fin d → ℝ) :
+    (if ∀ k, a < t k ∧ t k ≤ b then 1 else 0) ≤
+      bartonMajorant a b δ t := by
+  classical
+  have hnonneg : ∀ k, 0 ≤ selbergIntervalMajorant a b δ (t k) :=
+    fun k => selbergIntervalMajorant_nonneg hab hδ (t k)
+  by_cases hin : ∀ k, a < t k ∧ t k ≤ b
+  · rw [if_pos hin]
+    exact Finset.one_le_prod fun k _ =>
+      one_le_selbergIntervalMajorant hδ (hin k).1 (hin k).2
+  · rw [if_neg hin]
+    exact Finset.prod_nonneg fun k _ => hnonneg k
+
 theorem bartonMinorant_le_boxIndicator
     {d : ℕ} {a b δ : ℝ} (hab : a ≤ b) (hδ : 0 < δ)
     (hwidth : 1 ≤ δ * (b - a)) (t : Fin d → ℝ) :
@@ -545,6 +570,21 @@ theorem bartonMinorant_hasSum
         (((b - a) + δ⁻¹ : ℝ) : ℂ) := by push_cast; rfl
     rw [hbase1, hbase2, complex_pow_re, complex_pow_re]
 
+theorem bartonMajorant_hasSum
+    {d : ℕ} {a b δ : ℝ} (hab : a ≤ b) (hδ : 0 < δ) (hδ1 : δ ≤ 1) :
+    HasSum (fun n : Fin d → ℤ => bartonMajorant a b δ (fun k => n k))
+      (((b - a) + δ⁻¹) ^ d) := by
+  have hC1 := selbergUnmodulated_hasSum_mass hab hδ hδ1
+  have hC := hasSum_pi_prod (α := Fin d)
+    (fun _ n => (selbergIntervalMajorant a b δ (n : ℝ) : ℂ))
+    (fun _ => ((((b - a) + δ⁻¹ : ℝ)) : ℂ)) (fun _ => hC1)
+  have hreal := Complex.hasSum_re hC
+  convert hreal using 1
+  · funext n
+    rw [complex_prod_re]
+    rfl
+  · rw [Finset.prod_const, Finset.card_univ, Fintype.card_fin, complex_pow_re]
+
 theorem bartonMinorantModulated_hasSum_zero
     {d : ℕ} {a b δ : ℝ} (hab : a ≤ b) (hδ : 0 < δ)
     {u v : Fin d → ℝ}
@@ -617,6 +657,51 @@ theorem bartonMinorantModulated_hasSum_zero
       ring
     simp only [bartonMinorant]
     simp only [Vf, Cf, Finset.prod_mul_distrib, hphase]
+    push_cast
+    ring)
+
+theorem bartonMajorantModulated_hasSum_zero
+    {d : ℕ} {a b δ : ℝ} (hab : a ≤ b) (hδ : 0 < δ)
+    {u v : Fin d → ℝ}
+    (hsep : ∃ k, δ ≤ circleDist (v k - u k) 0) :
+    HasSum (fun n : Fin d → ℤ =>
+      (bartonMajorant a b δ (fun k => n k) : ℂ) *
+        Complex.exp (-2 * Real.pi * Complex.I *
+          ∑ k, ((n k : ℤ) : ℂ) * (v k - u k))) 0 := by
+  obtain ⟨k, hk⟩ := hsep
+  let phase : Fin d → ℤ → ℂ := fun i n => echar (v i - u i) (n : ℝ)
+  let Cf : Fin d → ℤ → ℂ := fun i n =>
+    (selbergIntervalMajorant a b δ (n : ℝ) : ℂ) * phase i n
+  have hCcomp : ∀ i, Summable (Cf i) := fun i =>
+    (selbergIntervalMajorant_mul_echar_int_summable hab hδ (v i - u i)).congr
+      (fun n => by rfl)
+  have hCk : HasSum (Cf k) 0 := by
+    simpa [Cf, phase] using selbergModulated_hasSum_zero hab hδ hk
+  have hCprod := hasSum_pi_prod (α := Fin d) Cf
+    (fun i => if i = k then 0 else ∑' n, Cf i n)
+    (fun i => by
+      by_cases hik : i = k
+      · subst i
+        simpa using hCk
+      · simp [hik]
+        exact (hCcomp i).hasSum)
+  have hCzero : (∏ i, if i = k then 0 else ∑' n, Cf i n) = 0 := by
+    apply Finset.prod_eq_zero (Finset.mem_univ k)
+    simp
+  rw [hCzero] at hCprod
+  exact HasSum.congr_fun hCprod (fun n => by
+    have hphase :
+        ∏ i, phase i (n i) =
+          Complex.exp (-2 * Real.pi * Complex.I *
+            ∑ i, ((n i : ℤ) : ℂ) * (v i - u i)) := by
+      simp only [phase, echar, ← Complex.exp_sum]
+      congr 1
+      rw [Finset.mul_sum]
+      apply Finset.sum_congr rfl
+      intro i _
+      push_cast
+      ring
+    simp only [bartonMajorant, Cf, Finset.prod_mul_distrib, hphase]
     push_cast
     ring)
 
@@ -794,6 +879,58 @@ theorem translatedCube_lower_of_barton
     hweighted
   rwa [← translatedCubeFourierEnergy_eq_latticeBlock] at hle
 
+theorem translatedCube_upper_of_barton
+    {d N : ℕ} {ι : Type*} [Fintype ι]
+    (a b δ W : ℝ) (x : ι → External.UnitTorusPoint d) (c : ι → ℂ)
+    (hblock : ∀ n : Fin d → ℤ,
+      (if n ∈ oneSidedFrequencyValues d N then 1 else 0) ≤
+        bartonMajorant a b δ (fun k => n k))
+    (hnonneg : ∀ n : Fin d → ℤ,
+      0 ≤ bartonMajorant a b δ (fun k => n k))
+    (hsum : HasSum
+      (fun n : Fin d → ℤ => bartonMajorant a b δ (fun k => n k)) W)
+    (hcross : ∀ i j, i ≠ j →
+      HasSum (fun n : Fin d → ℤ =>
+        (bartonMajorant a b δ (fun k => n k) : ℂ) *
+          Complex.exp (-2 * Real.pi * Complex.I *
+            ∑ k, ((n k : ℤ) : ℂ) * (x j k - x i k))) 0) :
+    External.translatedCubeFourierEnergy N x c ≤
+      W * External.coefficientEnergy c := by
+  let w : (Fin d → ℤ) → ℝ := fun n =>
+    bartonMajorant a b δ (fun k => n k)
+  have hweighted :=
+    SeparatedCubeFourierInternal.weighted_lattice_energy_hasSum
+      w W x c hsum (fun i j hij => by
+        have hc := (hcross i j hij).mul_left (star (c i) * c j)
+        have hr := Complex.hasSum_re hc
+        convert hr using 1
+        · funext n
+          rw [phase_cross_term]
+          have heq :
+              (w n : ℂ) *
+                  (star (c i) * c j * Complex.exp
+                    (-2 * Real.pi * Complex.I *
+                      ∑ k, ((n k : ℤ) : ℂ) * (x j k - x i k))) =
+                star (c i) * c j *
+                  ((bartonMajorant a b δ (fun k => n k) : ℂ) *
+                    Complex.exp
+                      (-2 * Real.pi * Complex.I *
+                        ∑ k, ((n k : ℤ) : ℂ) * (x j k - x i k))) := by
+            dsimp [w]
+            push_cast
+            ring
+          simpa [Complex.mul_re] using congrArg Complex.re heq
+        · simp)
+  have hle := block_le_weighted_series
+    (oneSidedFrequencyValues d N) w
+    (fun n => ‖SeparatedCubeFourierInternal.integerLatticeFourierValue x c n‖ ^ 2)
+    (W * External.coefficientEnergy c)
+    (fun _ => sq_nonneg _)
+    (fun n hn => by simpa [hn] using hblock n)
+    (fun n => hnonneg n)
+    hweighted
+  rwa [← translatedCubeFourierEnergy_eq_latticeBlock] at hle
+
 theorem exp_bound
     {d : ℕ} {β : ℝ} (hd : 1 ≤ d) (hβ : 0 < β) :
     (1 + 1 / (2 * β * d)) ^ d ≤ Real.exp (1 / (2 * β)) := by
@@ -817,6 +954,48 @@ theorem singleton_translatedCube_lower
     (x : ι → External.UnitTorusPoint d) (c : ι → ℂ) :
     (N ^ d : ℕ) * External.coefficientEnergy c ≤
       External.translatedCubeFourierEnergy N x c := by
+  classical
+  cases isEmpty_or_nonempty ι with
+  | inl h => simp [External.translatedCubeFourierEnergy,
+      External.coefficientEnergy]
+  | inr h =>
+      let j : ι := Classical.choice h
+      have hsum (n : External.OneSidedCubeFrequency d N) :
+          (∑ q, c q * Complex.exp
+            (-2 * Real.pi * Complex.I *
+              ∑ k, (((n k : Fin N) : ℕ) : ℂ) * x q k)) =
+            c j * Complex.exp
+              (-2 * Real.pi * Complex.I *
+                ∑ k, (((n k : Fin N) : ℕ) : ℂ) * x j k) := by
+        apply Fintype.sum_eq_single j
+        intro q hq
+        exact (hq (Subsingleton.elim q j)).elim
+      have hcoeff : External.coefficientEnergy c = ‖c j‖ ^ 2 := by
+        unfold External.coefficientEnergy
+        apply Fintype.sum_eq_single j
+        intro q hq
+        exact (hq (Subsingleton.elim q j)).elim
+      rw [External.translatedCubeFourierEnergy, hcoeff]
+      simp_rw [hsum, norm_mul, Complex.norm_exp]
+      have hre (n : External.OneSidedCubeFrequency d N) :
+          (-2 * Real.pi * Complex.I *
+            ∑ k, (((n k : Fin N) : ℕ) : ℂ) * x j k).re = 0 := by
+        have hreal :
+            (∑ k, (((n k : Fin N) : ℕ) : ℂ) * x j k) =
+              ((∑ k, ((n k : Fin N) : ℕ) * x j k : ℝ) : ℂ) := by
+          push_cast
+          rfl
+        rw [hreal]
+        simp
+      simp_rw [hre, Real.exp_zero, mul_one, Finset.sum_const, Finset.card_univ,
+        Fintype.card_fun, Fintype.card_fin]
+      simp [nsmul_eq_mul]
+
+theorem singleton_translatedCube_energy_eq
+    {d N : ℕ} {ι : Type*} [Fintype ι] [Subsingleton ι]
+    (x : ι → External.UnitTorusPoint d) (c : ι → ℂ) :
+    External.translatedCubeFourierEnergy N x c =
+      (N ^ d : ℕ) * External.coefficientEnergy c := by
   classical
   cases isEmpty_or_nonempty ι with
   | inl h => simp [External.translatedCubeFourierEnergy,
@@ -1029,6 +1208,139 @@ theorem translatedCubeFourier_lowerFrame
           mul_le_mul_of_nonneg_right hcoef hnonneg
         _ = (N ^ d : ℕ) * coefficientEnergy c := by ring
     exact hscale.trans hsingle
+
+/-- The translated-cube upper frame bound obtained from the tensor-product
+Selberg majorant. -/
+theorem translatedCubeFourier_upperFrame
+    {d N : ℕ} {ι : Type*} [Fintype ι]
+    (β : ℝ) (x : ι → UnitTorusPoint d)
+    (hd : 1 ≤ d) (hN : 2 ≤ N)
+    (hβ : 1 / (2 * Real.log 2) ≤ β)
+    (hx : ∀ j, InUnitHalfOpenCube (x j))
+    (hsep : ∀ i j, i ≠ j →
+      2 * β * d / N ≤ unitPeriodicLInfDistance (x i) (x j)) :
+    ∀ c,
+      translatedCubeFourierEnergy N x c ≤
+        Real.exp (1 / (2 * β)) * (N ^ d : ℕ) * coefficientEnergy c := by
+  intro c
+  have hβ0 : 0 < β := by
+    have hlog0 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+    exact (by positivity : 0 < 1 / (2 * Real.log 2)).trans_le hβ
+  letI : Decidable (Nontrivial ι) := Classical.dec _
+  by_cases hι : Nontrivial ι
+  · let δ : ℝ := 2 * β * d / N
+    let a : ℝ := -(1 : ℝ) / 2
+    let b : ℝ := N - (1 : ℝ) / 2
+    have hδ : 0 < δ := by
+      dsimp [δ]
+      positivity
+    have hab : a ≤ b := by
+      dsimp [a, b]
+      have hN0 : (0 : ℝ) ≤ N := by positivity
+      linarith
+    obtain ⟨i, j, hij⟩ := exists_pair_ne ι
+    have hδhalf : δ ≤ 1 / 2 :=
+      (hsep i j hij).trans
+        (TranslatedCubeFourier.unitPeriodicLInfDistance_le_half
+          (x i) (x j) (hx i) (hx j))
+    have hδ1 : δ ≤ 1 := hδhalf.trans (by norm_num)
+    let W : ℝ := ((N : ℝ) + δ⁻¹) ^ d
+    have hsum : HasSum
+        (fun n : Fin d → ℤ =>
+          TranslatedCubeFourier.bartonMajorant a b δ (fun k => n k)) W := by
+      have hs := TranslatedCubeFourier.bartonMajorant_hasSum
+        (d := d) hab hδ hδ1
+      convert hs using 1 <;> dsimp [W, a, b] <;> ring
+    have hblock (n : Fin d → ℤ) :
+        (if n ∈ TranslatedCubeFourier.oneSidedFrequencyValues d N then 1 else 0) ≤
+          TranslatedCubeFourier.bartonMajorant a b δ (fun k => n k) := by
+      have hs := TranslatedCubeFourier.boxIndicator_le_bartonMajorant
+        hab hδ (fun k => (n k : ℝ))
+      have hiff :
+          (∀ k, a < (n k : ℝ) ∧ (n k : ℝ) ≤ b) ↔
+            ∀ k, 0 ≤ n k ∧ n k < N := by
+        constructor
+        · intro h k
+          have hk := h k
+          dsimp [a, b] at hk
+          constructor
+          · have hneg1R : (-1 : ℝ) < n k := by linarith
+            have hneg1 : (-1 : ℤ) < n k := by exact_mod_cast hneg1R
+            omega
+          · exact_mod_cast (show (n k : ℝ) < N by linarith)
+        · intro h k
+          have hk := h k
+          dsimp [a, b]
+          have hk0 : (0 : ℝ) ≤ n k := by exact_mod_cast hk.1
+          have hkN : n k ≤ (N : ℤ) - 1 := by omega
+          have hkNleR : (n k : ℝ) ≤ (N : ℝ) - 1 := by
+            exact_mod_cast hkN
+          constructor <;> linarith
+      by_cases hn : n ∈ TranslatedCubeFourier.oneSidedFrequencyValues d N
+      · rw [if_pos hn]
+        have hp := hiff.mpr
+          ((TranslatedCubeFourier.oneSided_mem_iff n).mp hn)
+        simpa [hp] using hs
+      · rw [if_neg hn]
+        exact TranslatedCubeFourier.bartonMajorant_nonneg hab hδ _
+    have hnonneg (n : Fin d → ℤ) :
+        0 ≤ TranslatedCubeFourier.bartonMajorant a b δ (fun k => n k) := by
+      exact TranslatedCubeFourier.bartonMajorant_nonneg hab hδ _
+    have hcross : ∀ i j, i ≠ j →
+        HasSum (fun n : Fin d → ℤ =>
+          (TranslatedCubeFourier.bartonMajorant a b δ (fun k => n k) : ℂ) *
+            Complex.exp (-2 * Real.pi * Complex.I *
+              ∑ k, ((n k : ℤ) : ℂ) * (x j k - x i k))) 0 := by
+      intro p q hpq
+      obtain ⟨k, hk⟩ :=
+        SeparatedCubeFourierInternal.exists_coordinate_integer_separation
+          (by omega) (hx p) (hx q) (hsep p q hpq)
+      apply TranslatedCubeFourier.bartonMajorantModulated_hasSum_zero hab hδ
+      refine ⟨k, MathExtras.NumberTheory.Analysis.LargeSieve.le_circleDist_of_forall_int
+        (fun m => ?_)⟩
+      have h := hk (-m)
+      push_cast at h ⊢
+      simp only [sub_zero]
+      rw [show x q k - x p k - (m : ℝ) =
+        -(x p k - x q k + (m : ℝ)) by ring, abs_neg]
+      simpa [δ] using h
+    have hframe := TranslatedCubeFourier.translatedCube_upper_of_barton
+      a b δ W x c hblock hnonneg hsum hcross
+    have hexp := TranslatedCubeFourier.exp_bound hd hβ0
+    have hN0 : (0 : ℝ) < N := by positivity
+    have hδinv : δ⁻¹ = (N : ℝ) / (2 * β * d) := by
+      dsimp [δ]
+      field_simp
+    have hfactor :
+        W = (N : ℝ) ^ d * (1 + 1 / (2 * β * d)) ^ d := by
+      dsimp [W]
+      rw [hδinv]
+      have hbasefactor :
+          (N : ℝ) + (N : ℝ) / (2 * β * d) =
+            (N : ℝ) * (1 + 1 / (2 * β * d)) := by ring
+      rw [hbasefactor, mul_pow]
+    have hmass : W ≤ Real.exp (1 / (2 * β)) * (N : ℝ) ^ d := by
+      rw [hfactor]
+      nlinarith [pow_nonneg hN0.le d]
+    have henergy : 0 ≤ coefficientEnergy c :=
+      Finset.sum_nonneg fun _ _ => sq_nonneg _
+    calc
+      translatedCubeFourierEnergy N x c ≤ W * coefficientEnergy c := hframe
+      _ ≤ (Real.exp (1 / (2 * β)) * (N : ℝ) ^ d) * coefficientEnergy c :=
+        mul_le_mul_of_nonneg_right hmass henergy
+      _ = Real.exp (1 / (2 * β)) * (N ^ d : ℕ) * coefficientEnergy c := by
+        norm_cast
+  · haveI : Subsingleton ι := not_nontrivial_iff_subsingleton.mp hι
+    rw [TranslatedCubeFourier.singleton_translatedCube_energy_eq]
+    have hexp : 1 ≤ Real.exp (1 / (2 * β)) :=
+      Real.one_le_exp (by positivity)
+    have henergy : 0 ≤ (N ^ d : ℕ) * coefficientEnergy c :=
+      mul_nonneg (by positivity) (Finset.sum_nonneg fun _ _ => sq_nonneg _)
+    calc
+      (N ^ d : ℕ) * coefficientEnergy c ≤
+          Real.exp (1 / (2 * β)) * ((N ^ d : ℕ) * coefficientEnergy c) :=
+        le_mul_of_one_le_left henergy hexp
+      _ = Real.exp (1 / (2 * β)) * (N ^ d : ℕ) * coefficientEnergy c := by ring
 
 end
 

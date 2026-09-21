@@ -306,6 +306,50 @@ theorem modulateCoefficients_neg_self
     ring
   rw [hphase, Complex.exp_zero, mul_one]
 
+/-- The complete one-sided cube frame estimate, with the same endpoint and
+constants as the manuscript. -/
+theorem fineCubeFourier_bounds_of_translatedCube
+    {d K : ℕ} {ι : Type*} [Fintype ι]
+    (β : ℝ) (x : ι → FineCubeFrame.AngularPoint d)
+    (hd : 1 ≤ d) (hK : 1 ≤ K)
+    (hβ : 1 / (2 * Real.log 2) ≤ β)
+    (hx : ∀ j, FineCubeFrame.InAngularCube (x j))
+    (hsep : ∀ i j, i ≠ j →
+      4 * Real.pi * β * d / (K + 1) ≤
+        FineCubeFrame.angularPeriodicLInfDistance (x i) (x j)) :
+    ∀ c,
+      (2 - Real.exp (1 / (2 * β))) * (((K + 1) ^ d : ℕ) : ℝ) *
+          External.coefficientEnergy c ≤
+        FineCubeFrame.fineCubeFourierEnergy K x c ∧
+      FineCubeFrame.fineCubeFourierEnergy K x c ≤
+        Real.exp (1 / (2 * β)) * (((K + 1) ^ d : ℕ) : ℝ) *
+          External.coefficientEnergy c := by
+  intro c
+  have hN : 2 ≤ K + 1 := by omega
+  have hx' :
+      ∀ j, External.InUnitHalfOpenCube (normalizedAngularPoint (x j)) :=
+    fun j => normalizedAngularPoint_mem_halfOpenCube (hx j)
+  have hsep' :
+      ∀ i j, i ≠ j →
+        2 * β * d / (K + 1) ≤
+          External.unitPeriodicLInfDistance
+            (normalizedAngularPoint (x i)) (normalizedAngularPoint (x j)) := by
+    intro i j hij
+    rw [normalizedAngularPoint_lInfDistance (hx i) (hx j)]
+    apply (le_div_iff₀ (by positivity : 0 < 2 * Real.pi)).2
+    calc
+      (2 * β * d / (K + 1)) * (2 * Real.pi) =
+          4 * Real.pi * β * d / (K + 1) := by ring
+      _ ≤ FineCubeFrame.angularPeriodicLInfDistance (x i) (x j) := hsep i j hij
+  constructor
+  · have h := External.translatedCubeFourier_lowerFrame β
+      (fun j => normalizedAngularPoint (x j)) hd hN hβ hx'
+        (by simpa only [Nat.cast_add, Nat.cast_one] using hsep') c
+    rwa [translatedCubeFourierEnergy_normalizedAngularPoint] at h
+  · have h := External.translatedCubeFourier_upperFrame β
+      (fun j => normalizedAngularPoint (x j)) hd hN hβ hx'
+        (by simpa only [Nat.cast_add, Nat.cast_one] using hsep') c
+    rwa [translatedCubeFourierEnergy_normalizedAngularPoint] at h
 /-- Center modulation turns every shifted-coset Fourier value into the
 corresponding one-sided Fourier value. -/
 theorem shiftedCosetFourierValue_centerModulation

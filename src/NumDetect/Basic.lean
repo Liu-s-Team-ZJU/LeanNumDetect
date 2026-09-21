@@ -169,6 +169,11 @@ noncomputable def periodicMinimumL1Separation {d n : ℕ}
     (x : Fin n → Point d) (hn : 2 ≤ n) : ℝ :=
   minimumOverDistinctPairs hn fun i j => periodicL1Distance (x i) (x j)
 
+/-- The global periodic `ℓ^∞` minimum separation `Δ∞(𝓧)`. -/
+noncomputable def periodicMinimumLInfSeparation {d n : ℕ}
+    (x : Fin n → Point d) (hn : 2 ≤ n) : ℝ :=
+  minimumOverDistinctPairs hn fun i j => periodicLInfDistance (x i) (x j)
+
 /-- Extended minimum separation, with value `+∞` for an empty pair set (in particular a singleton). -/
 noncomputable def extendedPeriodicMinimumSeparation {d n : ℕ} (p : LpIndex)
     (x : Fin n → Point d) : WithTop ℝ :=
