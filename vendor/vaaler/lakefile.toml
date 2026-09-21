@@ -1,0 +1,10 @@
+name = "vaaler_mini"
+version = "0.1.0"
+
+[[lean_lib]]
+name = "MathExtras"
+globs = ["MathExtras.+"]
+
+[[lean_lib]]
+name = "AnalyticNT"
+globs = ["AnalyticNT.+"]

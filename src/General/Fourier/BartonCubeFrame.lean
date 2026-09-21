@@ -1,5 +1,5 @@
 import General.Fourier.FineCubeFrame
-import External.TranslatedCubeFourier
+import General.Fourier.TranslatedCubeFourier
 import NumDetect.SegmentedVandermonde
 
 /-!
@@ -15,8 +15,8 @@ It has the parametrization `α ↦ α - K / 2`, with
 of each coefficient by the corresponding center phase is unitary and changes
 the shifted-coset Fourier energy exactly into the one-sided cube energy.
 
-The literature input is the translated real-cube estimate registered as
-`External.translatedCubeFourier_lowerFrame`.  The results below prove the
+The translated real-cube estimate is formalized in
+`General.Fourier.TranslatedCubeFourier`.  The results below prove the
 normalization, separation scaling, energy identity, and the exact
 `HasFineCubeFrame` interface used by the segmented Vandermonde theorem.
 -/

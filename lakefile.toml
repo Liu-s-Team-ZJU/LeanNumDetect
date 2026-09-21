@@ -10,13 +10,13 @@ packagesDir = "../../.local/share/lean/mathlib4-v4.32.0/.lake/packages"
 name = "mathlib"
 path = "../../.local/share/lean/mathlib4-v4.32.0"
 
+[[require]]
+name = "vaaler_mini"
+path = "vendor/vaaler"
+
 [[lean_lib]]
 name = "General"
 globs = ["General.+"]
-
-[[lean_lib]]
-name = "External"
-globs = ["External.+"]
 
 [[lean_lib]]
 name = "SegmentedVDM"

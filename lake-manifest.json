@@ -3,6 +3,13 @@
  "packages":
  [{"type": "path",
    "scope": "",
+   "name": "vaaler_mini",
+   "manifestFile": "lake-manifest.json",
+   "inherited": false,
+   "dir": "vendor/vaaler",
+   "configFile": "lakefile.toml"},
+  {"type": "path",
+   "scope": "",
    "name": "mathlib",
    "manifestFile": "lake-manifest.json",
    "inherited": false,
