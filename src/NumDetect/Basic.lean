@@ -224,6 +224,29 @@ def IsAngularClumpStructure {d n : ℕ} (x : Fin n → Point d)
     (∀ i j, label i = label j → periodicLInfDistance (x i) (x j) ≤ τ) ∧
     ∀ i j, label i ≠ label j → η < periodicLInfDistance (x i) (x j)
 
+/-- Under the clump diameter bound and the cross-clump separation bound, the
+local periodic `ℓ^∞` neighborhood at scale `τ` is exactly one color class of
+`label`.  This identity is the bridge between color classes and the
+neighborhood form of the manuscript's localization lemma (`lem:localization`). -/
+theorem localNeighborhood_eq_of_clumpLabels
+    {d n A : ℕ} {x : Fin n → Point d} {τ η : ℝ}
+    (hτη : τ ≤ η) {label : Fin n → Fin A}
+    (hwithin : ∀ i j, label i = label j →
+      periodicLInfDistance (x i) (x j) ≤ τ)
+    (hcross : ∀ i j, label i ≠ label j →
+      η < periodicLInfDistance (x i) (x j))
+    (j : Fin n) :
+    localNeighborhood x j τ = Finset.univ.filter fun k => label k = label j := by
+  ext k
+  simp only [localNeighborhood, Finset.mem_filter, Finset.mem_univ, true_and]
+  constructor
+  · intro hdist
+    by_contra hlabel
+    have hfar := hcross j k (fun h => hlabel h.symm)
+    linarith
+  · intro hlabel
+    exact hwithin j k hlabel.symm
+
 /-- For manuscript clumps, the local sparsity at the clump diameter is exactly
 the largest clump size. -/
 theorem localSparsity_eq_of_angularClumpStructure
@@ -234,16 +257,8 @@ theorem localSparsity_eq_of_angularClumpStructure
     ⟨_hnStar, _hτ, hτη, _hangular, label, _hsurj, hcard, hmax,
       hwithin, hcross⟩
   have hneighborhood (j : Fin n) :
-      localNeighborhood x j τ = Finset.univ.filter fun k => label k = label j := by
-    ext k
-    simp only [localNeighborhood, Finset.mem_filter, Finset.mem_univ, true_and]
-    constructor
-    · intro hdist
-      by_contra hlabel
-      have hfar := hcross j k (fun h => hlabel h.symm)
-      linarith
-    · intro hlabel
-      exact hwithin j k hlabel.symm
+      localNeighborhood x j τ = Finset.univ.filter fun k => label k = label j :=
+    localNeighborhood_eq_of_clumpLabels hτη hwithin hcross j
   apply le_antisymm
   · unfold localSparsity
     apply Finset.sup'_le
