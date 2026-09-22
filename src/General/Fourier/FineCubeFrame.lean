@@ -1,10 +1,16 @@
 import General.Fourier.SeparatedCubeFourier
+import General.Fourier.TranslatedCubeFourier
 
 /-!
 Algebraic conversions from a centered integer-frequency cube to a one-sided
 angular-frequency cube. The conversion is exact when the largest one-sided
 frequency is even. In that case the real radius `(K + 1) / 2` has integer
 points `{-K/2, ..., K/2}`, which translate to `{0, ..., K}`.
+
+This file also provides the shared normalization `normalizedAngularPoint`
+from angular representatives in `(-π, π]` to the unit-torus representatives
+of `External`, together with the exact identity converting the external
+translated-cube Fourier energy to `fineCubeFourierEnergy`.
 -/
 
 set_option autoImplicit false
@@ -91,9 +97,16 @@ private theorem centeredCubeEquivFineCube_apply
   have hnonneg : 0 ≤ (ω k).val + q := by omega
   rw [Int.toNat_of_nonneg hnonneg]
 
-private theorem normalized_mem_halfOpenCube
-    {d : ℕ} {x : AngularPoint d} (hx : InAngularCube x) :
-    External.InUnitHalfOpenCube (fun k => -x k / (2 * Real.pi)) := by
+/-- Convert angular representatives in `(-π, π]` to Li's representatives in
+`[-1/2, 1/2)`.  The minus sign matches Li's Fourier phase convention. -/
+def normalizedAngularPoint {d : ℕ} (x : AngularPoint d) :
+    External.UnitTorusPoint d :=
+  fun k => -x k / (2 * Real.pi)
+
+theorem normalizedAngularPoint_mem_halfOpenCube
+    {d : ℕ} {x : AngularPoint d}
+    (hx : InAngularCube x) :
+    External.InUnitHalfOpenCube (normalizedAngularPoint x) := by
   intro k
   constructor
   · apply (le_div_iff₀ (by positivity : 0 < 2 * Real.pi)).2
@@ -101,13 +114,14 @@ private theorem normalized_mem_halfOpenCube
   · apply (div_lt_iff₀ (by positivity : 0 < 2 * Real.pi)).2
     nlinarith [Real.pi_pos, (hx k).1]
 
-private theorem normalized_coordinateDistance
+theorem normalizedAngularPoint_coordinateDistance
     {u v : ℝ}
     (hu : -Real.pi < u ∧ u ≤ Real.pi)
     (hv : -Real.pi < v ∧ v ≤ Real.pi) :
     External.unitPeriodicCoordinateDistance
         (-u / (2 * Real.pi)) (-v / (2 * Real.pi)) =
-      angularPeriodicCoordinateDistance u v / (2 * Real.pi) := by
+      angularPeriodicCoordinateDistance u v /
+        (2 * Real.pi) := by
   unfold External.unitPeriodicCoordinateDistance
     angularPeriodicCoordinateDistance
   have hp : 0 < 2 * Real.pi := by positivity
@@ -121,23 +135,64 @@ private theorem normalized_coordinateDistance
       (2 * Real.pi - |u - v|) / (2 * Real.pi) by field_simp]
   rw [min_div_div_right hp.le]
 
-private theorem normalized_lInfDistance
+theorem normalizedAngularPoint_lInfDistance
     {d : ℕ} {u v : AngularPoint d}
-    (hu : InAngularCube u) (hv : InAngularCube v) :
+    (hu : InAngularCube u)
+    (hv : InAngularCube v) :
     External.unitPeriodicLInfDistance
-        (fun k => -u k / (2 * Real.pi))
-        (fun k => -v k / (2 * Real.pi)) =
-      angularPeriodicLInfDistance u v / (2 * Real.pi) := by
-  unfold External.unitPeriodicLInfDistance angularPeriodicLInfDistance
-  simp_rw [normalized_coordinateDistance (hu _) (hv _)]
-  rw [show (fun k => angularPeriodicCoordinateDistance (u k) (v k) /
-      (2 * Real.pi)) =
+        (normalizedAngularPoint u) (normalizedAngularPoint v) =
+      angularPeriodicLInfDistance u v /
+        (2 * Real.pi) := by
+  unfold External.unitPeriodicLInfDistance
+    angularPeriodicLInfDistance normalizedAngularPoint
+  simp_rw [normalizedAngularPoint_coordinateDistance (hu _) (hv _)]
+  rw [show (fun k => angularPeriodicCoordinateDistance
+      (u k) (v k) / (2 * Real.pi)) =
       (2 * Real.pi)⁻¹ •
-        (fun k => angularPeriodicCoordinateDistance (u k) (v k)) by
+        (fun k => angularPeriodicCoordinateDistance
+          (u k) (v k)) by
       funext k
       simp [div_eq_inv_mul]]
   rw [norm_smul, Real.norm_eq_abs, abs_of_pos (inv_pos.mpr (by positivity))]
   field_simp
+
+/-- Li's translated-cube energy becomes the one-sided angular cube energy
+after normalization of the nodes. -/
+theorem translatedCubeFourierEnergy_normalizedAngularPoint
+    {d K : ℕ} {ι : Type*} [Fintype ι]
+    (x : ι → AngularPoint d) (c : ι → ℂ) :
+    External.translatedCubeFourierEnergy (K + 1)
+        (fun j => normalizedAngularPoint (x j)) c =
+      fineCubeFourierEnergy K x c := by
+  classical
+  unfold External.translatedCubeFourierEnergy
+    fineCubeFourierEnergy
+  apply Finset.sum_congr rfl
+  intro ω _
+  congr 1
+  apply congrArg norm
+  apply Finset.sum_congr rfl
+  intro j _
+  congr 1
+  apply congrArg Complex.exp
+  have hsum :
+      (∑ k,
+          (((ω k : Fin (K + 1)) : ℕ) : ℂ) *
+            normalizedAngularPoint (x j) k) =
+        -(∑ k, (((ω k : Fin (K + 1)) : ℕ) : ℂ) * x j k) /
+          (2 * (Real.pi : ℂ)) := by
+    calc
+      _ = ∑ k,
+          -((((ω k : Fin (K + 1)) : ℕ) : ℂ) * x j k) /
+            (2 * (Real.pi : ℂ)) := by
+          apply Finset.sum_congr rfl
+          intro k _
+          unfold normalizedAngularPoint
+          push_cast
+          field_simp [Real.pi_ne_zero]
+      _ = _ := by rw [← Finset.sum_div, Finset.sum_neg_distrib]
+  rw [hsum]
+  field_simp [Real.pi_ne_zero]
 
 private theorem centered_card
     (d q : ℕ) :

@@ -1592,99 +1592,10 @@ The remaining analytic input is the fine-cube lower frame bound with constant
 `BartonCubeFrame.fineCubeFourier_bounds_of_translatedCube` cannot be invoked
 here because `General.Fourier.BartonCubeFrame` imports this module
 (`NumDetect.SegmentedVandermonde`) to expose the `HasFineCubeFrame` interface.
-The conversions below therefore re-derive, as `private` helpers, the same
-normalization bridge from the importable translated-cube frame
-`External.translatedCubeFourier_lowerFrame`. -/
-
-/-- Convert angular representatives in `(-π, π]` to the unit-torus
-representatives of `External`, matching its Fourier phase convention. -/
-private def normalizedAngularPoint {d : ℕ} (x : Point d) :
-    External.UnitTorusPoint d :=
-  fun k => -x k / (2 * Real.pi)
-
-private theorem normalizedAngularPoint_mem_halfOpenCube
-    {d : ℕ} {x : Point d} (hx : InAngularCube x) :
-    External.InUnitHalfOpenCube (normalizedAngularPoint x) := by
-  intro k
-  constructor
-  · apply (le_div_iff₀ (by positivity : 0 < 2 * Real.pi)).2
-    nlinarith [Real.pi_pos, (hx k).2]
-  · apply (div_lt_iff₀ (by positivity : 0 < 2 * Real.pi)).2
-    nlinarith [Real.pi_pos, (hx k).1]
-
-private theorem normalizedAngularPoint_coordinateDistance
-    {u v : ℝ}
-    (hu : -Real.pi < u ∧ u ≤ Real.pi)
-    (hv : -Real.pi < v ∧ v ≤ Real.pi) :
-    External.unitPeriodicCoordinateDistance
-        (-u / (2 * Real.pi)) (-v / (2 * Real.pi)) =
-      periodicCoordinateDistance u v / (2 * Real.pi) := by
-  unfold External.unitPeriodicCoordinateDistance periodicCoordinateDistance
-  have hp : 0 < 2 * Real.pi := by positivity
-  have habs : |u - v| ≤ 2 * Real.pi := by
-    rw [abs_le]
-    constructor <;> linarith
-  rw [show -u / (2 * Real.pi) - -v / (2 * Real.pi) =
-      -(u - v) / (2 * Real.pi) by ring,
-    abs_div, abs_neg, abs_of_pos hp]
-  rw [show 1 - |u - v| / (2 * Real.pi) =
-      (2 * Real.pi - |u - v|) / (2 * Real.pi) by field_simp]
-  rw [min_div_div_right hp.le]
-
-private theorem normalizedAngularPoint_lInfDistance
-    {d : ℕ} {u v : Point d}
-    (hu : InAngularCube u) (hv : InAngularCube v) :
-    External.unitPeriodicLInfDistance
-        (normalizedAngularPoint u) (normalizedAngularPoint v) =
-      periodicLInfDistance u v / (2 * Real.pi) := by
-  unfold External.unitPeriodicLInfDistance periodicLInfDistance
-    normalizedAngularPoint
-  simp_rw [normalizedAngularPoint_coordinateDistance (hu _) (hv _)]
-  rw [show (fun k => periodicCoordinateDistance (u k) (v k) / (2 * Real.pi)) =
-      (2 * Real.pi)⁻¹ •
-        (fun k => periodicCoordinateDistance (u k) (v k)) by
-      funext k
-      simp [div_eq_inv_mul]]
-  rw [norm_smul, Real.norm_eq_abs, abs_of_pos (inv_pos.mpr (by positivity))]
-  field_simp
-
-/-- The translated-cube energy of normalized nodes is the one-sided fine-cube
-energy. -/
-private theorem translatedCubeFourierEnergy_normalizedAngularPoint
-    {d K : ℕ} {ι : Type*} [Fintype ι]
-    (x : ι → Point d) (c : ι → ℂ) :
-    External.translatedCubeFourierEnergy (K + 1)
-        (fun j => normalizedAngularPoint (x j)) c =
-      FineCubeFrame.fineCubeFourierEnergy K x c := by
-  classical
-  unfold External.translatedCubeFourierEnergy
-    FineCubeFrame.fineCubeFourierEnergy
-  apply Finset.sum_congr rfl
-  intro ω _
-  congr 1
-  apply congrArg norm
-  apply Finset.sum_congr rfl
-  intro j _
-  congr 1
-  apply congrArg Complex.exp
-  have hsum :
-      (∑ k,
-          (((ω k : Fin (K + 1)) : ℕ) : ℂ) *
-            normalizedAngularPoint (x j) k) =
-        -(∑ k, (((ω k : Fin (K + 1)) : ℕ) : ℂ) * x j k) /
-          (2 * (Real.pi : ℂ)) := by
-    calc
-      _ = ∑ k,
-          -((((ω k : Fin (K + 1)) : ℕ) : ℂ) * x j k) /
-            (2 * (Real.pi : ℂ)) := by
-          apply Finset.sum_congr rfl
-          intro k _
-          unfold normalizedAngularPoint
-          push_cast
-          field_simp [Real.pi_ne_zero]
-      _ = _ := by rw [← Finset.sum_div, Finset.sum_neg_distrib]
-  rw [hsum]
-  field_simp [Real.pi_ne_zero]
+The normalization bridge to the importable translated-cube frame
+`External.translatedCubeFourier_lowerFrame` is the shared conversion
+`FineCubeFrame.translatedCubeFourierEnergy_normalizedAngularPoint` through
+`FineCubeFrame.normalizedAngularPoint`. -/
 
 /-- The fine-cube lower frame bound with constant `a_β` on an `η`-separated
 angular node family.  This is the `r = 0`, `m = K` case of manuscript
@@ -1704,24 +1615,26 @@ private theorem fineCube_frame_of_angularSeparation
   intro v
   have hN : 2 ≤ K + 1 := by omega
   have hx' :
-      ∀ j, External.InUnitHalfOpenCube (normalizedAngularPoint (x j)) :=
-    fun j => normalizedAngularPoint_mem_halfOpenCube (hx j)
+      ∀ j, External.InUnitHalfOpenCube
+        (FineCubeFrame.normalizedAngularPoint (x j)) :=
+    fun j => FineCubeFrame.normalizedAngularPoint_mem_halfOpenCube (hx j)
   have hsep' :
       ∀ i j, i ≠ j →
         2 * β * d / (K + 1) ≤
           External.unitPeriodicLInfDistance
-            (normalizedAngularPoint (x i)) (normalizedAngularPoint (x j)) := by
+            (FineCubeFrame.normalizedAngularPoint (x i))
+            (FineCubeFrame.normalizedAngularPoint (x j)) := by
     intro i j hij
-    rw [normalizedAngularPoint_lInfDistance (hx i) (hx j)]
+    rw [FineCubeFrame.normalizedAngularPoint_lInfDistance (hx i) (hx j)]
     apply (le_div_iff₀ (by positivity : 0 < 2 * Real.pi)).2
     calc
       (2 * β * d / (K + 1)) * (2 * Real.pi) =
           4 * Real.pi * β * d / (K + 1) := by ring
       _ ≤ periodicLInfDistance (x i) (x j) := hsep i j hij
   have h := External.translatedCubeFourier_lowerFrame β
-    (fun j => normalizedAngularPoint (x j)) hd hN hβ hx'
+    (fun j => FineCubeFrame.normalizedAngularPoint (x j)) hd hN hβ hx'
     (by simpa only [Nat.cast_add, Nat.cast_one] using hsep') v
-  rw [translatedCubeFourierEnergy_normalizedAngularPoint] at h
+  rw [FineCubeFrame.translatedCubeFourierEnergy_normalizedAngularPoint] at h
   rwa [← fineCubeFourierEnergy_eq_energy_fineCubeEvaluation]
 
 /-- Product of one cardinal factor per color class, realizing the decomposition
