@@ -1,3 +1,5 @@
+import General.Fourier.FineCubeFrame
+import General.Fourier.TranslatedCubeFourier
 import NumDetect.Matrices
 import NumDetect.UniformInterpolation
 import SegmentedVDM.Interpolation
@@ -53,6 +55,44 @@ theorem mass_nonneg {d m r : ℕ} (P : SegmentedPacket d m r) :
     0 ≤ P.mass :=
   Finset.sum_nonneg fun _ _ => norm_nonneg _
 
+/-- The `L^∞(𝕋^d)` sup norm of the trigonometric polynomial presented by `P`.
+All frequencies of a presentation are integers, so `P.value D` is
+`2 * Real.pi`-periodic in every coordinate and the supremum over `Point d`
+agrees with the supremum over one fundamental domain, i.e. with the
+manuscript's `‖·‖_{L^∞(𝕋^d)}`. -/
+noncomputable def linftyNorm {d m r : ℕ} (P : SegmentedPacket d m r)
+    (D : ℕ) : ℝ :=
+  ⨆ y : Point d, ‖P.value D y‖
+
+/-- Every evaluation modulus is at most the coefficient `ℓ¹` mass by the
+triangle inequality. -/
+theorem value_norm_le_mass {d m r : ℕ} (P : SegmentedPacket d m r)
+    (D : ℕ) (y : Point d) : ‖P.value D y‖ ≤ P.mass := by
+  classical
+  change ‖∑ i, P.coeff i * Complex.exp
+      (Complex.I *
+        ((∑ k, ((D * P.coarse i k + P.fine i k : ℕ) : ℝ) * y k : ℝ) : ℂ))‖ ≤
+    P.mass
+  refine (norm_sum_le _ _).trans ?_
+  exact Finset.sum_le_sum fun _ _ => by simp [Complex.norm_exp]
+
+/-- The family of evaluation moduli is bounded above by the mass. -/
+theorem linftyNorm_bddAbove {d m r : ℕ} (P : SegmentedPacket d m r)
+    (D : ℕ) : BddAbove (Set.range fun y : Point d => ‖P.value D y‖) :=
+  ⟨P.mass, by
+    rintro _ ⟨y, rfl⟩
+    exact P.value_norm_le_mass D y⟩
+
+/-- The `L^∞(𝕋^d)` norm is bounded by the coefficient `ℓ¹` mass. -/
+theorem linftyNorm_le_mass {d m r : ℕ} (P : SegmentedPacket d m r)
+    (D : ℕ) : P.linftyNorm D ≤ P.mass :=
+  ciSup_le fun y => P.value_norm_le_mass D y
+
+/-- Every evaluation modulus is bounded by the `L^∞(𝕋^d)` norm. -/
+theorem value_norm_le_linftyNorm {d m r : ℕ} (P : SegmentedPacket d m r)
+    (D : ℕ) (y : Point d) : ‖P.value D y‖ ≤ P.linftyNorm D :=
+  le_ciSup (P.linftyNorm_bddAbove D) y
+
 /-- The constant polynomial. -/
 noncomputable def one (d : ℕ) : SegmentedPacket d 0 0 where
   Index := Unit
@@ -88,6 +128,10 @@ def widen {d m r m' r' : ℕ} (P : SegmentedPacket d m r)
 @[simp] theorem mass_widen {d m r m' r' : ℕ} (P : SegmentedPacket d m r)
     (hm : m ≤ m') (hr : r ≤ r') :
     (P.widen hm hr).mass = P.mass := rfl
+
+@[simp] theorem linftyNorm_widen {d m r m' r' : ℕ} (P : SegmentedPacket d m r)
+    (hm : m ≤ m') (hr : r ≤ r') (D : ℕ) :
+    (P.widen hm hr).linftyNorm D = P.linftyNorm D := rfl
 
 /-- Product of two segmented packets. -/
 noncomputable def mul {d m₁ m₂ r₁ r₂ : ℕ}
@@ -1457,11 +1501,240 @@ theorem fineCube_cardinalPacket
       rw [div_pow, one_pow, Real.sq_sqrt ha.le]
     exact (sq_le_sq₀ P.mass_nonneg (by positivity)).mp (by rwa [he])
 
-/-- Product of one cardinal factor per color eliminates every node outside the
-anchor's clump. -/
-theorem localizationPacket_of_colorFrames
+/-- The wrapped distance in one coordinate vanishes at equal points. -/
+private theorem periodicCoordinateDistance_self (v : ℝ) :
+    periodicCoordinateDistance v v = 0 := by
+  unfold periodicCoordinateDistance
+  rw [sub_self, abs_zero, sub_zero]
+  exact min_eq_left (by positivity)
+
+/-- The wrapped `ℓ^∞` distance of a point to itself vanishes. -/
+private theorem periodicLInfDistance_self {d : ℕ} (u : Point d) :
+    periodicLInfDistance u u = 0 := by
+  have hfun : (fun k => periodicCoordinateDistance (u k) (u k)) = fun _ => (0:ℝ) := by
+    funext k
+    exact periodicCoordinateDistance_self (u k)
+  unfold periodicLInfDistance
+  rw [hfun]
+  exact norm_zero
+
+/-- The coefficient-mass constant `(1 / √a) ^ n` is the real power
+`a ^ (-n / 2)` used by the manuscript. -/
+private theorem inv_sqrt_pow_eq_rpow {a : ℝ} (ha : 0 < a) (n : ℕ) :
+    (1 / Real.sqrt a) ^ n = a ^ (-(n : ℝ) / 2) := by
+  have hsqrt : (Real.sqrt a) ^ n = a ^ ((n : ℝ) / 2) := by
+    rw [Real.sqrt_eq_rpow, ← Real.rpow_mul_natCast ha.le]
+    congr 1
+    ring
+  have h : (1 / Real.sqrt a) ^ n = ((Real.sqrt a) ^ n)⁻¹ := by
+    rw [one_div, inv_pow]
+  rw [h, hsqrt, ← Real.rpow_neg ha.le ((n : ℝ) / 2)]
+  congr 1
+  exact (neg_div _ _).symm
+
+/-- The frame constant `a_β = 2 - exp (1 / (2 * β))` of manuscript
+`thm:well_separated_segmented` is positive in the range `β > 1 / (2 * log 2)`. -/
+private theorem wellSeparatedFrameConstant_pos {β : ℝ}
+    (hβ : 1 / (2 * Real.log 2) < β) : 0 < 2 - Real.exp (1 / (2 * β)) := by
+  have hlog : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  have hβpos : 0 < β :=
+    (by positivity : 0 < 1 / (2 * Real.log 2)).trans hβ
+  have hexponent : 1 / (2 * β) < Real.log 2 := by
+    have h := (div_lt_iff₀ (by positivity : 0 < 2 * Real.log 2)).1 hβ
+    apply (div_lt_iff₀ (by positivity : 0 < 2 * β)).2
+    nlinarith
+  have hexp : Real.exp (1 / (2 * β)) < 2 := by
+    calc
+      Real.exp (1 / (2 * β)) < Real.exp (Real.log 2) :=
+        Real.exp_lt_exp.mpr hexponent
+      _ = 2 := Real.exp_log (by norm_num)
+  linarith
+
+/-- The frame constant `a_β = 2 - exp (1 / (2 * β))` is at most one. -/
+private theorem wellSeparatedFrameConstant_le_one {β : ℝ}
+    (hβ : 1 / (2 * Real.log 2) < β) : 2 - Real.exp (1 / (2 * β)) ≤ 1 := by
+  have hβpos : 0 < β :=
+    (by positivity : 0 < 1 / (2 * Real.log 2)).trans hβ
+  have hone : 1 ≤ Real.exp (1 / (2 * β)) :=
+    Real.one_le_exp (by positivity)
+  linarith
+
+/-- The fine-cube Fourier energy of a node family is the squared `ℓ²` energy of
+its evaluation on the nonnegative frequency cube. -/
+private theorem fineCubeFourierEnergy_eq_energy_fineCubeEvaluation
+    {d : ℕ} {ι : Type*} [Fintype ι] (K : ℕ) (x : ι → Point d)
+    (v : ι → ℂ) :
+    FineCubeFrame.fineCubeFourierEnergy K x v =
+      SegmentedVDM.energy (fineCubeEvaluation K x *ᵥ v) := by
+  classical
+  simp only [FineCubeFrame.fineCubeFourierEnergy, SegmentedVDM.energy,
+    fineCubeEvaluation, Matrix.mulVec, dotProduct]
+  apply Finset.sum_congr rfl
+  intro α _
+  apply congrArg (fun z : ℂ => ‖z‖ ^ 2)
+  apply Finset.sum_congr rfl
+  intro j _
+  have hphase :
+      Complex.I * (∑ k, ((α k : ℕ) : ℂ) * x j k) =
+        Complex.I * ((∑ k, (α k : ℝ) * x j k : ℝ) : ℂ) := by
+    congr 1
+    rw [Complex.ofReal_sum]
+    apply Finset.sum_congr rfl
+    intro k _
+    rw [Complex.ofReal_mul, Complex.ofReal_natCast]
+  rw [mul_comm (v j), hphase]
+
+/-! ### Normalization bridge to the translated-cube frame
+
+The remaining analytic input is the fine-cube lower frame bound with constant
+`2 - exp (1 / (2 * β))`, i.e. the `r = 0`, `m = K` case of manuscript
+`thm:well_separated_segmented`.  Its proved form
+`BartonCubeFrame.fineCubeFourier_bounds_of_translatedCube` cannot be invoked
+here because `General.Fourier.BartonCubeFrame` imports this module
+(`NumDetect.SegmentedVandermonde`) to expose the `HasFineCubeFrame` interface.
+The conversions below therefore re-derive, as `private` helpers, the same
+normalization bridge from the importable translated-cube frame
+`External.translatedCubeFourier_lowerFrame`. -/
+
+/-- Convert angular representatives in `(-π, π]` to the unit-torus
+representatives of `External`, matching its Fourier phase convention. -/
+private def normalizedAngularPoint {d : ℕ} (x : Point d) :
+    External.UnitTorusPoint d :=
+  fun k => -x k / (2 * Real.pi)
+
+private theorem normalizedAngularPoint_mem_halfOpenCube
+    {d : ℕ} {x : Point d} (hx : InAngularCube x) :
+    External.InUnitHalfOpenCube (normalizedAngularPoint x) := by
+  intro k
+  constructor
+  · apply (le_div_iff₀ (by positivity : 0 < 2 * Real.pi)).2
+    nlinarith [Real.pi_pos, (hx k).2]
+  · apply (div_lt_iff₀ (by positivity : 0 < 2 * Real.pi)).2
+    nlinarith [Real.pi_pos, (hx k).1]
+
+private theorem normalizedAngularPoint_coordinateDistance
+    {u v : ℝ}
+    (hu : -Real.pi < u ∧ u ≤ Real.pi)
+    (hv : -Real.pi < v ∧ v ≤ Real.pi) :
+    External.unitPeriodicCoordinateDistance
+        (-u / (2 * Real.pi)) (-v / (2 * Real.pi)) =
+      periodicCoordinateDistance u v / (2 * Real.pi) := by
+  unfold External.unitPeriodicCoordinateDistance periodicCoordinateDistance
+  have hp : 0 < 2 * Real.pi := by positivity
+  have habs : |u - v| ≤ 2 * Real.pi := by
+    rw [abs_le]
+    constructor <;> linarith
+  rw [show -u / (2 * Real.pi) - -v / (2 * Real.pi) =
+      -(u - v) / (2 * Real.pi) by ring,
+    abs_div, abs_neg, abs_of_pos hp]
+  rw [show 1 - |u - v| / (2 * Real.pi) =
+      (2 * Real.pi - |u - v|) / (2 * Real.pi) by field_simp]
+  rw [min_div_div_right hp.le]
+
+private theorem normalizedAngularPoint_lInfDistance
+    {d : ℕ} {u v : Point d}
+    (hu : InAngularCube u) (hv : InAngularCube v) :
+    External.unitPeriodicLInfDistance
+        (normalizedAngularPoint u) (normalizedAngularPoint v) =
+      periodicLInfDistance u v / (2 * Real.pi) := by
+  unfold External.unitPeriodicLInfDistance periodicLInfDistance
+    normalizedAngularPoint
+  simp_rw [normalizedAngularPoint_coordinateDistance (hu _) (hv _)]
+  rw [show (fun k => periodicCoordinateDistance (u k) (v k) / (2 * Real.pi)) =
+      (2 * Real.pi)⁻¹ •
+        (fun k => periodicCoordinateDistance (u k) (v k)) by
+      funext k
+      simp [div_eq_inv_mul]]
+  rw [norm_smul, Real.norm_eq_abs, abs_of_pos (inv_pos.mpr (by positivity))]
+  field_simp
+
+/-- The translated-cube energy of normalized nodes is the one-sided fine-cube
+energy. -/
+private theorem translatedCubeFourierEnergy_normalizedAngularPoint
+    {d K : ℕ} {ι : Type*} [Fintype ι]
+    (x : ι → Point d) (c : ι → ℂ) :
+    External.translatedCubeFourierEnergy (K + 1)
+        (fun j => normalizedAngularPoint (x j)) c =
+      FineCubeFrame.fineCubeFourierEnergy K x c := by
+  classical
+  unfold External.translatedCubeFourierEnergy
+    FineCubeFrame.fineCubeFourierEnergy
+  apply Finset.sum_congr rfl
+  intro ω _
+  congr 1
+  apply congrArg norm
+  apply Finset.sum_congr rfl
+  intro j _
+  congr 1
+  apply congrArg Complex.exp
+  have hsum :
+      (∑ k,
+          (((ω k : Fin (K + 1)) : ℕ) : ℂ) *
+            normalizedAngularPoint (x j) k) =
+        -(∑ k, (((ω k : Fin (K + 1)) : ℕ) : ℂ) * x j k) /
+          (2 * (Real.pi : ℂ)) := by
+    calc
+      _ = ∑ k,
+          -((((ω k : Fin (K + 1)) : ℕ) : ℂ) * x j k) /
+            (2 * (Real.pi : ℂ)) := by
+          apply Finset.sum_congr rfl
+          intro k _
+          unfold normalizedAngularPoint
+          push_cast
+          field_simp [Real.pi_ne_zero]
+      _ = _ := by rw [← Finset.sum_div, Finset.sum_neg_distrib]
+  rw [hsum]
+  field_simp [Real.pi_ne_zero]
+
+/-- The fine-cube lower frame bound with constant `a_β` on an `η`-separated
+angular node family.  This is the `r = 0`, `m = K` case of manuscript
+`thm:well_separated_segmented`, obtained from the proved translated-cube
+Barton frame through the normalization bridge above. -/
+private theorem fineCube_frame_of_angularSeparation
+    {d : ℕ} {ι : Type} [Fintype ι] {K : ℕ} {β : ℝ}
+    (hd : 1 ≤ d) (hK : 1 ≤ K) (hβ : 1 / (2 * Real.log 2) ≤ β)
+    (x : ι → Point d)
+    (hx : ∀ j, InAngularCube (x j))
+    (hsep : ∀ i j, i ≠ j →
+      4 * Real.pi * β * d / (K + 1) ≤ periodicLInfDistance (x i) (x j)) :
+    ∀ v,
+      (2 - Real.exp (1 / (2 * β))) * (((K + 1) ^ d : ℕ) : ℝ) *
+          SegmentedVDM.energy v ≤
+        SegmentedVDM.energy (fineCubeEvaluation K x *ᵥ v) := by
+  intro v
+  have hN : 2 ≤ K + 1 := by omega
+  have hx' :
+      ∀ j, External.InUnitHalfOpenCube (normalizedAngularPoint (x j)) :=
+    fun j => normalizedAngularPoint_mem_halfOpenCube (hx j)
+  have hsep' :
+      ∀ i j, i ≠ j →
+        2 * β * d / (K + 1) ≤
+          External.unitPeriodicLInfDistance
+            (normalizedAngularPoint (x i)) (normalizedAngularPoint (x j)) := by
+    intro i j hij
+    rw [normalizedAngularPoint_lInfDistance (hx i) (hx j)]
+    apply (le_div_iff₀ (by positivity : 0 < 2 * Real.pi)).2
+    calc
+      (2 * β * d / (K + 1)) * (2 * Real.pi) =
+          4 * Real.pi * β * d / (K + 1) := by ring
+      _ ≤ periodicLInfDistance (x i) (x j) := hsep i j hij
+  have h := External.translatedCubeFourier_lowerFrame β
+    (fun j => normalizedAngularPoint (x j)) hd hN hβ hx'
+    (by simpa only [Nat.cast_add, Nat.cast_one] using hsep') v
+  rw [translatedCubeFourierEnergy_normalizedAngularPoint] at h
+  rwa [← fineCubeFourierEnergy_eq_energy_fineCubeEvaluation]
+
+/-- Product of one cardinal factor per color class, realizing the decomposition
+of manuscript `prop:decomposition` by the injective slots of `C`.  The
+anchor's value is one, every node of a family covered by the non-anchor labels
+is annihilated, and the coefficient `ℓ¹` mass is at most `(1 / √a) ^ nStar`
+when each color class carries a fine-cube frame with constant `a`.  This is the
+constructive core of manuscript `lem:localization`. -/
+theorem localizationPacket_of_colorCover
     {d n A nStar K : ℕ} {x : Fin n → Point d}
     (C : ClumpSlots (A := A) (nStar := nStar) x) (anchor : Fin n)
+    (outside : Fin n → Prop)
+    (hcover : ∀ j, outside j → C.label j ≠ C.label anchor)
     {a : ℝ} (ha : 0 < a)
     (hframe : ∀ color (v : ↥(clumpColorClass C anchor color) → ℂ),
       a * (((K + 1) ^ d : ℕ) : ℝ) * SegmentedVDM.energy v ≤
@@ -1470,7 +1743,7 @@ theorem localizationPacket_of_colorFrames
             (fun j : ↥(clumpColorClass C anchor color) => x j) *ᵥ v)) :
     ∃ P : SegmentedPacket d (nStar * K) 0,
       (∀ D, P.value D (x anchor) = 1) ∧
-      (∀ D j, C.label j ≠ C.label anchor → P.value D (x j) = 0) ∧
+      (∀ D j, outside j → P.value D (x j) = 0) ∧
       P.mass ≤ (1 / Real.sqrt a) ^ nStar := by
   classical
   choose F hF using fun color =>
@@ -1490,13 +1763,14 @@ theorem localizationPacket_of_colorFrames
   · intro D j hj
     simp only [P, SegmentedPacket.value_widen, SegmentedPacket.value_prod]
     apply Finset.prod_eq_zero (Finset.mem_univ (C.slot j))
+    have hne : C.label j ≠ C.label anchor := hcover j hj
     have hmem : j ∈ clumpColorClass C anchor (C.slot j) := by
-      simp [hj]
+      simp [hne]
     have hzero := (hF (C.slot j)).1 D ⟨j, hmem⟩
-    have hne : anchor ≠ j := by
+    have haj : anchor ≠ j := by
       intro he
-      exact hj (congrArg C.label he.symm)
-    simpa [Subtype.ext_iff, hne] using hzero
+      exact hne (congrArg C.label he.symm)
+    simpa [Subtype.ext_iff, haj] using hzero
   · simp only [P, SegmentedPacket.mass_widen, SegmentedPacket.mass_prod]
     calc
       _ ≤ ∏ _color : Fin nStar, 1 / Real.sqrt a :=
@@ -1504,6 +1778,27 @@ theorem localizationPacket_of_colorFrames
           (fun color _ => (F color).mass_nonneg)
           (fun color _ => (hF color).2)
       _ = _ := by simp
+
+/-- Product of one cardinal factor per color eliminates every node outside the
+anchor's clump.  This is the color-class form of the general localization
+theorem `localizationPolynomial_of_angularClumpStructure` (manuscript
+`lem:localization`): the vanishing set is phrased by non-anchor labels and the
+fine-cube frame hypothesis is kept explicit. -/
+theorem localizationPacket_of_colorFrames
+    {d n A nStar K : ℕ} {x : Fin n → Point d}
+    (C : ClumpSlots (A := A) (nStar := nStar) x) (anchor : Fin n)
+    {a : ℝ} (ha : 0 < a)
+    (hframe : ∀ color (v : ↥(clumpColorClass C anchor color) → ℂ),
+      a * (((K + 1) ^ d : ℕ) : ℝ) * SegmentedVDM.energy v ≤
+        SegmentedVDM.energy
+          (fineCubeEvaluation K
+            (fun j : ↥(clumpColorClass C anchor color) => x j) *ᵥ v)) :
+    ∃ P : SegmentedPacket d (nStar * K) 0,
+      (∀ D, P.value D (x anchor) = 1) ∧
+      (∀ D j, C.label j ≠ C.label anchor → P.value D (x j) = 0) ∧
+      P.mass ≤ (1 / Real.sqrt a) ^ nStar :=
+  localizationPacket_of_colorCover C anchor
+    (fun j => C.label j ≠ C.label anchor) (fun _ hj => hj) ha hframe
 
 /-- Combine localization outside the anchor's clump with quantized
 interpolation inside that clump. -/
@@ -1575,6 +1870,165 @@ theorem clumpStructure_has_slots
     exact hsame i j (by simpa only [hC] using hij)
   · intro i j hij
     exact hcross i j (by simpa only [hC] using hij)
+
+/-- Manuscript `lem:localization` at full strength.  Let `x` form
+`(A, ∞, τ, η, nStar)`-clumps and let `m < D`.  With `K = ⌊m / nStar⌋`, if
+`β > 1 / (2 * log 2)` and `η ≥ 4 * π * β * d / (K + 1)`, then for every node
+`x anchor` there exists `P : SegmentedPacket d m 0`, the finite presentation of
+a polynomial of `𝒫(m, 0, D, d)`, with `P.value D (x anchor) = 1`, with
+`P.value D (x j) = 0` for every `j ∉ localNeighborhood x anchor τ`, and with
+`L^∞(𝕋^d)` norm at most `(2 - exp (1 / (2 * β))) ^ (-nStar / 2)`.  Here
+`P.value D (x j)` is the manuscript's `g_k(y_j / (2 * π))` in the angular
+normalization (the `1 / (2 * π)` is absorbed by `SegmentedPacket.value`), and
+`P.linftyNorm D` is its `‖g_k‖_{L^∞(𝕋^d)}`.  The color decomposition is
+manuscript `prop:decomposition` realized by the injective slots of `ClumpSlots`,
+and the frame constant `2 - exp (1 / (2 * β))` is the fine-cube (`r = 0`,
+`m = K`) case of manuscript `thm:well_separated_segmented`. -/
+theorem localizationPolynomial_of_angularClumpStructure
+    {d n A nStar m D : ℕ} {x : Fin n → Point d} {τ η β : ℝ}
+    (hclumps : IsAngularClumpStructure x A nStar τ η)
+    (_hDm : m < D) (hβ : 1 / (2 * Real.log 2) < β)
+    (hη : 4 * Real.pi * β * d / ((m / nStar : ℕ) + 1) ≤ η)
+    (anchor : Fin n) :
+    ∃ P : SegmentedPacket d m 0,
+      P.value D (x anchor) = 1 ∧
+      (∀ j, j ∉ localNeighborhood x anchor τ → P.value D (x j) = 0) ∧
+      P.linftyNorm D ≤ (2 - Real.exp (1 / (2 * β))) ^ (-(nStar : ℝ) / 2) := by
+  classical
+  obtain ⟨C, hsame, hcross⟩ := clumpStructure_has_slots hclumps
+  have hτ : 0 < τ := hclumps.2.1
+  have hτη : τ ≤ η := hclumps.2.2.1
+  have hcube : ∀ j, InAngularCube (x j) := hclumps.2.2.2.1
+  have hneighborhood (j : Fin n) :
+      localNeighborhood x j τ =
+        Finset.univ.filter fun k => C.label k = C.label j :=
+    localNeighborhood_eq_of_clumpLabels hτη hsame hcross j
+  have hbridge (j : Fin n) (hj : j ∉ localNeighborhood x anchor τ) :
+      C.label j ≠ C.label anchor := by
+    intro hlabel
+    apply hj
+    rw [hneighborhood anchor]
+    simp [hlabel]
+  have haβpos : 0 < 2 - Real.exp (1 / (2 * β)) :=
+    wellSeparatedFrameConstant_pos hβ
+  have hrpow : (1 / Real.sqrt (2 - Real.exp (1 / (2 * β)))) ^ nStar =
+      (2 - Real.exp (1 / (2 * β))) ^ (-(nStar : ℝ) / 2) :=
+    inv_sqrt_pow_eq_rpow haβpos nStar
+  have hone : (1 : ℝ) ≤ (2 - Real.exp (1 / (2 * β))) ^ (-(nStar : ℝ) / 2) := by
+    have haβle := wellSeparatedFrameConstant_le_one hβ
+    have hneg : (-(nStar : ℝ) / 2) ≤ 0 := by
+      rw [neg_div 2 (nStar : ℝ)]
+      exact neg_nonpos.mpr
+        (div_nonneg (Nat.cast_nonneg nStar) (by norm_num))
+    calc
+      (1 : ℝ) = (2 - Real.exp (1 / (2 * β))) ^ (0 : ℝ) :=
+        (Real.rpow_zero _).symm
+      _ ≤ (2 - Real.exp (1 / (2 * β))) ^ (-(nStar : ℝ) / 2) :=
+        Real.rpow_le_rpow_of_exponent_ge haβpos haβle hneg
+  by_cases hout : ∃ j, j ∉ localNeighborhood x anchor τ
+  · obtain ⟨j₀, hj₀⟩ := hout
+    -- In the nontrivial case the dimension is positive.
+    have hd : 1 ≤ d := by
+      by_contra hnd
+      have hd0 : d = 0 := by omega
+      haveI hempty : IsEmpty (Fin d) :=
+        ⟨fun i => by have hi := i.isLt; omega⟩
+      haveI : Subsingleton (Point d) :=
+        ⟨fun u v => funext fun k => hempty.elim k⟩
+      have heq : x anchor = x j₀ := Subsingleton.elim _ _
+      apply hj₀
+      simp only [localNeighborhood, Finset.mem_filter, Finset.mem_univ,
+        true_and]
+      rw [heq, periodicLInfDistance_self]
+      exact hτ.le
+    -- The manuscript argument gives `K = ⌊m / nStar⌋ ≥ 1`.
+    have hK : 1 ≤ (m / nStar : ℕ) := by
+      by_contra hnk
+      have hK0 : (m / nStar : ℕ) = 0 := by
+        by_contra hk
+        exact hnk (Nat.one_le_iff_ne_zero.2 hk)
+      have hη' : 4 * Real.pi * β * d ≤ η := by
+        have hden : (((m / nStar : ℕ) : ℝ) + 1) = 1 := by
+          rw [hK0]
+          simp
+        rw [hden, div_one] at hη
+        exact hη
+      have hquarter : (1 : ℝ) / 4 < 1 / (2 * Real.log 2) := by
+        rw [div_lt_div_iff₀ (by norm_num) (by positivity)]
+        nlinarith [Real.log_two_lt_d9]
+      have hβq : (1 : ℝ) / 4 < β := hquarter.trans hβ
+      have hdR : (1 : ℝ) ≤ d := by exact_mod_cast hd
+      have hfac : (1 : ℝ) < 4 * β * d := by
+        have h1 : (1 : ℝ) < 4 * β := by nlinarith
+        calc
+          (1:ℝ) = 1 * 1 := by ring
+          _ < (4 * β) * 1 := by nlinarith
+          _ ≤ (4 * β) * d := mul_le_mul_of_nonneg_left hdR (by positivity)
+          _ = 4 * β * d := by ring
+      have hlt : Real.pi < 4 * Real.pi * β * d := by
+        have heq : 4 * Real.pi * β * d = Real.pi * (4 * β * d) := by ring
+        rw [heq]
+        simpa using mul_lt_mul_of_pos_left hfac Real.pi_pos
+      have hfar : η < periodicLInfDistance (x anchor) (x j₀) :=
+        hcross anchor j₀ (hbridge j₀ hj₀).symm
+      have hle : periodicLInfDistance (x anchor) (x j₀) ≤ Real.pi :=
+        periodicLInfDistance_le_pi (hcube anchor) (hcube j₀)
+      linarith
+    -- Each color class is `η`-separated, hence a fine-cube frame at `K`.
+    have hframe (color : Fin nStar)
+        (v : ↥(clumpColorClass C anchor color) → ℂ) :
+        (2 - Real.exp (1 / (2 * β))) *
+            ((((m / nStar) + 1) ^ d : ℕ) : ℝ) * SegmentedVDM.energy v ≤
+          SegmentedVDM.energy
+            (fineCubeEvaluation (m / nStar)
+              (fun j : ↥(clumpColorClass C anchor color) => x j) *ᵥ v) := by
+      refine fineCube_frame_of_angularSeparation hd hK (le_of_lt hβ)
+        (fun j : ↥(clumpColorClass C anchor color) => x j)
+        (fun j => hcube j) (fun i j hij => ?_) v
+      have hsep' :
+          4 * Real.pi * β * d / ((m / nStar : ℕ) + 1) ≤
+            periodicLInfDistance (x i) (x j) :=
+        hη.trans
+          (hcross i j
+            (clumpColorClass_labels_ne C anchor color i j hij)).le
+      simpa using hsep'
+    obtain ⟨P₀, hP₀one, hP₀zero, hP₀mass⟩ :=
+      localizationPacket_of_colorCover C anchor
+        (fun j => j ∉ localNeighborhood x anchor τ)
+        (fun j hj => hbridge j hj) haβpos hframe
+    let P : SegmentedPacket d m 0 :=
+      P₀.widen (by simpa [Nat.mul_comm] using Nat.div_mul_le_self m nStar)
+        le_rfl
+    refine ⟨P, ?_, ?_, ?_⟩
+    · show P.value D (x anchor) = 1
+      exact hP₀one D
+    · intro j hj
+      show P.value D (x j) = 0
+      exact hP₀zero D j hj
+    · show P.linftyNorm D ≤ (2 - Real.exp (1 / (2 * β))) ^ (-(nStar : ℝ) / 2)
+      calc
+        P.linftyNorm D ≤ P.mass := SegmentedPacket.linftyNorm_le_mass P D
+        _ = P₀.mass := rfl
+        _ ≤ (1 / Real.sqrt (2 - Real.exp (1 / (2 * β)))) ^ nStar := hP₀mass
+        _ = (2 - Real.exp (1 / (2 * β))) ^ (-(nStar : ℝ) / 2) := hrpow
+  · -- The complement of the neighborhood is empty: the constant polynomial
+    -- works, as in the manuscript.
+    have hall : ∀ j : Fin n, j ∈ localNeighborhood x anchor τ := by
+      intro j
+      by_contra hk
+      exact hout ⟨j, hk⟩
+    let P : SegmentedPacket d m 0 :=
+      (SegmentedPacket.one d).widen (Nat.zero_le m) le_rfl
+    refine ⟨P, ?_, ?_, ?_⟩
+    · show P.value D (x anchor) = 1
+      simp [P]
+    · intro j hj
+      exact absurd (hall j) hj
+    · show P.linftyNorm D ≤ (2 - Real.exp (1 / (2 * β))) ^ (-(nStar : ℝ) / 2)
+      calc
+        P.linftyNorm D ≤ P.mass := SegmentedPacket.linftyNorm_le_mass P D
+        _ = 1 := by simp [P]
+        _ ≤ (2 - Real.exp (1 / (2 * β))) ^ (-(nStar : ℝ) / 2) := hone
 
 /-- Complete segmented packet construction from fine-cube frame bounds.  This
 is the algebraic and geometric core of the manuscript theorem; the remaining
