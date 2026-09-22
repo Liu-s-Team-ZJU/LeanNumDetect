@@ -1,4 +1,5 @@
 import SegmentedVDM.Interpolation
+import General.Fourier.TrigonometricPolynomialParseval
 import General.MatrixAnalysis.SingularValueBounds
 import Mathlib.Algebra.Order.Chebyshev
 
@@ -6,9 +7,13 @@ import Mathlib.Algebra.Order.Chebyshev
 is a direct finite-dimensional proof of NumDetect `lem:interpolation_via_svd`, for
 arbitrary target values; `cardinal_coefficients_of_frame` is its `w = e_j`
 corollary. The interpolating trigonometric polynomial is represented by its
-coefficient vector `c`: `energy c` is its squared `L²` norm by Parseval, and the
-coefficient `ℓ¹` mass `∑ i, ‖c i‖` bounds its `L∞` norm by the triangle
-inequality. -/
+coefficient vector `c` through `LeanNumDetect.unitTorusTrigPolynomial`: the
+coefficient form `Real.sqrt (energy c)` of its squared `L²` norm and the
+coefficient `ℓ¹` mass `∑ i, ‖c i‖` bounding its `L∞` norm are
+`interpolation_coefficients_of_fullColumnRank_coefficientNorms`, and
+`interpolation_coefficients_of_fullColumnRank` converts them to the genuine
+torus norms `L²(𝕋^d)` and `L^∞(𝕋^d)` through the Parseval bridge
+`General.Fourier.TrigonometricPolynomialParseval`. -/
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -47,8 +52,9 @@ private theorem toEuclideanLin_injective_of_mulVec_injective {ρ ι : Type*}
   apply hV
   exact congrArg ofLp hxy
 
-/-- Minimum-norm interpolation with both norm bounds of NumDetect
-`lem:interpolation_via_svd`. Let `V : Matrix ρ ι ℂ` have full column rank
+/-- The coefficient-form bounds behind NumDetect `lem:interpolation_via_svd`
+(`interpolation_coefficients_of_fullColumnRank`). Let
+`V : Matrix ρ ι ℂ` have full column rank
 (`Function.Injective V.toEuclideanLin`, equivalently `HasFullColumnRank V`), the
 role of the Vandermonde matrix `V_{Λ^d}(X)` of `defi:high_dim_uniform_poly` with
 `Fintype.card ι` nodes and `Fintype.card ρ = |Λ^d| = [(r+1)(m+1)]^d` frequencies.
@@ -56,11 +62,14 @@ Then for every `w : ι → ℂ` there is a coefficient vector `c : ρ → ℂ` w
 
 * `c ⬝ᵥ Vᵀ k = w k` for all `k`, the coefficient form of the interpolation
   condition `f (y_k / (2 * π)) = w k` of the manuscript;
-* `Real.sqrt (energy c) ≤ Real.sqrt (energy w) / σ`, the `L²` bound
-  `‖f‖_{L²(𝕋^d)} ≤ ‖w‖_2 / σ_min`, since `Real.sqrt (energy c) = ‖f‖_{L²}` is
-  the normalized torus `L²` norm by Parseval and `Real.sqrt (energy w) = ‖w‖_2`;
+* `Real.sqrt (energy c) ≤ Real.sqrt (energy w) / σ`, the coefficient form of
+  the `L²` bound `‖f‖_{L²(𝕋^d)} ≤ ‖w‖_2 / σ_min`, since
+  `Real.sqrt (energy w) = ‖w‖_2` and, for pairwise distinct frequencies,
+  `Real.sqrt (energy c) = ‖f‖_{L²}` is the normalized torus `L²` norm by
+  Parseval;
 * `∑ i, ‖c i‖ ≤ Real.sqrt (Fintype.card ρ) * Real.sqrt (energy w) / σ`, the
-  `L∞` bound `‖f‖_{L^∞(𝕋^d)} ≤ √|Λ^d| ‖w‖_2 / σ_min`, since
+  coefficient form of the `L∞` bound
+  `‖f‖_{L^∞(𝕋^d)} ≤ √|Λ^d| ‖w‖_2 / σ_min`, since
   `‖f‖_{L^∞} ≤ ∑ i, ‖c i‖` by the triangle inequality and `Fintype.card ρ` is
   the frequency count `|Λ^d|` of `defi:high_dim_uniform_poly`, so
   `Real.sqrt (Fintype.card ρ)` is the factor `√|Λ^d|` (Cauchy–Schwarz converts
@@ -68,11 +77,10 @@ Then for every `w : ι → ℂ` there is a coefficient vector `c : ρ → ℂ` w
   packets, into the coefficient `ℓ²` norm),
 
 where `σ = matrixSingularValue V (Fintype.card ι - 1)` is `σ_min` with zero-based
-indices. As elsewhere in this development, the polynomial is represented by its
-coefficient vector; the displayed `L²`/`L∞` norms are `Real.sqrt (energy c)` and
-the coefficient `ℓ¹` mass, identified with the torus norms by the Parseval and
-triangle-inequality steps of the manuscript proof. -/
-theorem interpolation_coefficients_of_fullColumnRank {ρ ι : Type*} [Fintype ρ] [Fintype ι]
+indices. The manuscript's genuine torus-norm conclusions are
+`interpolation_coefficients_of_fullColumnRank`, derived from these
+coefficient-form bounds through the Parseval bridge. -/
+theorem interpolation_coefficients_of_fullColumnRank_coefficientNorms {ρ ι : Type*} [Fintype ρ] [Fintype ι]
     [DecidableEq ι] (V : Matrix ρ ι ℂ) (hinj : Function.Injective V.toEuclideanLin)
     (w : ι → ℂ) :
     ∃ c : ρ → ℂ, (∀ k, c ⬝ᵥ Vᵀ k = w k) ∧
@@ -197,6 +205,71 @@ theorem interpolation_coefficients_of_fullColumnRank {ρ ι : Type*} [Fintype ρ
         (div_nonneg (mul_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _))
           hσ.le)).mp hm2
 
+/-- Minimum-norm interpolation with both norm bounds of NumDetect
+`lem:interpolation_via_svd`, in the manuscript's own normalization. Let
+`V : Matrix ρ ι ℂ` have full column rank (`Function.Injective V.toEuclideanLin`,
+equivalently `HasFullColumnRank V`), the role of the Vandermonde matrix
+`V_{Λ^d}(X)` of `defi:high_dim_uniform_poly` with `Fintype.card ι` nodes and
+`Fintype.card ρ = |Λ^d| = [(r+1)(m+1)]^d` pairwise distinct frequency vectors,
+presented by `s : ρ → Fin d → ℤ` with `hs : Function.Injective s` (the
+$\Lambda^d$-is-a-set condition of `defi:high_dim_uniform_poly`). Then for every
+`w : ι → ℂ` there is a coefficient vector `c : ρ → ℂ` with
+`c ⬝ᵥ Vᵀ k = w k` for all `k`, the coefficient form of the interpolation
+condition `f (y_k / (2 * π)) = w k` of the manuscript, such that the
+trigonometric polynomial
+
+$$
+f(\bm\omega) = \sum_i c_i\, e^{2\pi i\, \mathbf s_i \cdot \bm\omega},
+\qquad \bm\omega \in \mathbb T^d \cong [0,1)^d ,
+$$
+
+satisfies the manuscript's two bounds
+
+$$
+\|f\|_{L^2(\mathbb T^d)}\le\frac{\|\mathbf w\|_2}{\sigma_{\min}(\mathcal V)},
+\qquad
+\|f\|_{L^\infty(\mathbb T^d)}\le
+\frac{\sqrt{|\Lambda^d|}\,\|\mathbf w\|_2}{\sigma_{\min}(\mathcal V)} ,
+$$
+
+with $\|f\|_{L^2(\mathbb T^d)}^2 = \int_{\mathbb T^d}\|f(\bm\omega)\|^2\,d\bm\omega$
+the normalized torus $L^2$ norm, $\|\mathbf w\|_2 = $ `Real.sqrt (energy w)`,
+$|\Lambda^d| =$ `Fintype.card ρ`, and $\sigma_{\min}(\mathcal V) = $
+`matrixSingularValue V (Fintype.card ι - 1)` with zero-based indices.
+
+Both conclusions are derived from the coefficient-form bounds
+`interpolation_coefficients_of_fullColumnRank_coefficientNorms` through the
+Parseval bridge `General.Fourier.TrigonometricPolynomialParseval`, in the safe
+directions: `Real.sqrt (energy c) = ‖f‖_{L²(𝕋^d)}` by
+`LeanNumDetect.unitTorusL2Norm_eq_sqrt` (an equality exactly because `hs` gives
+pairwise distinct frequencies), and `‖f‖_{L^∞(𝕋^d)} ≤ ∑ i, ‖c i‖` by the
+triangle inequality `LeanNumDetect.unitTorusLInfNorm_le`, with the
+Cauchy--Schwarz step `LeanNumDetect.sum_norm_le_sqrt_card_mul_sqrt_sum_norm_sq`
+(already inside the coefficient bound) producing the factor $\sqrt{|\Lambda^d|}$;
+see `LeanNumDetect.unitTorusLInfNorm_le_sqrt_card_mul_unitTorusL2Norm` for the
+combined one-step form. The distinctness `hs` is essential for the `L²` bound:
+with repeated frequencies the presented polynomial can have larger `L²` norm
+than `Real.sqrt (energy c)`, and the conclusion genuinely fails
+(`LeanNumDetect.parseval_fails_of_repeated_frequencies`). -/
+theorem interpolation_coefficients_of_fullColumnRank {ρ ι : Type*} [Fintype ρ] [Fintype ι]
+    [DecidableEq ι] {d : ℕ} (s : ρ → Fin d → ℤ) (hs : Function.Injective s)
+    (V : Matrix ρ ι ℂ) (hinj : Function.Injective V.toEuclideanLin)
+    (w : ι → ℂ) :
+    ∃ c : ρ → ℂ, (∀ k, c ⬝ᵥ Vᵀ k = w k) ∧
+      unitTorusL2Norm (unitTorusTrigPolynomial s c) ≤
+        Real.sqrt (energy w) / matrixSingularValue V (Fintype.card ι - 1) ∧
+      unitTorusLInfNorm (unitTorusTrigPolynomial s c) ≤
+        Real.sqrt (Fintype.card ρ) * Real.sqrt (energy w) /
+          matrixSingularValue V (Fintype.card ι - 1) := by
+  obtain ⟨c, hinterp, hL2, hL1⟩ :=
+    interpolation_coefficients_of_fullColumnRank_coefficientNorms V hinj w
+  refine ⟨c, hinterp, ?_, ?_⟩
+  · rw [unitTorusL2Norm_eq_sqrt hs c]
+    show Real.sqrt (energy c) ≤
+      Real.sqrt (energy w) / matrixSingularValue V (Fintype.card ι - 1)
+    exact hL2
+  · exact (unitTorusLInfNorm_le s c).trans hL1
+
 /-- A cardinal interpolant with coefficient energy at most `1/a`. This is the
 `w = e_j` corollary of NumDetect `lem:interpolation_via_svd`
 (`interpolation_coefficients_of_fullColumnRank`), specialized to the frame
@@ -243,7 +316,7 @@ theorem cardinal_coefficients_of_frame {ρ ι : Type*} [Fintype ρ] [Fintype ι]
     apply V.toEuclideanLin.injective_iff_forall_lt_finrank_singularValues_pos.mp hinj
     simpa using Nat.sub_lt (Fintype.card_pos_iff.mpr ⟨j⟩) Nat.zero_lt_one
   obtain ⟨c, hinterp, hL2, _⟩ :=
-    interpolation_coefficients_of_fullColumnRank V hinj
+    interpolation_coefficients_of_fullColumnRank_coefficientNorms V hinj
       (fun k => if j = k then 1 else 0)
   refine ⟨c, hinterp, ?_⟩
   rw [hw, Real.sqrt_one] at hL2

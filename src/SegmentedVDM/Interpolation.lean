@@ -1,8 +1,14 @@
+import General.Fourier.TrigonometricPolynomialParseval
 import General.MatrixAnalysis.RowDeletion
 
 /-! The finite-dimensional Lagrange-interpolation argument of NumDetect,
-`lem:minsvd_bound_by_lagInterp_high_dim`. All norms below are Euclidean;
-the coefficient sum is the normalized torus L² norm squared by Parseval. -/
+`lem:minsvd_bound_by_lagInterp_high_dim`. All Euclidean norms below are
+coefficient-space quantities; the identification of the coefficient energy with
+the squared normalized torus `L²` norm is the Parseval theorem
+`LeanNumDetect.unitTorusL2Norm_sq_eq` of
+`General.Fourier.TrigonometricPolynomialParseval`, applied in
+`singularValue_inv_le_lagrangeFamily_l2` to state the manuscript's conclusion in
+the genuine `L²(𝕋^d)` function-space norms. -/
 
 set_option autoImplicit false
 open scoped BigOperators
@@ -58,32 +64,28 @@ theorem gram_eigenvector_energy {ρ : Type*} [Fintype ρ] {n : ℕ}
   rw [hh]
   simp
 
-/-- The minimum-singular-value bound of the manuscript's
-`lem:minsvd_bound_by_lagInterp_high_dim` for a whole family of Lagrange
-interpolants, together with the full column rank that the interpolation
-identities force as part of the conclusion.  There is no rank hypothesis: the
-interpolation identities alone imply both claims.
+/-- The coefficient-energy form of the minimum-singular-value bound of the
+manuscript's `lem:minsvd_bound_by_lagInterp_high_dim` for a whole family of
+Lagrange interpolants, together with the full column rank that the
+interpolation identities force as part of the conclusion.  There is no rank
+hypothesis: the interpolation identities alone imply both claims.
 
 `C * V = 1` is the Lean form of the interpolation identities
 $f_k(\mathbf y_\ell/2\pi)=\delta_{k,\ell}$ of the manuscript's
 `defi:high_dim_lagrange`, with `C k` the coefficient vector of $f_k$ and `V`
 the Vandermonde matrix on the same frequency and node sets.
 
-The right-hand side is exactly the manuscript's
-$(\sum_k \|f_k\|_{L^2(\mathbb T^d)}^2)^{1/2}$: by Parseval on the unit torus
-$\mathbb T^d \cong [0,1)^d$ with normalized measure, the squared $L^2$ norm of
-the trigonometric polynomial $f_k = \sum_i c_{k,i} e^{2\pi i \mathbf s_i \cdot
-\bm\omega}$ with pairwise distinct frequencies equals its coefficient energy,
-$\|f_k\|_{L^2(\mathbb T^d)}^2 = \sum_i \|c_{k,i}\|^2 =$ `energy (C k)`.  This
-identification is documented rather than proved: no Parseval bridge from
-coefficient energies to continuous torus $L^2$ norms of trigonometric
-polynomials is formalized in this repository (the `General.Fourier` Parseval
-results concern transforms of windowed sums), so `Real.sqrt (energy (C k))` is
-the implemented $L^2$ norm here.  The bridge would follow from
-`hasSum_sq_fourierCoeffOn`, e.g. through
-`LeanNumDetect.hasSum_intervalAngularTransform`, together with the
-orthogonality $\int_0^1 e^{2\pi i (s-t) \omega}\,d\omega = \delta_{s,t}$ of
-distinct integer frequencies.
+The right-hand side is the coefficient root-sum-square
+$\bigl(\sum_k \mathrm{energy}(C k)\bigr)^{1/2}$.  The manuscript states the
+bound with the genuine torus $L^2$ norms
+$(\sum_k \|f_k\|_{L^2(\mathbb T^d)}^2)^{1/2}$; that form is
+`singularValue_inv_le_lagrangeFamily_l2`, which converts this bound through
+Parseval on the unit torus $\mathbb T^d \cong [0,1)^d$ with normalized measure:
+for pairwise distinct frequencies the squared $L^2$ norm of the trigonometric
+polynomial $f_k = \sum_i c_{k,i} e^{2\pi i \mathbf s_i \cdot \bm\omega}$
+equals its coefficient energy,
+$\|f_k\|_{L^2(\mathbb T^d)}^2 = \sum_i \|c_{k,i}\|^2 =$ `energy (C k)`
+(`LeanNumDetect.unitTorusL2Norm_sq_eq`).
 
 The proof applies `interpolation_energy` to a nonzero Gram eigenvector and
 `gram_eigenvector_energy` to its energy, giving
@@ -91,7 +93,7 @@ $1 \le \bigl(\sum_k \mathrm{energy}(C k)\bigr) \sigma_{\min}(\mathcal V)^2$.
 This forces $\sigma_{\min}(\mathcal V) > 0$ (full column rank) and, taking
 square roots, $1/\sigma_{\min}(\mathcal V) \le \bigl(\sum_k
 \mathrm{energy}(C k)\bigr)^{1/2}$. -/
-theorem singularValue_inv_le_lagrangeFamily_l2 {ρ : Type*} [Fintype ρ] {n : ℕ}
+theorem singularValue_inv_le_lagrangeFamily_energy {ρ : Type*} [Fintype ρ] {n : ℕ}
     (V : Matrix ρ (Fin n) ℂ) (C : Matrix (Fin n) ρ ℂ)
     (hCV : C * V = 1) (hn : 0 < n) :
     0 < matrixSingularValue V (n - 1) ∧
@@ -121,6 +123,55 @@ theorem singularValue_inv_le_lagrangeFamily_l2 {ρ : Type*} [Fintype ρ] {n : �
     exact absurd hprod (by norm_num)
   exact ⟨hσpos, (div_le_iff₀ hσpos).2 hprod⟩
 
+/-- The minimum-singular-value bound of the manuscript's
+`lem:minsvd_bound_by_lagInterp_high_dim` in the manuscript's own normalization.
+Let the pairwise distinct frequency vectors $\Lambda^d$ of
+`defi:high_dim_lagrange` be presented by `s : ρ → Fin d → ℤ`
+(`hs : Function.Injective s` is the $\Lambda^d$-is-a-set condition), let
+`V : Matrix ρ (Fin n) ℂ` be the Vandermonde matrix on those frequencies and
+the nodes, and let `C * V = 1` be the interpolation identities
+$f_k(\mathbf y_\ell/2\pi)=\delta_{k,\ell}$ with `C k` the coefficient vector of
+
+$$
+f_k(\bm\omega) = \sum_i C_{k,i}\, e^{2\pi i\, \mathbf s_i \cdot \bm\omega},
+\qquad \bm\omega \in \mathbb T^d \cong [0,1)^d .
+$$
+
+Then, together with the full column rank forced by the interpolation
+identities,
+
+$$
+\frac{1}{\sigma_{\min}(\mathcal V)}\le
+\Big(\sum_{k=1}^n\|f_k\|_{L^2(\mathbb T^d)}^2\Big)^{1/2},
+\qquad
+\|f\|_{L^2(\mathbb T^d)}^2=\int_{\mathbb T^d}\|f(\bm\omega)\|^2\,d\bm\omega ,
+$$
+
+exactly the right-hand side of the manuscript.  The conclusion is derived from
+the coefficient-energy form `singularValue_inv_le_lagrangeFamily_energy`
+through the Parseval bridge `LeanNumDetect.unitTorusL2Norm_sq_eq`: for
+pairwise distinct frequencies the squared normalized torus $L^2$ norm of $f_k$
+is exactly `energy (C k)`, so the two root-sum-squares coincide.  Distinctness
+is essential here: for presentations with repeated frequencies Parseval fails
+(`LeanNumDetect.parseval_fails_of_repeated_frequencies`) and the coefficient
+energy no longer equals $\|f_k\|_{L^2(\mathbb T^d)}^2$. -/
+theorem singularValue_inv_le_lagrangeFamily_l2 {ρ : Type*} [Fintype ρ] {n d : ℕ}
+    (s : ρ → Fin d → ℤ) (hs : Function.Injective s)
+    (V : Matrix ρ (Fin n) ℂ) (C : Matrix (Fin n) ρ ℂ)
+    (hCV : C * V = 1) (hn : 0 < n) :
+    0 < matrixSingularValue V (n - 1) ∧
+      1 / matrixSingularValue V (n - 1) ≤
+        Real.sqrt (∑ k, unitTorusL2Norm (unitTorusTrigPolynomial s (C k)) ^ 2) := by
+  obtain ⟨hσpos, hinv⟩ := singularValue_inv_le_lagrangeFamily_energy V C hCV hn
+  refine ⟨hσpos, ?_⟩
+  have hE : ∀ k : Fin n,
+      unitTorusL2Norm (unitTorusTrigPolynomial s (C k)) ^ 2 = energy (C k) := by
+    intro k
+    rw [unitTorusL2Norm_sq_eq hs (C k)]
+    rfl
+  simp_rw [hE]
+  exact hinv
+
 /-- The uniform-bound corollary of `singularValue_inv_le_lagrangeFamily_l2`:
 a per-interpolant bound `energy (C j) ≤ B ^ 2` feeds into the family
 root-sum-square and `Real.sqrt (n * B ^ 2) = Real.sqrt n * B`.  A coefficient
@@ -131,7 +182,7 @@ theorem singularValue_ge_of_interpolation {ρ : Type*} [Fintype ρ] {n : ℕ}
     (hCV : C * V = 1) (hn : 0 < n) {B : ℝ} (hB : 0 < B)
     (hC : ∀ j, energy (C j) ≤ B ^ 2) :
     1 / (Real.sqrt n * B) ≤ matrixSingularValue V (n - 1) := by
-  obtain ⟨hσpos, hinv⟩ := singularValue_inv_le_lagrangeFamily_l2 V C hCV hn
+  obtain ⟨hσpos, hinv⟩ := singularValue_inv_le_lagrangeFamily_energy V C hCV hn
   have hsum : (∑ j, energy (C j)) ≤ (n : ℝ) * B ^ 2 := by
     calc
       _ ≤ ∑ _j : Fin n, B ^ 2 := Finset.sum_le_sum fun j _ => hC j

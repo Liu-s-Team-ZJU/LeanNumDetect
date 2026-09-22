@@ -1,5 +1,6 @@
 import General.Fourier.FineCubeFrame
 import General.Fourier.TranslatedCubeFourier
+import General.Fourier.TrigonometricPolynomialParseval
 import NumDetect.Matrices
 import NumDetect.UniformInterpolation
 import SegmentedVDM.Interpolation
@@ -57,9 +58,12 @@ theorem mass_nonneg {d m r : ℕ} (P : SegmentedPacket d m r) :
 
 /-- The `L^∞(𝕋^d)` sup norm of the trigonometric polynomial presented by `P`.
 All frequencies of a presentation are integers, so `P.value D` is
-`2 * Real.pi`-periodic in every coordinate and the supremum over `Point d`
-agrees with the supremum over one fundamental domain, i.e. with the
-manuscript's `‖·‖_{L^∞(𝕋^d)}`. -/
+`2 * Real.pi`-periodic in every coordinate (`value_two_pi_periodic`) and the
+supremum over `Point d` agrees with the supremum over one fundamental domain.
+`linftyNorm_eq_unitTorusLInfNorm` proves that this is exactly the torus
+`L^∞` norm `unitTorusLInfNorm` of the polynomial
+`unitTorusTrigPolynomial (P.angularFrequency D) P.coeff` in the manuscript's
+normalization, i.e. the manuscript's `‖·‖_{L^∞(𝕋^d)}`. -/
 noncomputable def linftyNorm {d m r : ℕ} (P : SegmentedPacket d m r)
     (D : ℕ) : ℝ :=
   ⨆ y : Point d, ‖P.value D y‖
@@ -92,6 +96,123 @@ theorem linftyNorm_le_mass {d m r : ℕ} (P : SegmentedPacket d m r)
 theorem value_norm_le_linftyNorm {d m r : ℕ} (P : SegmentedPacket d m r)
     (D : ℕ) (y : Point d) : ‖P.value D y‖ ≤ P.linftyNorm D :=
   le_ciSup (P.linftyNorm_bddAbove D) y
+
+/-- The integer angular frequency vector of the `i`-th term of a presentation
+at scale `D`: coordinate `k` carries the frequency `D * coarse i k + fine i k`
+of the manuscript's Fourier kernel $e^{2\pi i \mathbf s \cdot \bm\omega}$
+through the angular reduction $\bm\omega = \mathbf y / (2 \pi)$. -/
+def angularFrequency {d m r : ℕ} (P : SegmentedPacket d m r) (D : ℕ) :
+    P.Index → Fin d → ℤ :=
+  fun i k => ((D * P.coarse i k + P.fine i k : ℕ) : ℤ)
+
+/-- Evaluation is the bridge's angular trigonometric polynomial at the
+packet's integer angular frequency family: `P.value D` presents the torus
+polynomial `unitTorusTrigPolynomial (P.angularFrequency D) P.coeff` of
+`General.Fourier.TrigonometricPolynomialParseval` through the angular
+reduction $\bm\omega = \mathbf y / (2 \pi)$. -/
+theorem value_eq_angularTrigPolynomial {d m r : ℕ} (P : SegmentedPacket d m r)
+    (D : ℕ) (x : Point d) :
+    P.value D x = angularTrigPolynomial (P.angularFrequency D) P.coeff x := by
+  classical
+  show (∑ i, P.coeff i * Complex.exp
+      (Complex.I * ((∑ k, ((D * P.coarse i k + P.fine i k : ℕ) : ℝ) * x k : ℝ) : ℂ))) = _
+  simp only [angularTrigPolynomial, angularFrequency]
+  apply Finset.sum_congr rfl
+  intro i _
+  refine congrArg (fun z : ℂ => P.coeff i * Complex.exp z) ?_
+  push_cast
+  rfl
+
+/-- `2 * Real.pi`-periodicity of `P.value D` in every coordinate: all
+frequencies of a presentation are integers.  This is the periodicity behind
+the identification of the global supremum `linftyNorm` with the manuscript's
+`L^∞(𝕋^d)` norm over one fundamental domain; see
+`linftyNorm_eq_unitTorusLInfNorm`. -/
+theorem value_two_pi_periodic {d m r : ℕ} (P : SegmentedPacket d m r)
+    (D : ℕ) (x : Point d) (k : Fin d) :
+    P.value D (Function.update x k (x k + 2 * Real.pi)) = P.value D x := by
+  classical
+  unfold SegmentedPacket.value
+  apply Finset.sum_congr rfl
+  intro i _
+  let z : ℤ := ((D * P.coarse i k + P.fine i k : ℕ) : ℤ)
+  have hphase :
+      (∑ j, ((D * P.coarse i j + P.fine i j : ℕ) : ℝ) *
+          Function.update x k (x k + 2 * Real.pi) j) =
+        (∑ j, ((D * P.coarse i j + P.fine i j : ℕ) : ℝ) * x j) +
+          2 * Real.pi * (z : ℝ) := by
+    have hsplit : ∀ j : Fin d,
+        ((D * P.coarse i j + P.fine i j : ℕ) : ℝ) *
+            Function.update x k (x k + 2 * Real.pi) j =
+          ((D * P.coarse i j + P.fine i j : ℕ) : ℝ) * x j +
+            (if j = k then
+              ((D * P.coarse i j + P.fine i j : ℕ) : ℝ) * (2 * Real.pi) else 0) := by
+      intro j
+      rw [Function.update_apply]
+      by_cases hj : j = k
+      · rw [hj, if_pos rfl, if_pos rfl]
+        ring
+      · rw [if_neg hj, if_neg hj]
+        ring
+    simp_rw [hsplit]
+    rw [Finset.sum_add_distrib]
+    have hite : (∑ j : Fin d,
+        (if j = k then ((D * P.coarse i j + P.fine i j : ℕ) : ℝ) * (2 * Real.pi) else 0)) =
+        2 * Real.pi * (z : ℝ) := by
+      rw [Finset.sum_ite_eq' Finset.univ k
+        (fun j : Fin d => ((D * P.coarse i j + P.fine i j : ℕ) : ℝ) * (2 * Real.pi)),
+        if_pos (Finset.mem_univ k)]
+      dsimp [z]
+      push_cast
+      ring
+    rw [hite]
+  congr 1
+  apply Complex.exp_eq_exp_iff_exists_int.mpr
+  refine ⟨z, ?_⟩
+  rw [hphase]
+  push_cast
+  ring
+
+/-- The `L^∞` sup norm `linftyNorm` of a presentation agrees with the torus
+`L^∞` norm `unitTorusLInfNorm` of the polynomial it presents, in the
+manuscript's normalization $g(\bm\omega) = \sum_i c_i e^{2\pi i \mathbf s_i
+\cdot \bm\omega}$ on $\bm\omega \in \mathbb T^d \cong [0,1)^d$.  This is the
+identification behind the `L^∞(𝕋^d)` claims of `linftyNorm`, proved through
+the bridge's angular layer (`value_eq_angularTrigPolynomial` and
+`unitTorusTrigPolynomial_eq_angularTrigPolynomial`): both suprema range over
+all of `ℝ^d`, and `value_two_pi_periodic` shows each equals the supremum over
+one fundamental domain, e.g. the angular cube `InAngularCube`. -/
+theorem linftyNorm_eq_unitTorusLInfNorm {d m r : ℕ} (P : SegmentedPacket d m r)
+    (D : ℕ) :
+    P.linftyNorm D =
+      unitTorusLInfNorm (unitTorusTrigPolynomial (P.angularFrequency D) P.coeff) := by
+  classical
+  have hass' : BddAbove (Set.range fun ω : Fin d → ℝ =>
+      ‖unitTorusTrigPolynomial (P.angularFrequency D) P.coeff ω‖) :=
+    ⟨∑ i, ‖P.coeff i‖, by
+      rintro _ ⟨ω, rfl⟩
+      exact norm_unitTorusTrigPolynomial_le _ _ ω⟩
+  apply le_antisymm
+  · show (⨆ y : Point d, ‖P.value D y‖) ≤
+      (⨆ ω : Fin d → ℝ, ‖unitTorusTrigPolynomial (P.angularFrequency D) P.coeff ω‖)
+    apply ciSup_le
+    intro y
+    have h2π : (2:ℝ) * Real.pi ≠ 0 := mul_ne_zero two_ne_zero Real.pi_ne_zero
+    have hdiv : (fun k : Fin d => 2 * Real.pi * (y k / (2 * Real.pi))) = y := by
+      funext k
+      field_simp [h2π]
+    have h := unitTorusTrigPolynomial_eq_angularTrigPolynomial
+      (P.angularFrequency D) P.coeff (fun k => y k / (2 * Real.pi))
+    rw [hdiv] at h
+    rw [value_eq_angularTrigPolynomial P D y, ← h]
+    exact le_ciSup hass' (fun k => y k / (2 * Real.pi))
+  · show (⨆ ω : Fin d → ℝ, ‖unitTorusTrigPolynomial (P.angularFrequency D) P.coeff ω‖) ≤
+      (⨆ y : Point d, ‖P.value D y‖)
+    apply ciSup_le
+    intro ω
+    rw [unitTorusTrigPolynomial_eq_angularTrigPolynomial,
+      ← value_eq_angularTrigPolynomial P D (fun k => 2 * Real.pi * ω k)]
+    exact le_ciSup (P.linftyNorm_bddAbove D) (fun k => 2 * Real.pi * ω k)
 
 /-- The constant polynomial. -/
 noncomputable def one (d : ℕ) : SegmentedPacket d 0 0 where
@@ -1784,16 +1905,33 @@ theorem clumpStructure_has_slots
   · intro i j hij
     exact hcross i j (by simpa only [hC] using hij)
 
-/-- Manuscript `lem:localization` at full strength.  Let `x` form
+/-- Manuscript `lem:localization` at full strength, with the `L^∞(𝕋^d)`
+conclusion in the manuscript's own normalization.  Let `x` form
 `(A, ∞, τ, η, nStar)`-clumps and let `m < D`.  With `K = ⌊m / nStar⌋`, if
 `β > 1 / (2 * log 2)` and `η ≥ 4 * π * β * d / (K + 1)`, then for every node
 `x anchor` there exists `P : SegmentedPacket d m 0`, the finite presentation of
 a polynomial of `𝒫(m, 0, D, d)`, with `P.value D (x anchor) = 1`, with
 `P.value D (x j) = 0` for every `j ∉ localNeighborhood x anchor τ`, and with
-`L^∞(𝕋^d)` norm at most `(2 - exp (1 / (2 * β))) ^ (-nStar / 2)`.  Here
-`P.value D (x j)` is the manuscript's `g_k(y_j / (2 * π))` in the angular
+
+$$
+\|g_k\|_{L^\infty(\mathbb T^d)}\le
+\left(2-e^{1/(2\beta)}\right)^{-n^\star/2},
+\qquad
+g_k(\bm\omega) = \sum_i c_i\, e^{2\pi i\, \mathbf s_i \cdot \bm\omega} .
+$$
+
+Here `P.value D (x j)` is the manuscript's `g_k(y_j / (2 * π))` in the angular
 normalization (the `1 / (2 * π)` is absorbed by `SegmentedPacket.value`), and
-`P.linftyNorm D` is its `‖g_k‖_{L^∞(𝕋^d)}`.  The color decomposition is
+the norm bound is the genuine torus `L^∞` norm `unitTorusLInfNorm` of the
+polynomial `unitTorusTrigPolynomial (P.angularFrequency D) P.coeff` presented
+by `P`, which equals the packet sup norm `P.linftyNorm D` by
+`SegmentedPacket.linftyNorm_eq_unitTorusLInfNorm`
+(cf. `localizationPolynomial_of_angularClumpStructure_linftyNorm`).  The
+conclusion is derived from the coefficient `ℓ¹` mass bound
+`P.mass ≤ (1 / Real.sqrt a) ^ nStar` of `localizationPacket_of_colorCover`,
+the coefficient form of the conclusion, through the triangle-inequality sup
+bound `unitTorusLInfNorm_le` of the Parseval bridge; as the bridge states, the
+sup bound needs no frequency distinctness.  The color decomposition is
 manuscript `prop:decomposition` realized by the injective slots of `ClumpSlots`,
 and the frame constant `2 - exp (1 / (2 * β))` is the fine-cube (`r = 0`,
 `m = K`) case of manuscript `thm:well_separated_segmented`. -/
@@ -1806,7 +1944,8 @@ theorem localizationPolynomial_of_angularClumpStructure
     ∃ P : SegmentedPacket d m 0,
       P.value D (x anchor) = 1 ∧
       (∀ j, j ∉ localNeighborhood x anchor τ → P.value D (x j) = 0) ∧
-      P.linftyNorm D ≤ (2 - Real.exp (1 / (2 * β))) ^ (-(nStar : ℝ) / 2) := by
+      unitTorusLInfNorm (unitTorusTrigPolynomial (P.angularFrequency D) P.coeff) ≤
+        (2 - Real.exp (1 / (2 * β))) ^ (-(nStar : ℝ) / 2) := by
   classical
   obtain ⟨C, hsame, hcross⟩ := clumpStructure_has_slots hclumps
   have hτ : 0 < τ := hclumps.2.1
@@ -1918,9 +2057,13 @@ theorem localizationPolynomial_of_angularClumpStructure
     · intro j hj
       show P.value D (x j) = 0
       exact hP₀zero D j hj
-    · show P.linftyNorm D ≤ (2 - Real.exp (1 / (2 * β))) ^ (-(nStar : ℝ) / 2)
+    · show unitTorusLInfNorm (unitTorusTrigPolynomial (P.angularFrequency D) P.coeff) ≤
+        (2 - Real.exp (1 / (2 * β))) ^ (-(nStar : ℝ) / 2)
       calc
-        P.linftyNorm D ≤ P.mass := SegmentedPacket.linftyNorm_le_mass P D
+        unitTorusLInfNorm (unitTorusTrigPolynomial (P.angularFrequency D) P.coeff)
+            ≤ ∑ i, ‖P.coeff i‖ :=
+          unitTorusLInfNorm_le (P.angularFrequency D) P.coeff
+        _ = P.mass := rfl
         _ = P₀.mass := rfl
         _ ≤ (1 / Real.sqrt (2 - Real.exp (1 / (2 * β)))) ^ nStar := hP₀mass
         _ = (2 - Real.exp (1 / (2 * β))) ^ (-(nStar : ℝ) / 2) := hrpow
@@ -1937,11 +2080,35 @@ theorem localizationPolynomial_of_angularClumpStructure
       simp [P]
     · intro j hj
       exact absurd (hall j) hj
-    · show P.linftyNorm D ≤ (2 - Real.exp (1 / (2 * β))) ^ (-(nStar : ℝ) / 2)
+    · show unitTorusLInfNorm (unitTorusTrigPolynomial (P.angularFrequency D) P.coeff) ≤
+        (2 - Real.exp (1 / (2 * β))) ^ (-(nStar : ℝ) / 2)
       calc
-        P.linftyNorm D ≤ P.mass := SegmentedPacket.linftyNorm_le_mass P D
+        unitTorusLInfNorm (unitTorusTrigPolynomial (P.angularFrequency D) P.coeff)
+            ≤ ∑ i, ‖P.coeff i‖ :=
+          unitTorusLInfNorm_le (P.angularFrequency D) P.coeff
+        _ = P.mass := rfl
         _ = 1 := by simp [P]
         _ ≤ (2 - Real.exp (1 / (2 * β))) ^ (-(nStar : ℝ) / 2) := hone
+
+/-- The `L^∞` conclusion of `localizationPolynomial_of_angularClumpStructure`
+phrased with the packet sup norm `SegmentedPacket.linftyNorm` over all of
+`Point d`; it equals the torus `L^∞` norm of the presented polynomial by
+`SegmentedPacket.linftyNorm_eq_unitTorusLInfNorm`. -/
+theorem localizationPolynomial_of_angularClumpStructure_linftyNorm
+    {d n A nStar m D : ℕ} {x : Fin n → Point d} {τ η β : ℝ}
+    (hclumps : IsAngularClumpStructure x A nStar τ η)
+    (hDm : m < D) (hβ : 1 / (2 * Real.log 2) < β)
+    (hη : 4 * Real.pi * β * d / ((m / nStar : ℕ) + 1) ≤ η)
+    (anchor : Fin n) :
+    ∃ P : SegmentedPacket d m 0,
+      P.value D (x anchor) = 1 ∧
+      (∀ j, j ∉ localNeighborhood x anchor τ → P.value D (x j) = 0) ∧
+      P.linftyNorm D ≤ (2 - Real.exp (1 / (2 * β))) ^ (-(nStar : ℝ) / 2) := by
+  obtain ⟨P, hone, hzero, hnorm⟩ :=
+    localizationPolynomial_of_angularClumpStructure hclumps hDm hβ hη anchor
+  refine ⟨P, hone, hzero, ?_⟩
+  rw [P.linftyNorm_eq_unitTorusLInfNorm]
+  exact hnorm
 
 /-- Complete segmented packet construction from fine-cube frame bounds.  This
 is the algebraic and geometric core of the manuscript theorem; the remaining
