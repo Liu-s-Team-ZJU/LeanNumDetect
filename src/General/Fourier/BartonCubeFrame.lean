@@ -169,7 +169,7 @@ theorem shiftedCosetEquivFineCube_value
 `(-K / 2 + ℤ)^d ∩ [-K / 2, K / 2]^d`. -/
 noncomputable def shiftedCosetFourierEnergy
     {d : ℕ} {ι : Type*} [Fintype ι]
-    (K : ℕ) (x : ι → FineCubeFrame.AngularPoint d)
+    (K : ℕ) (x : ι → NumDetect.Point d)
     (c : ι → ℂ) : ℝ :=
   ∑ ω : ShiftedCosetFrequency d K,
     ‖∑ j, c j * Complex.exp
@@ -179,14 +179,14 @@ noncomputable def shiftedCosetFourierEnergy
 /-- Unitary coefficient modulation by the scalar frequency shift `s`. -/
 noncomputable def modulateCoefficients
     {d : ℕ} {ι : Type*} [Fintype ι]
-    (s : ℝ) (x : ι → FineCubeFrame.AngularPoint d)
+    (s : ℝ) (x : ι → NumDetect.Point d)
     (c : ι → ℂ) : ι → ℂ :=
   fun j => c j * Complex.exp
     (Complex.I * ((s * ∑ k, x j k : ℝ) : ℂ))
 
 theorem coefficientEnergy_modulateCoefficients
     {d : ℕ} {ι : Type*} [Fintype ι]
-    (s : ℝ) (x : ι → FineCubeFrame.AngularPoint d)
+    (s : ℝ) (x : ι → NumDetect.Point d)
     (c : ι → ℂ) :
     External.coefficientEnergy (modulateCoefficients s x c) =
       External.coefficientEnergy c := by
@@ -197,7 +197,7 @@ theorem coefficientEnergy_modulateCoefficients
 
 theorem modulateCoefficients_neg_self
     {d : ℕ} {ι : Type*} [Fintype ι]
-    (s : ℝ) (x : ι → FineCubeFrame.AngularPoint d)
+    (s : ℝ) (x : ι → NumDetect.Point d)
     (c : ι → ℂ) :
     modulateCoefficients s x (modulateCoefficients (-s) x c) = c := by
   funext j
@@ -214,13 +214,13 @@ theorem modulateCoefficients_neg_self
 constants as the manuscript. -/
 theorem fineCubeFourier_bounds_of_translatedCube
     {d K : ℕ} {ι : Type*} [Fintype ι]
-    (β : ℝ) (x : ι → FineCubeFrame.AngularPoint d)
+    (β : ℝ) (x : ι → NumDetect.Point d)
     (hd : 1 ≤ d) (hK : 1 ≤ K)
     (hβ : 1 / (2 * Real.log 2) ≤ β)
-    (hx : ∀ j, FineCubeFrame.InAngularCube (x j))
+    (hx : ∀ j, NumDetect.InAngularCube (x j))
     (hsep : ∀ i j, i ≠ j →
       4 * Real.pi * β * d / (K + 1) ≤
-        FineCubeFrame.angularPeriodicLInfDistance (x i) (x j)) :
+        NumDetect.periodicLInfDistance (x i) (x j)) :
     ∀ c,
       (2 - Real.exp (1 / (2 * β))) * (((K + 1) ^ d : ℕ) : ℝ) *
           External.coefficientEnergy c ≤
@@ -246,7 +246,7 @@ theorem fineCubeFourier_bounds_of_translatedCube
     calc
       (2 * β * d / (K + 1)) * (2 * Real.pi) =
           4 * Real.pi * β * d / (K + 1) := by ring
-      _ ≤ FineCubeFrame.angularPeriodicLInfDistance (x i) (x j) := hsep i j hij
+      _ ≤ NumDetect.periodicLInfDistance (x i) (x j) := hsep i j hij
   constructor
   · have h := External.translatedCubeFourier_lowerFrame β
       (fun j => FineCubeFrame.normalizedAngularPoint (x j))
@@ -262,7 +262,7 @@ theorem fineCubeFourier_bounds_of_translatedCube
 corresponding one-sided Fourier value. -/
 theorem shiftedCosetFourierValue_centerModulation
     {d K : ℕ} {ι : Type*} [Fintype ι]
-    (x : ι → FineCubeFrame.AngularPoint d) (c : ι → ℂ)
+    (x : ι → NumDetect.Point d) (c : ι → ℂ)
     (ω : ShiftedCosetFrequency d K) :
     (∑ j, modulateCoefficients ((K : ℝ) / 2) x c j *
         Complex.exp
@@ -301,7 +301,7 @@ theorem shiftedCosetFourierValue_centerModulation
 one-sided integer cube. -/
 theorem shiftedCosetFourierEnergy_centerModulation
     {d K : ℕ} {ι : Type*} [Fintype ι]
-    (x : ι → FineCubeFrame.AngularPoint d) (c : ι → ℂ) :
+    (x : ι → NumDetect.Point d) (c : ι → ℂ) :
     shiftedCosetFourierEnergy K x
         (modulateCoefficients ((K : ℝ) / 2) x c) =
       FineCubeFrame.fineCubeFourierEnergy K x c := by
@@ -316,7 +316,7 @@ theorem shiftedCosetFourierEnergy_centerModulation
 /-- The lower frame inequality on the finite shifted coset. -/
 def HasShiftedCosetLowerFrameBound
     {d : ℕ} {ι : Type*} [Fintype ι]
-    (K : ℕ) (A : ℝ) (x : ι → FineCubeFrame.AngularPoint d) : Prop :=
+    (K : ℕ) (A : ℝ) (x : ι → NumDetect.Point d) : Prop :=
   ∀ c,
     A * External.coefficientEnergy c ≤
       shiftedCosetFourierEnergy K x c
@@ -324,7 +324,7 @@ def HasShiftedCosetLowerFrameBound
 /-- The corresponding lower frame inequality on the one-sided integer cube. -/
 def HasOneSidedLowerFrameBound
     {d : ℕ} {ι : Type*} [Fintype ι]
-    (K : ℕ) (A : ℝ) (x : ι → FineCubeFrame.AngularPoint d) : Prop :=
+    (K : ℕ) (A : ℝ) (x : ι → NumDetect.Point d) : Prop :=
   ∀ c,
     A * External.coefficientEnergy c ≤
       FineCubeFrame.fineCubeFourierEnergy K x c
@@ -333,7 +333,7 @@ def HasOneSidedLowerFrameBound
 This is the parity-free replacement for reducing to a centered integer cube. -/
 theorem hasShiftedCosetLowerFrameBound_iff_oneSided
     {d : ℕ} {ι : Type*} [Fintype ι]
-    (K : ℕ) (A : ℝ) (x : ι → FineCubeFrame.AngularPoint d) :
+    (K : ℕ) (A : ℝ) (x : ι → NumDetect.Point d) :
     HasShiftedCosetLowerFrameBound K A x ↔
       HasOneSidedLowerFrameBound K A x := by
   constructor
@@ -360,20 +360,20 @@ theorem hasShiftedCosetLowerFrameBound_iff_oneSided
 /-- Uniform shifted-coset lower frame property at angular separation `η`. -/
 def HasShiftedCosetLowerFrame
     (d K : ℕ) (η A : ℝ) : Prop :=
-  ∀ (ι : Type) [Fintype ι] (x : ι → FineCubeFrame.AngularPoint d),
-    (∀ j, FineCubeFrame.InAngularCube (x j)) →
+  ∀ (ι : Type) [Fintype ι] (x : ι → NumDetect.Point d),
+    (∀ j, NumDetect.InAngularCube (x j)) →
     (∀ i j, i ≠ j →
-      η < FineCubeFrame.angularPeriodicLInfDistance (x i) (x j)) →
+      η < NumDetect.periodicLInfDistance (x i) (x j)) →
     HasShiftedCosetLowerFrameBound K
       (A * (((K + 1) ^ d : ℕ) : ℝ)) x
 
 /-- Uniform one-sided lower frame property at angular separation `η`. -/
 def HasOneSidedLowerFrame
     (d K : ℕ) (η A : ℝ) : Prop :=
-  ∀ (ι : Type) [Fintype ι] (x : ι → FineCubeFrame.AngularPoint d),
-    (∀ j, FineCubeFrame.InAngularCube (x j)) →
+  ∀ (ι : Type) [Fintype ι] (x : ι → NumDetect.Point d),
+    (∀ j, NumDetect.InAngularCube (x j)) →
     (∀ i j, i ≠ j →
-      η < FineCubeFrame.angularPeriodicLInfDistance (x i) (x j)) →
+      η < NumDetect.periodicLInfDistance (x i) (x j)) →
     HasOneSidedLowerFrameBound K
       (A * (((K + 1) ^ d : ℕ) : ℝ)) x
 
@@ -399,14 +399,12 @@ theorem hasFineCubeFrame_of_oneSidedLowerFrame
     NumDetect.HasFineCubeFrame d K η A := by
   unfold NumDetect.HasFineCubeFrame
   intro ι _ _ x hx hsep c
-  have hx' : ∀ j, FineCubeFrame.InAngularCube (x j) := by
-    simpa [FineCubeFrame.InAngularCube, NumDetect.InAngularCube] using hx
+  have hx' : ∀ j, NumDetect.InAngularCube (x j) := by
+    simpa [NumDetect.InAngularCube] using hx
   have hsep' :
       ∀ i j, i ≠ j →
-        η < FineCubeFrame.angularPeriodicLInfDistance (x i) (x j) := by
-    simpa [FineCubeFrame.angularPeriodicLInfDistance,
-      FineCubeFrame.angularPeriodicCoordinateDistance,
-      NumDetect.periodicLInfDistance,
+        η < NumDetect.periodicLInfDistance (x i) (x j) := by
+    simpa [NumDetect.periodicLInfDistance,
       NumDetect.periodicCoordinateDistance] using hsep
   have hc := h ι x hx' hsep' c
   simpa [HasOneSidedLowerFrameBound,
@@ -446,16 +444,14 @@ theorem hasFineCubeFrame_of_translatedCube
       apply (le_div_iff₀ (by positivity : 0 < 2 * Real.pi)).2
       have hangular :
           4 * Real.pi * β * d / (K + 1) <
-            FineCubeFrame.angularPeriodicLInfDistance (x i) (x j) :=
+            NumDetect.periodicLInfDistance (x i) (x j) :=
         hη.trans_lt (by
-          simpa [FineCubeFrame.angularPeriodicLInfDistance,
-            FineCubeFrame.angularPeriodicCoordinateDistance,
-            NumDetect.periodicLInfDistance,
+          simpa [NumDetect.periodicLInfDistance,
             NumDetect.periodicCoordinateDistance] using hsep i j hij)
       calc
         (2 * β * d / (K + 1)) * (2 * Real.pi) =
             4 * Real.pi * β * d / (K + 1) := by ring
-        _ ≤ FineCubeFrame.angularPeriodicLInfDistance (x i) (x j) :=
+        _ ≤ NumDetect.periodicLInfDistance (x i) (x j) :=
           hangular.le
     have hframe :=
       External.translatedCubeFourier_lowerFrame β

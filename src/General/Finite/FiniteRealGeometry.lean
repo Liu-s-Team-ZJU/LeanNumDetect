@@ -45,6 +45,38 @@ theorem periodic_separation_lt_half {x β : ℝ}
   have hh := (hsep p).trans_le hp
   nlinarith [Real.pi_pos]
 
+/-! ### Angular-torus representatives and wrapped distances
+
+The carrier `Point d`, the fundamental-domain condition `InAngularCube`, and
+the wrapped coordinatewise and `ℓ^∞` distances `periodicCoordinateDistance`
+and `periodicLInfDistance` on the angular torus.  These shared definitions of
+the NumDetect observation model live in `General` because both
+`NumDetect.Basic` and `General.Fourier.FineCubeFrame` build on them while
+`General` may not import `NumDetect`. -/
+
+namespace NumDetect
+
+noncomputable section
+
+/-- A point or frequency in `ℝ^d`. -/
+abbrev Point (d : ℕ) := Fin d → ℝ
+
+/-- The angular-torus representative convention `(-π, π]^d`. -/
+def InAngularCube {d : ℕ} (x : Point d) : Prop :=
+  ∀ k, -Real.pi < x k ∧ x k ≤ Real.pi
+
+/-- Wrapped distance in one angular coordinate, for representatives in `(-π, π]`. -/
+def periodicCoordinateDistance (u v : ℝ) : ℝ :=
+  min |u - v| (2 * Real.pi - |u - v|)
+
+/-- Periodic `ℓ^∞` distance on the angular torus. -/
+def periodicLInfDistance {d : ℕ} (u v : Point d) : ℝ :=
+  ‖fun k => periodicCoordinateDistance (u k) (v k)‖
+
+end
+
+end NumDetect
+
 /-! ### Finite-dimensional `ℓ^q` norms
 
 `lpNorm q x` is the ordinary vector `ℓ^q`-norm of `x : ι → ℝ` on a finite index

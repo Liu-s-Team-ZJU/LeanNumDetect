@@ -1,4 +1,5 @@
 import Mathlib
+import General.Finite.FiniteRealGeometry
 
 /-! Core objects in the NumDetect observation model. -/
 
@@ -11,9 +12,6 @@ namespace LeanNumDetect
 namespace NumDetect
 
 noncomputable section
-
-/-- A point or frequency in `ℝ^d`. -/
-abbrev Point (d : ℕ) := Fin d → ℝ
 
 /-- The Euclidean dot product used by the Fourier phase. -/
 def dot {d : ℕ} (x y : Point d) : ℝ :=
@@ -56,10 +54,6 @@ def InOpenCube {d : ℕ} (δ : ℝ) (center y : Point d) : Prop :=
 /-- The closed frequency band `[-Ω, Ω]^d`. -/
 def InFrequencyBand {d : ℕ} (Ω : ℝ) (ω : Point d) : Prop :=
   ∀ k, |ω k| ≤ Ω
-
-/-- The angular-torus representative convention `(-π, π]^d`. -/
-def InAngularCube {d : ℕ} (x : Point d) : Prop :=
-  ∀ k, -Real.pi < x k ∧ x k ≤ Real.pi
 
 /-- A reduced finite atomic measure: nodes are distinct and amplitudes are nonzero. -/
 structure AtomicMeasure (d n : ℕ) where
@@ -164,10 +158,6 @@ def IsLocalCluster1D {n : ℕ} (x : Fin n → ℝ) (hn : 2 ≤ n)
     (center τ : ℝ) : Prop :=
   ∀ j, |x j - center| ≤ τ * minimumSeparation1D x hn / 2
 
-/-- Wrapped distance in one angular coordinate, for representatives in `(-π, π]`. -/
-def periodicCoordinateDistance (u v : ℝ) : ℝ :=
-  min |u - v| (2 * Real.pi - |u - v|)
-
 /-- Periodic `ℓ^p` distance on the angular torus. -/
 noncomputable def periodicLpDistance {d : ℕ} (p : ℝ) (u v : Point d) : ℝ :=
   (∑ k, periodicCoordinateDistance (u k) (v k) ^ p) ^ (1 / p)
@@ -175,10 +165,6 @@ noncomputable def periodicLpDistance {d : ℕ} (p : ℝ) (u v : Point d) : ℝ :
 /-- Periodic `ℓ^1` distance on the angular torus. -/
 def periodicL1Distance {d : ℕ} (u v : Point d) : ℝ :=
   ∑ k, periodicCoordinateDistance (u k) (v k)
-
-/-- Periodic `ℓ^∞` distance on the angular torus. -/
-def periodicLInfDistance {d : ℕ} (u v : Point d) : ℝ :=
-  ‖fun k => periodicCoordinateDistance (u k) (v k)‖
 
 /-- Periodic distance selected by a finite exponent or by `∞`. -/
 noncomputable def periodicDistance {d : ℕ} : LpIndex → Point d → Point d → ℝ

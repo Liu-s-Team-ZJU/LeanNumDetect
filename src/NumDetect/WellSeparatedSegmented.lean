@@ -122,9 +122,8 @@ theorem segmentedVandermonde_energy_bounds
     BartonCubeFrame.fineCubeFourier_bounds_of_translatedCube β x hd hm hβ hx
       (by
         intro i j hij
-        simpa [FineCubeFrame.angularPeriodicLInfDistance,
-          FineCubeFrame.angularPeriodicCoordinateDistance,
-          periodicLInfDistance, periodicCoordinateDistance] using hsep i j hij)
+        simpa [periodicLInfDistance,
+          periodicCoordinateDistance] using hsep i j hij)
       (segmentedBlockCoefficients D s x c)
   have hcard : Fintype.card (SegmentedCoarseIndex d r) = (r + 1) ^ d := by
     simp

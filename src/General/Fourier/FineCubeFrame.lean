@@ -1,3 +1,4 @@
+import General.Finite.FiniteRealGeometry
 import General.Fourier.SeparatedCubeFourier
 import General.Fourier.TranslatedCubeFourier
 
@@ -24,23 +25,11 @@ namespace FineCubeFrame
 
 noncomputable section
 
-abbrev AngularPoint (d : ℕ) := Fin d → ℝ
-
-def InAngularCube {d : ℕ} (x : AngularPoint d) : Prop :=
-  ∀ k, -Real.pi < x k ∧ x k ≤ Real.pi
-
-def angularPeriodicCoordinateDistance (u v : ℝ) : ℝ :=
-  min |u - v| (2 * Real.pi - |u - v|)
-
-def angularPeriodicLInfDistance {d : ℕ}
-    (u v : AngularPoint d) : ℝ :=
-  ‖fun k => angularPeriodicCoordinateDistance (u k) (v k)‖
-
 abbrev FineCubeFrequency (d K : ℕ) := Fin d → Fin (K + 1)
 
 noncomputable def fineCubeFourierEnergy
     {d : ℕ} {ι : Type*} [Fintype ι]
-    (K : ℕ) (x : ι → AngularPoint d) (c : ι → ℂ) : ℝ :=
+    (K : ℕ) (x : ι → NumDetect.Point d) (c : ι → ℂ) : ℝ :=
   ∑ α : FineCubeFrequency d K,
     ‖∑ j, c j * Complex.exp
       (Complex.I * (∑ k, ((α k : ℕ) : ℂ) * x j k))‖ ^ 2
@@ -99,13 +88,13 @@ private theorem centeredCubeEquivFineCube_apply
 
 /-- Convert angular representatives in `(-π, π]` to Li's representatives in
 `[-1/2, 1/2)`.  The minus sign matches Li's Fourier phase convention. -/
-def normalizedAngularPoint {d : ℕ} (x : AngularPoint d) :
+def normalizedAngularPoint {d : ℕ} (x : NumDetect.Point d) :
     External.UnitTorusPoint d :=
   fun k => -x k / (2 * Real.pi)
 
 theorem normalizedAngularPoint_mem_halfOpenCube
-    {d : ℕ} {x : AngularPoint d}
-    (hx : InAngularCube x) :
+    {d : ℕ} {x : NumDetect.Point d}
+    (hx : NumDetect.InAngularCube x) :
     External.InUnitHalfOpenCube (normalizedAngularPoint x) := by
   intro k
   constructor
@@ -120,10 +109,10 @@ theorem normalizedAngularPoint_coordinateDistance
     (hv : -Real.pi < v ∧ v ≤ Real.pi) :
     External.unitPeriodicCoordinateDistance
         (-u / (2 * Real.pi)) (-v / (2 * Real.pi)) =
-      angularPeriodicCoordinateDistance u v /
+      NumDetect.periodicCoordinateDistance u v /
         (2 * Real.pi) := by
   unfold External.unitPeriodicCoordinateDistance
-    angularPeriodicCoordinateDistance
+    NumDetect.periodicCoordinateDistance
   have hp : 0 < 2 * Real.pi := by positivity
   have habs : |u - v| ≤ 2 * Real.pi := by
     rw [abs_le]
@@ -136,20 +125,20 @@ theorem normalizedAngularPoint_coordinateDistance
   rw [min_div_div_right hp.le]
 
 theorem normalizedAngularPoint_lInfDistance
-    {d : ℕ} {u v : AngularPoint d}
-    (hu : InAngularCube u)
-    (hv : InAngularCube v) :
+    {d : ℕ} {u v : NumDetect.Point d}
+    (hu : NumDetect.InAngularCube u)
+    (hv : NumDetect.InAngularCube v) :
     External.unitPeriodicLInfDistance
         (normalizedAngularPoint u) (normalizedAngularPoint v) =
-      angularPeriodicLInfDistance u v /
+      NumDetect.periodicLInfDistance u v /
         (2 * Real.pi) := by
   unfold External.unitPeriodicLInfDistance
-    angularPeriodicLInfDistance normalizedAngularPoint
+    NumDetect.periodicLInfDistance normalizedAngularPoint
   simp_rw [normalizedAngularPoint_coordinateDistance (hu _) (hv _)]
-  rw [show (fun k => angularPeriodicCoordinateDistance
+  rw [show (fun k => NumDetect.periodicCoordinateDistance
       (u k) (v k) / (2 * Real.pi)) =
       (2 * Real.pi)⁻¹ •
-        (fun k => angularPeriodicCoordinateDistance
+        (fun k => NumDetect.periodicCoordinateDistance
           (u k) (v k)) by
       funext k
       simp [div_eq_inv_mul]]
@@ -160,7 +149,7 @@ theorem normalizedAngularPoint_lInfDistance
 after normalization of the nodes. -/
 theorem translatedCubeFourierEnergy_normalizedAngularPoint
     {d K : ℕ} {ι : Type*} [Fintype ι]
-    (x : ι → AngularPoint d) (c : ι → ℂ) :
+    (x : ι → NumDetect.Point d) (c : ι → ℂ) :
     External.translatedCubeFourierEnergy (K + 1)
         (fun j => normalizedAngularPoint (x j)) c =
       fineCubeFourierEnergy K x c := by
@@ -203,7 +192,7 @@ private theorem centered_card
 
 private theorem modulated_coefficient_energy
     {d : ℕ} {ι : Type*} [Fintype ι]
-    (q : ℕ) (x : ι → AngularPoint d) (c : ι → ℂ) :
+    (q : ℕ) (x : ι → NumDetect.Point d) (c : ι → ℂ) :
     External.coefficientEnergy
         (fun j => c j * Complex.exp
           (Complex.I * (q * ∑ k, x j k : ℝ))) =
@@ -215,7 +204,7 @@ private theorem modulated_coefficient_energy
 
 private theorem discreteEnergy_modulated_eq_fineCubeEnergy
     {d q : ℕ} {ι : Type*} [Fintype ι]
-    (x : ι → AngularPoint d) (c : ι → ℂ) :
+    (x : ι → NumDetect.Point d) (c : ι → ℂ) :
     External.discreteCubeFourierEnergy
         (((2 * q + 1 : ℕ) : ℝ) / 2)
         (fun j k => -x j k / (2 * Real.pi))

@@ -1206,12 +1206,73 @@ theorem energy_coefficientVector_eq_of_injective {d m r : ℕ}
   change SegmentedVDM.energy (fun β => ∑ i, if P.frequencyIndex i = β then P.coeff i else 0) = _
   exact hsum
 
+/-- The integer angular frequency carried by the segmented row index `α` at
+scale `D`: coordinate `k` has frequency `D * (α k).1 + (α k).2`.  This is the
+index-to-frequency map of `SegmentedPacket.coefficientVector`: the elements of
+`SegmentedIndex d m r` are frequencies, and `SegmentedPacket.angularFrequency D`
+factors through this map along `SegmentedPacket.frequencyIndex`
+(`SegmentedPacket.angularFrequency_eq`). -/
+def SegmentedIndex.angularFrequency (d m r D : ℕ) (α : SegmentedIndex d m r) :
+    Fin d → ℤ :=
+  fun k => ((D * (α k).1 + (α k).2 : ℕ) : ℤ)
+
+/-- `SegmentedPacket.angularFrequency D` is the index-to-frequency map of
+`SegmentedIndex` along `SegmentedPacket.frequencyIndex`. -/
+theorem SegmentedPacket.angularFrequency_eq {d m r : ℕ}
+    (P : SegmentedPacket d m r) (D : ℕ) (i : P.Index) :
+    P.angularFrequency D i =
+      SegmentedIndex.angularFrequency d m r D (P.frequencyIndex i) :=
+  rfl
+
+/-- The index-to-frequency map of `SegmentedIndex` is injective when the fine
+budget lies below the scale, `m < D` (the manuscript's `D > m`): the integer
+frequency `D * a + b` with `b < D` recovers the pair `(a, b)` by division with
+remainder.  This is the pairwise distinctness behind the Parseval
+identification for the collected coefficient vector
+`SegmentedPacket.coefficientVector`; no distinctness of
+`SegmentedPacket.frequencyIndex` is needed, and none is possible in general,
+since a product construction presents repeated frequencies. -/
+theorem SegmentedIndex.angularFrequency_injective {d m r D : ℕ} (hmD : m < D) :
+    Function.Injective (SegmentedIndex.angularFrequency d m r D) := by
+  have hDpos : 0 < D := by omega
+  intro α β h
+  have hval : ∀ k : Fin d,
+      (D * (α k).1 + (α k).2 : ℕ) = (D * (β k).1 + (β k).2 : ℕ) := by
+    intro k
+    have hk := congrFun h k
+    simp only [SegmentedIndex.angularFrequency] at hk
+    exact_mod_cast hk
+  have hcoarse : ∀ k : Fin d, ((α k).1 : ℕ) = ((β k).1 : ℕ) := by
+    intro k
+    have ha : ((α k).2 : ℕ) < D :=
+      lt_of_le_of_lt (Nat.le_of_lt_succ (α k).2.isLt) hmD
+    have hb : ((β k).2 : ℕ) < D :=
+      lt_of_le_of_lt (Nat.le_of_lt_succ (β k).2.isLt) hmD
+    have hdiv := congrArg (fun n : ℕ => n / D) (hval k)
+    have h1 : (D * (α k).1 + (α k).2 : ℕ) / D = ((α k).1 : ℕ) := by
+      rw [add_comm, Nat.add_mul_div_left ((α k).2 : ℕ) ((α k).1 : ℕ) hDpos,
+        Nat.div_eq_of_lt ha, zero_add]
+    have h2 : (D * (β k).1 + (β k).2 : ℕ) / D = ((β k).1 : ℕ) := by
+      rw [add_comm, Nat.add_mul_div_left ((β k).2 : ℕ) ((β k).1 : ℕ) hDpos,
+        Nat.div_eq_of_lt hb, zero_add]
+    rw [h1, h2] at hdiv
+    exact hdiv
+  have hfine : ∀ k : Fin d, ((α k).2 : ℕ) = ((β k).2 : ℕ) := by
+    intro k
+    have hk := hval k
+    rw [hcoarse k] at hk
+    exact Nat.add_left_cancel hk
+  funext k
+  exact Prod.ext (Fin.ext (hcoarse k)) (Fin.ext (hfine k))
+
 /-- The NumDetect manuscript's `lem:neighborset_segmented` at full strength. The
 neighbor set `𝓤 ⊂ (-π, π]^d` of coordinatewise shortest representatives of torus
 differences is presented by its distinguished element `0` and the family
-`u : Fin (v - 1) → Point d` of its nonzero elements, so `v` is the cardinality of
-`𝓤` when `u` is injective; the exclusion of the zero representative is the
-hypothesis `0 < ‖u i‖_{p'}`. Here `q` is the Hölder conjugate exponent `p'` of
+`u : Fin (v - 1) → Point d` of its nonzero elements; the hypothesis
+`huinj : Function.Injective u` realizes the manuscript's "`𝓤` is a finite set of
+cardinality `v`", so `{0} ∪ range u` has exactly `v` elements. The exclusion of
+the zero representative is the hypothesis `0 < ‖u i‖_{p'}`. Here `q` is the
+Hölder conjugate exponent `p'` of
 `p`, `‖·‖_{p'}` is `LeanNumDetect.lpNorm q`, and the dimension factor `d^{1/p}`
 is `(d : ℝ) ^ p.toReal⁻¹`. If `‖u i‖_{p'} ≤ π/(2 D d^{1/p})` for all nodes and
 `2 d^{1/p} v ≤ M`, there is a polynomial `f ∈ 𝒫(m, M, D, d)`, presented by
@@ -1221,12 +1282,19 @@ is `(d : ℝ) ^ p.toReal⁻¹`. If `‖u i‖_{p'} ≤ π/(2 D d^{1/p})` for all
 
 the product running only over the near neighbors `0 < ‖u‖_{p'} ≤ π v/(M D)`
 (`SegmentedVDM.neighborScaleFactor`); each far neighbor costs only its share of
-`(√2)^{v-1}`. The `L²` norm is realized as
-`Real.sqrt (SegmentedVDM.energy P.coefficientVector)`, which is the manuscript's
-`‖f‖_{L²(𝕋^d)}` by Parseval on the unit torus with normalized measure (compare
-the documentation of `SegmentedVDM.singularValue_ge_of_interpolation`); the
-bridge lemma that will discharge this identification is the Parseval statement
-being formalized in `General.Fourier.TrigonometricPolynomialParseval`. The same
+`(√2)^{v-1}`. The `L²` norm is the genuine torus norm `unitTorusL2Norm` of the
+polynomial `unitTorusTrigPolynomial (SegmentedIndex.angularFrequency d m M D)
+P.coefficientVector` presented by the collected coefficient vector, phrased like
+`SegmentedVDM.singularValue_inv_le_lagrangeFamily_l2` and
+`SegmentedVDM.interpolation_coefficients_of_fullColumnRank`; it equals
+`Real.sqrt (SegmentedVDM.energy P.coefficientVector)` through the Parseval
+bridge `LeanNumDetect.unitTorusL2Norm_eq_sqrt` of
+`General.Fourier.TrigonometricPolynomialParseval`, which applies to the
+collected vector with no distinctness hypothesis on `SegmentedPacket.frequencyIndex`
+(weaker presentations can have repeated frequencies, and the product
+construction does); the needed distinctness is the injectivity of the
+index-to-frequency map `SegmentedIndex.angularFrequency d m M D`
+(`SegmentedIndex.angularFrequency_injective`). The same
 witness satisfies the coefficient `ℓ¹` mass bound `P.mass ≤ (√2)^{v-1} ∏ …`
 without the normalizing denominator, which is the form retained by the
 worst-case corollary `segmentedNeighborProduct`.
@@ -1239,7 +1307,7 @@ condition `u i ∈ (-π, π]^d` of the manuscript is not used by the proof. -/
 theorem neighborSetSegmented_polynomial
     {d v M m D : ℕ} {p q : ENNReal} (hpq : ENNReal.HolderConjugate p q)
     (hv : 0 < v) (hmD : m < D)
-    (u : Fin (v - 1) → Point d)
+    (u : Fin (v - 1) → Point d) (huinj : Function.Injective u)
     (hun : ∀ i, 0 < LeanNumDetect.lpNorm q (u i))
     (huro : ∀ i, LeanNumDetect.lpNorm q (u i) ≤
       Real.pi / (2 * (D : ℝ) * (d : ℝ) ^ p.toReal⁻¹))
@@ -1249,7 +1317,9 @@ theorem neighborSetSegmented_polynomial
       (∀ i, P.value D (u i) = 0) ∧
       P.mass ≤ (Real.sqrt 2) ^ (v - 1) *
         ∏ i : Fin (v - 1), SegmentedVDM.neighborScaleFactor q (v : ℝ) (M : ℝ) (D : ℝ) (u i) ∧
-      Real.sqrt (SegmentedVDM.energy P.coefficientVector) ≤
+      unitTorusL2Norm
+          (unitTorusTrigPolynomial (SegmentedIndex.angularFrequency d m M D)
+            P.coefficientVector) ≤
         ((Real.sqrt 2) ^ (v - 1) *
           ∏ i : Fin (v - 1), SegmentedVDM.neighborScaleFactor q (v : ℝ) (M : ℝ) (D : ℝ) (u i)) /
           Real.sqrt (((M : ℝ) / v) ^ d * ((m + 1 : ℕ) : ℝ) ^ d) := by
@@ -1551,7 +1621,11 @@ theorem neighborSetSegmented_polynomial
           ∏ i : Fin (v - 1), SegmentedVDM.neighborScaleFactor q (v : ℝ) (M : ℝ) (D : ℝ) (u i)) /
           Real.sqrt (((M : ℝ) / v) ^ d * ((m + 1 : ℕ) : ℝ) ^ d) :=
         div_le_div_of_nonneg_left hBpos (Real.sqrt_pos.mpr hDnpos) h2
-  exact ⟨P, hP0, hPu, hmassvec.trans hprod, hnorm⟩
+  refine ⟨P, hP0, hPu, hmassvec.trans hprod, ?_⟩
+  rw [unitTorusL2Norm_eq_sqrt
+    (SegmentedIndex.angularFrequency_injective (d := d) (r := M) hmD)
+    P.coefficientVector]
+  exact hnorm
 
 /-- The `p = ∞`, worst-case-factor corollary of `lem:neighborset_segmented`
 (`neighborSetSegmented_polynomial`): a product of recentered two-point factors
