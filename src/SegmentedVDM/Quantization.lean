@@ -286,4 +286,55 @@ theorem scalar_frequency_quantization {D α u : ℝ}
     rw [norm_sub_rev, exp_sub_one_norm_abs _ hπ] at hden
     exact hden
 
+/-- Budget-scale form of `frequency_quantization_of_lp_separation`, giving the
+per-node quantized data of the NumDetect manuscript's `lem:neighborset_segmented`
+from `lem:freq_quantization`. Writing `t = 1/(2 D α)` for the budget scale of
+`lem:freq_quantization`, the scale constraints `‖u‖_{p'} ≤ 2πα ≤ π/(2 D d^{1/p})`
+read `‖u‖_{p'} ≤ π/(D t)` and `2 d^{1/p} ≤ t`, the quantized frequency obeys
+`‖k‖_p ≤ t`, and the two-point denominator satisfies
+`√2 D t ‖u‖_{p'} / π ≤ |1 - e^{i D k·u}|`. -/
+theorem frequency_quantization_of_budgetScale {d : ℕ} {p q : ℝ≥0∞}
+    (hpq : ENNReal.HolderConjugate p q) {D t : ℝ} (hD : 0 < D)
+    (hdim : 0 < (d : ℝ) ^ p.toReal⁻¹) (ht : 2 * (d : ℝ) ^ p.toReal⁻¹ ≤ t)
+    (u : Fin d → ℝ) (hun : 0 < lpNorm q u) (hut : lpNorm q u ≤ Real.pi / (D * t)) :
+    ∃ k : Fin d → ℤ,
+      lpNorm p (fun j => (k j : ℝ)) ≤ t ∧
+      Real.sqrt 2 * D * t * lpNorm q u / Real.pi ≤
+        ‖1 - Complex.exp (Complex.I * ((D * ∑ j, (k j : ℝ) * u j : ℝ) : ℂ))‖ := by
+  have htpos : 0 < t := by
+    have h1 : 0 < Real.pi / (D * t) := lt_of_lt_of_le hun hut
+    have h2 : 0 < D * t := (div_pos_iff_of_pos_left Real.pi_pos).mp h1
+    exact pos_of_mul_pos_right h2 (le_of_lt hD)
+  have hαpos : (0 : ℝ) < 1 / (2 * D * t) := by positivity
+  have hscale : 2 * Real.pi * (1 / (2 * D * t)) = Real.pi / (D * t) := by
+    field_simp
+  have hαD : 2 * Real.pi * (1 / (2 * D * t)) ≤
+      Real.pi / (2 * D * (d : ℝ) ^ p.toReal⁻¹) := by
+    rw [hscale]
+    have h2pos : 0 < 2 * D * (d : ℝ) ^ p.toReal⁻¹ :=
+      mul_pos (mul_pos (by norm_num) hD) hdim
+    rw [div_le_div_iff₀ (mul_pos hD htpos) h2pos]
+    have hmul := mul_le_mul_of_nonneg_left ht (le_of_lt Real.pi_pos)
+    have hD' := mul_le_mul_of_nonneg_right hmul (le_of_lt hD)
+    have he1 : Real.pi * (2 * D * (d : ℝ) ^ p.toReal⁻¹)
+        = (Real.pi * (2 * (d : ℝ) ^ p.toReal⁻¹)) * D := by ring
+    have he2 : Real.pi * (D * t) = (Real.pi * t) * D := by ring
+    rw [he1, he2]
+    exact hD'
+  obtain ⟨k, hk, _, _, hden⟩ := frequency_quantization_of_lp_separation hpq hD hαpos
+    u hun (by rw [hscale]; exact hut) hαD
+  have hk' : lpNorm p (fun j => (k j : ℝ)) ≤ t := by
+    have heq : t = 1 / (2 * D * (1 / (2 * D * t))) := by
+      have h2 : D * t ≠ 0 := (mul_pos hD htpos).ne'
+      field_simp
+    rw [heq]
+    exact hk
+  refine ⟨k, hk', ?_⟩
+  have heq : Real.sqrt 2 * D * t * lpNorm q u / Real.pi
+      = Real.sqrt 2 / (2 * Real.pi * (1 / (2 * D * t))) * lpNorm q u := by
+    have h2 : D * t ≠ 0 := (mul_pos hD htpos).ne'
+    field_simp
+  rw [heq]
+  exact hden
+
 end SegmentedVDM

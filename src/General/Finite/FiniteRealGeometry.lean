@@ -93,6 +93,23 @@ theorem lpNorm_top_le (x : ι → ℝ) (k : ι) : |x k| ≤ lpNorm ⊤ x := by
   rw [lpNorm_top]
   exact le_ciSup (Set.finite_range fun k => |x k|).bddAbove k
 
+/-- Every coordinate is bounded by the `ℓ^q`-norm, for every nonzero exponent
+`q`, including `q = ⊤`. -/
+theorem lpNorm_apply_le {q : ℝ≥0∞} (hq : q ≠ 0) (x : ι → ℝ) (k : ι) :
+    |x k| ≤ lpNorm q x := by
+  obtain hq' | hq' := eq_or_ne q ⊤
+  · rw [hq']
+    exact lpNorm_top_le x k
+  · rw [lpNorm_of_ne_top hq']
+    have hq0 : 0 < q := lt_of_le_of_ne bot_le (Ne.symm hq)
+    have hr : 0 < q.toReal := ENNReal.toReal_pos_iff.mpr ⟨hq0, lt_top_iff_ne_top.mpr hq'⟩
+    have hterm : |x k| ^ q.toReal ≤ ∑ j, |x j| ^ q.toReal :=
+      Finset.single_le_sum (fun j _ => Real.rpow_nonneg (abs_nonneg _) _)
+        (Finset.mem_univ k)
+    have h := Real.rpow_le_rpow (Real.rpow_nonneg (abs_nonneg _) _) hterm
+      (inv_nonneg.mpr hr.le)
+    rwa [Real.rpow_rpow_inv (abs_nonneg _) hr.ne'] at h
+
 theorem lpNorm_abs (q : ℝ≥0∞) (x : ι → ℝ) :
     lpNorm q (fun k => |x k|) = lpNorm q x := by
   obtain hq | hq := eq_or_ne q ⊤
