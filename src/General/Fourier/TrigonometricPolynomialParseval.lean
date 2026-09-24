@@ -27,7 +27,7 @@ measure.  The main consequences are:
   coefficient vector); see `unitTorusL2Norm_eq_sqrt`;
 * the sup-norm bound `norm_unitTorusTrigPolynomial_le` /
   `unitTorusLInfNorm_le`: $\|f\|_{L^\infty(\mathbb T^d)} \le \sum_i \|c_i\|$,
-  the coefficient `ℓ¹` mass (`SegmentedPacket.mass`,
+  the coefficient `ℓ¹` mass (`SegmentedPolynomial.mass`,
   `SegmentedVDM.Packet.mass`), together with
   `sum_norm_le_sqrt_card_mul_sqrt_sum_norm_sq`, the Cauchy--Schwarz step
 
@@ -46,11 +46,10 @@ measure.  The main consequences are:
 ## Repeated frequencies
 
 Parseval is **false** for a presentation containing repeated frequency
-vectors: the mixed terms between equal frequencies survive.  This repository
-explicitly allows repeated frequencies in presentations (coefficients are
-collected only when a matrix coefficient row is formed), so the distinctness
-hypothesis is stated honestly as `Function.Injective` on the frequency map `s`
-and is never assumed away.  `parseval_fails_of_repeated_frequencies` exhibits
+vectors: the mixed terms between equal frequencies survive. The canonical
+`SegmentedPolynomial` carries `m < D`, so its frequency map is injective.
+The general theorem retains an explicit `Function.Injective` hypothesis on
+the frequency map `s`. `parseval_fails_of_repeated_frequencies` exhibits
 a concrete counterexample.  What remains true without any distinctness
 hypothesis is the collected form
 `integral_norm_sq_unitTorusTrigPolynomial_collected`: collecting the
@@ -61,19 +60,19 @@ Parseval gives $\int_{\mathbb T^d}\|f\|^2 =
 ## Angular convention
 
 The repository evaluates segmented polynomials in the angular normalization
-`SegmentedPacket.value D x = ∑ i, c i * exp (i (D s_i + h_i) · x)` on
+`SegmentedPolynomial.angularValue x = ∑ i, c i * exp (i (D s_i + h_i) · x)` on
 `x ∈ (-π, π]^d`, while the manuscript writes
 $f(\bm\omega) = \sum_i c_i e^{2\pi i \mathbf s_i\cdot\bm\omega}$ on
 $\bm\omega\in[0,1)^d$.  The two agree under the angular reduction
 $\bm\omega = \mathbf y/2\pi$.  `angularTrigPolynomial` is the evaluation with
-the `SegmentedPacket.value` phase convention, and
+the `SegmentedPolynomial.angularValue` phase convention, and
 `unitTorusTrigPolynomial_eq_angularTrigPolynomial` identifies
 `unitTorusTrigPolynomial s c ω` with `angularTrigPolynomial s c (2π • ω)`.
 The bridge statements phrased directly in the angular convention are
 `integral_norm_sq_angularTrigPolynomial_scale` (the `L²(𝕋^d)` statement of
 manuscript `lem:minsvd_bound_by_lagInterp_high_dim`,
 `lem:interpolation_via_svd`) and `norm_angularTrigPolynomial_le` (the
-`L^∞(𝕋^d)` statement of `lem:localization`, cf. `SegmentedPacket.linftyNorm`,
+`L^∞(𝕋^d)` statement of `lem:localization`, cf. `unitTorusLInfNorm`,
 which is the supremum of these evaluation moduli).
 -/
 
@@ -501,11 +500,11 @@ theorem unitTorusLInfNorm_le_sqrt_card_mul_unitTorusL2Norm {d : ℕ} {ι : Type*
   rw [unitTorusL2Norm_eq_sqrt hs c]
   exact (unitTorusLInfNorm_le s c).trans (sum_norm_le_sqrt_card_mul_sqrt_sum_norm_sq c)
 
-/-! ### The angular convention of `SegmentedPacket.value` -/
+/-! ### The angular convention of `SegmentedPolynomial.angularValue` -/
 
 /-- A trigonometric polynomial in the repository's angular normalization
 `f(x) = ∑ i, c i * exp (i s i · x)` — the phase convention of
-`SegmentedPacket.value`, with integer angular frequency vectors (e.g.
+`SegmentedPolynomial.angularValue`, with integer angular frequency vectors (e.g.
 `s i k = D * coarse i k + fine i k`). -/
 def angularTrigPolynomial {d : ℕ} {ι : Type*} [Fintype ι]
     (s : ι → Fin d → ℤ) (c : ι → ℂ) (x : Fin d → ℝ) : ℂ :=
@@ -539,7 +538,7 @@ theorem integral_norm_sq_angularTrigPolynomial_scale {d : ℕ} {ι : Type*} [Fin
   exact integral_norm_sq_unitTorusTrigPolynomial hs c
 
 /-- The coefficient `ℓ¹` mass bounds every angular evaluation modulus: the
-`L^∞(𝕋^d)` bound in the angular convention (cf. `SegmentedPacket.linftyNorm`,
+`L^∞(𝕋^d)` bound in the angular convention (cf. `unitTorusLInfNorm`,
 which is the supremum of these moduli). -/
 theorem norm_angularTrigPolynomial_le {d : ℕ} {ι : Type*} [Fintype ι]
     (s : ι → Fin d → ℤ) (c : ι → ℂ) (x : Fin d → ℝ) :

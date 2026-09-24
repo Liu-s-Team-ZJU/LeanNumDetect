@@ -1,6 +1,6 @@
 import General.Fourier.BartonCubeFrame
 import NumDetect.MatrixFacts
-import NumDetect.SegmentedVandermonde
+import NumDetect.Segmented.ClumpBounds
 
 /-!
 The complete well-separated segmented Vandermonde estimate from manuscript

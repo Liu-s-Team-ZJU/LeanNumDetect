@@ -3,7 +3,7 @@ import General.Fourier.BartonCubeFrame
 import General.Fourier.OneDimensionalFineCubeFrame
 import NumDetect.MUSIC
 import NumDetect.Random
-import NumDetect.Segmented
+import NumDetect.Segmented.Main
 import NumDetect.WellSeparatedSegmented
 import NumDetect.Uniform
 

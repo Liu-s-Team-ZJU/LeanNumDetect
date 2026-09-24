@@ -1,5 +1,6 @@
-import NumDetect.SegmentedVandermonde
-import NumDetect.SegmentedThreshold
+import NumDetect.Segmented.Interpolation
+import NumDetect.Segmented.ClumpBounds
+import NumDetect.Segmented.Threshold
 import General.Fourier.BartonCubeFrame
 
 /-! Segmented-frequency Vandermonde and thresholding results. -/
@@ -56,7 +57,7 @@ theorem segmentedVandermonde_minimumSingularValue_of_fineCubeFrame
     segmentedVandermonde_minimumSingularValue_of_colorFrames
       (m₁ := localizationHalfWidth m) (b := m / 2)
       (K := localizationOrder m nStar)
-      μ hd hn hclumps hsplit hK hDpos hτ hβ hr hΔ hmin hscale
+      μ hd hn hclumps hsplit hD hK hDpos hτ hβ hr hΔ hmin hscale
   intro C anchor _hsame hcross color v
   unfold HasFineCubeFrame at hframe
   have hcubeColor :
@@ -139,7 +140,7 @@ theorem segmentedVandermonde_minimumSingularValue_oneDimensional_of_halfFrameRan
     segmentedVandermonde_minimumSingularValue_of_colorFrames
       (m₁ := localizationHalfWidth m) (b := m / 2)
       (K := localizationOrder m nStar)
-      μ (by omega) hn hclumps hsplit hK hDpos (by simpa using hτ)
+      μ (by omega) hn hclumps hsplit hD hK hDpos (by simpa using hτ)
         hβ hr hΔ hmin hscale
   intro C anchor _hsame hcross color v
   apply fineCube_frame_oneDimensional_of_sourceRange

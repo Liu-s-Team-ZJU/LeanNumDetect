@@ -57,11 +57,24 @@ $j=n+1,\ldots,L^d$ is represented by `n ≤ j ∧ j < L ^ d`.
 | --- | --- |
 | [Basic.lean](Basic.lean), [Matrices.lean](Matrices.lean), [MatrixFacts.lean](MatrixFacts.lean) | Atomic measures, measurements, admissibility, GHM/GTM and Vandermonde matrices, exact Fourier factorizations, and shared matrix estimates |
 | [UniformDefinitions.lean](UniformDefinitions.lean), [UniformInterpolation.lean](UniformInterpolation.lean), [UniformVandermonde.lean](UniformVandermonde.lean), [UniformThreshold.lean](UniformThreshold.lean), [Uniform.lean](Uniform.lean) | Contiguous-grid interpolation, Vandermonde lower bounds, singular-value thresholding, and number-detection uniqueness |
-| [SegmentedDefinitions.lean](SegmentedDefinitions.lean), [SegmentedVandermonde.lean](SegmentedVandermonde.lean), [SegmentedThreshold.lean](SegmentedThreshold.lean), [Segmented.lean](Segmented.lean), [WellSeparatedSegmented.lean](WellSeparatedSegmented.lean) | Angular clumps, segmented interpolation packets, one-sided and two-sided Vandermonde bounds, and segmented GHM thresholding |
+| [Segmented/](Segmented/), [WellSeparatedSegmented.lean](WellSeparatedSegmented.lean) | Angular clumps, canonical segmented trigonometric polynomials, one-sided and two-sided Vandermonde bounds, and segmented GHM thresholding |
 | [RandomMatrixBounds.lean](RandomMatrixBounds.lean), [Random.lean](Random.lean) | Matrix estimates and deterministic consequences for fixed realized random-frequency draws |
 | [MUSICPerturbation.lean](MUSICPerturbation.lean), [MUSIC.lean](MUSIC.lean) | Fixed-rank trailing singular subspaces, noiseless MUSIC, general GHM stability, and the segmented specialization |
 | [CRLLowerBound.lean](CRLLowerBound.lean), [CRL.lean](CRL.lean) | Finite-difference obstructions, upper guarantees, and two-sided computational resolution limits |
 | [Main.lean](Main.lean) | Aggregate public import for all groups above |
+
+The Appendix B construction is organized under `Segmented/`:
+[Polynomial.lean](Segmented/Polynomial.lean) defines Definition B.1 and its
+coefficient algebra; [NeighborFactors.lean](Segmented/NeighborFactors.lean)
+constructs the quantized factors; [Interpolation.lean](Segmented/Interpolation.lean)
+states the Lagrange and neighbor interpolation lemmas;
+[ClumpBasics.lean](Segmented/ClumpBasics.lean) proves the independent
+decomposition proposition; and [ClumpBounds.lean](Segmented/ClumpBounds.lean)
+proves localization and the singular-value bounds. The polynomial type stores $m<D$.
+Its multiplication collects all contributions to each output frequency in one
+coefficient, with output fine budget $m_1+m_2<D$. The threshold and final
+consequences are in [Threshold.lean](Segmented/Threshold.lean) and
+[Main.lean](Segmented/Main.lean).
 
 The multidimensional segmented proof uses the translated-cube Fourier frame in
 [General/Fourier/TranslatedCubeFourier.lean](../General/Fourier/TranslatedCubeFourier.lean).

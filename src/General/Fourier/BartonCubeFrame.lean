@@ -1,6 +1,6 @@
 import General.Fourier.FineCubeFrame
 import General.Fourier.TranslatedCubeFourier
-import NumDetect.SegmentedVandermonde
+import NumDetect.Segmented.ClumpBounds
 
 /-!
 Parity-free algebraic reduction for the discrete cube estimate.
