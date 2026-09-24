@@ -73,4 +73,23 @@ theorem neighbor_factor {T D Δ u : ℝ} (hT : 2 ≤ T) (hD : 0 < D)
       field_simp
       nlinarith
 
+/-- The pointwise near-neighbor factor `π v/(M D ‖u‖_{p'})` of the NumDetect
+manuscript's `lem:neighborset_segmented`, flattened to `1` at the far nodes
+`π v/(M D) < ‖u‖_{p'}`. The product in the conclusion of that lemma runs only
+over the near neighbors `0 < ‖u‖_{p'} ≤ π v/(M D)`; every node costs at most `√2`
+times this factor. -/
+noncomputable def neighborScaleFactor {d : ℕ} (q : ENNReal) (v M D : ℝ) (u : Fin d → ℝ) : ℝ :=
+  if LeanNumDetect.lpNorm q u ≤ Real.pi * v / (M * D)
+  then Real.pi * v / (M * D * LeanNumDetect.lpNorm q u) else 1
+
+theorem neighborScaleFactor_of_le {d : ℕ} {q : ENNReal} {v M D : ℝ} {u : Fin d → ℝ}
+    (h : LeanNumDetect.lpNorm q u ≤ Real.pi * v / (M * D)) :
+    neighborScaleFactor q v M D u = Real.pi * v / (M * D * LeanNumDetect.lpNorm q u) :=
+  if_pos h
+
+theorem neighborScaleFactor_of_lt {d : ℕ} {q : ENNReal} {v M D : ℝ} {u : Fin d → ℝ}
+    (h : Real.pi * v / (M * D) < LeanNumDetect.lpNorm q u) :
+    neighborScaleFactor q v M D u = 1 :=
+  if_neg (not_le.mpr h)
+
 end SegmentedVDM

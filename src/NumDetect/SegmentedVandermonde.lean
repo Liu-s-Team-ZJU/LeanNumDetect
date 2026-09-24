@@ -990,8 +990,576 @@ theorem SegmentedPacket.value_sub_eq_wrappedDifference
   push_cast
   ring
 
-/-- Product of recentered two-point factors annihilating a finite family of
-short wrapped differences. -/
+/-! ### Recentered quantized two-point factors and segmented neighbor products
+
+Manuscript correspondence: `neighborSetSegmented_polynomial` is the NumDetect
+manuscript's `lem:neighborset_segmented` at full strength, and
+`segmentedNeighborProduct` is its `p = ∞` worst-case-factor corollary. The
+construction follows the manuscript's proof: every nonzero node is annihilated
+by the recentered quantized two-point factor `twoPointRecentered` at the integer
+frequency of `lem:freq_quantization`
+(`SegmentedVDM.frequency_quantization_of_budgetScale`), the near/far split is
+restored through the budget scale `t = min (M/v) (π/(D‖u‖_{p'}))`, and the `L²`
+normalization `√((M/v)^d (m+1)^d)` is carried by the averaging block
+`smoothedSegmentedVector`. -/
+
+/-- The two-point quotient of `lem:freq_quantization` at the integer frequency
+`k`, recentered so that both frequencies `D k⁺` and `D k⁻` lie in the
+nonnegative cube `D{0,…,K}^d`. The recentering prefactor `e^{i D k⁻·x}` has unit
+modulus, so the interpolation values and all coefficient-modulus bounds of the
+unrecentered two-point factor are preserved. -/
+noncomputable def twoPointRecentered {d K : ℕ} (k : Fin d → ℤ)
+    (hk : ∀ j, (k j).natAbs ≤ K) (z : ℂ) : SegmentedPacket d 0 K where
+  Index := Bool
+  finite := inferInstance
+  coarse b j := if b then (k j).toNat else (-k j).toNat
+  fine _ _ := 0
+  coarse_le b j := by
+    cases b
+    · show (-k j).toNat ≤ K
+      exact Int.toNat_le.mpr
+        ((Int.le_natAbs (a := -k j)).trans (by rw [Int.natAbs_neg]; exact_mod_cast hk j))
+    · show (k j).toNat ≤ K
+      exact Int.toNat_le.mpr ((Int.le_natAbs (a := k j)).trans (by exact_mod_cast hk j))
+  fine_le _ _ := le_rfl
+  coeff b := if b then (1 - z)⁻¹ else -z / (1 - z)
+
+theorem value_twoPointRecentered {d K : ℕ} (k : Fin d → ℤ)
+    (hk : ∀ j, (k j).natAbs ≤ K) (z : ℂ) (D : ℕ) (x : Point d) :
+    (twoPointRecentered k hk z).value D x =
+      Complex.exp (Complex.I * (((D : ℝ) * ∑ j, ((-k j).toNat : ℝ) * x j : ℝ) : ℂ)) *
+        ((Complex.exp (Complex.I * (((D : ℝ) * ∑ j, (k j : ℝ) * x j : ℝ) : ℂ)) - z) /
+          (1 - z)) := by
+  classical
+  have htoNat (j : Fin d) : ((k j).toNat : ℝ) = ((-k j).toNat : ℝ) + (k j : ℝ) := by
+    have h : ((k j).toNat : ℤ) = ((-k j).toNat : ℤ) + k j := by omega
+    exact_mod_cast h
+  have hterm (j : Fin d) :
+      ((D : ℝ) * ((k j).toNat : ℝ)) * x j
+        = (D : ℝ) * (((-k j).toNat : ℝ) * x j) + (D : ℝ) * ((k j : ℝ) * x j) := by
+    rw [htoNat j]
+    ring
+  have hθp : (∑ j, ((D * (k j).toNat + 0 : ℕ) : ℝ) * x j)
+      = (D : ℝ) * ∑ j, ((-k j).toNat : ℝ) * x j + (D : ℝ) * ∑ j, (k j : ℝ) * x j := by
+    simp only [add_zero, Nat.cast_mul]
+    rw [Finset.sum_congr rfl (fun j _ => hterm j), Finset.sum_add_distrib]
+    rw [Finset.mul_sum, Finset.mul_sum]
+  have hθm : (∑ j, ((D * (-k j).toNat + 0 : ℕ) : ℝ) * x j)
+      = (D : ℝ) * ∑ j, ((-k j).toNat : ℝ) * x j := by
+    simp only [add_zero, Nat.cast_mul]
+    have hterm' : ∀ j : Fin d,
+        ((D : ℝ) * ((-k j).toNat : ℝ)) * x j
+          = (D : ℝ) * (((-k j).toNat : ℝ) * x j) := fun j => by ring
+    rw [Finset.sum_congr rfl (fun j _ => hterm' j), Finset.mul_sum]
+  have hex : Complex.exp
+        (Complex.I * (((D : ℝ) * ∑ j, ((-k j).toNat : ℝ) * x j
+          + (D : ℝ) * ∑ j, (k j : ℝ) * x j : ℝ) : ℂ))
+      = Complex.exp (Complex.I * (((D : ℝ) * ∑ j, ((-k j).toNat : ℝ) * x j : ℝ) : ℂ)) *
+        Complex.exp (Complex.I * (((D : ℝ) * ∑ j, (k j : ℝ) * x j : ℝ) : ℂ)) := by
+    rw [Complex.ofReal_add, mul_add, Complex.exp_add]
+  show (∑ b : Bool, (if b then (1 - z)⁻¹ else -z / (1 - z)) *
+      Complex.exp (Complex.I *
+        (((∑ j, ((D * (if b then (k j).toNat else (-k j).toNat) + 0 : ℕ) : ℝ) * x j : ℝ) : ℂ))))
+      = _
+  rw [Fintype.sum_bool]
+  simp only [if_true, if_neg (by decide : ¬(false = true))]
+  rw [hθp, hθm, hex]
+  ring
+
+theorem value_twoPointRecentered_zero {d K : ℕ} (k : Fin d → ℤ)
+    (hk : ∀ j, (k j).natAbs ≤ K) (z : ℂ) (hz : z ≠ 1) (D : ℕ) :
+    (twoPointRecentered k hk z).value D 0 = 1 := by
+  rw [value_twoPointRecentered]
+  simp [sub_ne_zero.mpr (Ne.symm hz)]
+
+theorem value_twoPointRecentered_vanishes {d K : ℕ} (k : Fin d → ℤ)
+    (hk : ∀ j, (k j).natAbs ≤ K) (z : ℂ) (D : ℕ) (u : Point d)
+    (hz : z = Complex.exp (Complex.I * (((D : ℝ) * ∑ j, (k j : ℝ) * u j : ℝ) : ℂ))) :
+    (twoPointRecentered k hk z).value D u = 0 := by
+  rw [value_twoPointRecentered, hz, sub_self, zero_div, mul_zero]
+
+theorem mass_twoPointRecentered {d K : ℕ} (k : Fin d → ℤ)
+    (hk : ∀ j, (k j).natAbs ≤ K) (z : ℂ) (hz : ‖z‖ = 1) :
+    (twoPointRecentered k hk z).mass = 2 / ‖1 - z‖ := by
+  simp [SegmentedPacket.mass, twoPointRecentered, Fintype.sum_bool, norm_div, hz]
+  ring
+
+/-- One node's recentered quantized two-point factor: the per-node building
+block of the NumDetect manuscript's `lem:neighborset_segmented`, applying
+`lem:freq_quantization` (`SegmentedVDM.frequency_quantization_of_budgetScale`)
+at the budget scale `t`. Every scale `t` with `2 d^{1/p} ≤ t` and
+`‖u‖_{p'} ≤ π/(D t)` yields a factor supported in `D{0,…,⌊t⌋}^d`, equal to one at
+`0` and zero at `u`, with coefficient `ℓ¹` mass at most
+`√2 π/(D t ‖u‖_{p'})`. The near/far split of `lem:neighborset_segmented` is the
+choice `t = min (M/v) (π/(D‖u‖_{p'}))`. -/
+theorem neighborNodeFactor {d D : ℕ} {p q : ENNReal} (hpq : ENNReal.HolderConjugate p q)
+    (hD : 0 < D) (hdim : 0 < (d : ℝ) ^ p.toReal⁻¹)
+    {t : ℝ} (ht : 2 * (d : ℝ) ^ p.toReal⁻¹ ≤ t)
+    (u : Point d) (hun : 0 < LeanNumDetect.lpNorm q u)
+    (hut : LeanNumDetect.lpNorm q u ≤ Real.pi / (D * t)) :
+    ∃ P : SegmentedPacket d 0 ⌊t⌋₊,
+      P.value D 0 = 1 ∧ P.value D u = 0 ∧
+      P.mass ≤ Real.sqrt 2 * Real.pi / (D * t * LeanNumDetect.lpNorm q u) := by
+  classical
+  have hDpos : (0 : ℝ) < D := by exact_mod_cast hD
+  have htpos : 0 < t := by
+    have h1 : 0 < Real.pi / (D * t) := lt_of_lt_of_le hun hut
+    have h2 : 0 < D * t := (div_pos_iff_of_pos_left Real.pi_pos).mp h1
+    exact pos_of_mul_pos_right h2 hDpos.le
+  obtain ⟨k, hk, hden⟩ := SegmentedVDM.frequency_quantization_of_budgetScale hpq hDpos
+    hdim ht u hun hut
+  set z : ℂ := Complex.exp (Complex.I * (((D : ℝ) * ∑ j, (k j : ℝ) * u j : ℝ) : ℂ)) with hzdef
+  have hzn : ‖z‖ = 1 := by simp [z, Complex.norm_exp]
+  have hden' : Real.sqrt 2 * (D * t * LeanNumDetect.lpNorm q u / Real.pi) ≤ ‖1 - z‖ := by
+    have he : Real.sqrt 2 * (D * t * LeanNumDetect.lpNorm q u / Real.pi)
+        = Real.sqrt 2 * D * t * LeanNumDetect.lpNorm q u / Real.pi := by ring
+    rw [he, hzdef]
+    exact hden
+  have hzne : z ≠ 1 := by
+    intro h
+    have hp : 0 < Real.sqrt 2 * (D * t * LeanNumDetect.lpNorm q u / Real.pi) := by positivity
+    simp [h] at hden'
+    linarith
+  have hkabs (j : Fin d) : |(k j : ℝ)| ≤ t :=
+    (LeanNumDetect.lpNorm_apply_le (holderConjugate_ne_zero hpq).1 (fun j => (k j : ℝ)) j).trans
+      hk
+  have hkK (j : Fin d) : (k j).natAbs ≤ ⌊t⌋₊ := by
+    apply Nat.le_floor
+    have h1 : ((k j).natAbs : ℝ) = |(k j : ℝ)| := (Nat.cast_natAbs (k j)).trans Int.cast_abs
+    rw [h1]
+    exact hkabs j
+  refine ⟨twoPointRecentered k hkK z, ?_, ?_, ?_⟩
+  · exact value_twoPointRecentered_zero k hkK z hzne D
+  · exact value_twoPointRecentered_vanishes k hkK z D u hzdef
+  · rw [mass_twoPointRecentered k hkK z hzn]
+    have hpos : 0 < Real.sqrt 2 * (D * t * LeanNumDetect.lpNorm q u / Real.pi) := by positivity
+    calc
+      2 / ‖1 - z‖ ≤ 2 / (Real.sqrt 2 * (D * t * LeanNumDetect.lpNorm q u / Real.pi)) :=
+        div_le_div_of_nonneg_left (by norm_num) hpos hden'
+      _ = Real.sqrt 2 * Real.pi / (D * t * LeanNumDetect.lpNorm q u) := by
+        have hs := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 2)
+        field_simp
+        nlinarith
+
+/-- The coefficient `ℓ¹` mass of a spread is at most the `ℓ¹` mass of its
+coefficients. -/
+theorem spread_norm_sum_le {ι ρ : Type*} [Fintype ι] [Fintype ρ] [DecidableEq ρ]
+    (f : ι → ρ) (c : ι → ℂ) :
+    (∑ a : ρ, ‖SegmentedVDM.spread f c a‖) ≤ ∑ i : ι, ‖c i‖ := by
+  classical
+  have happly : ∀ a : ρ, SegmentedVDM.spread f c a
+      = ∑ i, c i * (if a = f i then (1 : ℂ) else 0) := by
+    intro a
+    show (SegmentedVDM.spread f c).ofLp a = _
+    simp only [SegmentedVDM.spread, WithLp.ofLp_sum, WithLp.ofLp_smul, PiLp.ofLp_single,
+      Finset.sum_apply, Pi.smul_apply, smul_eq_mul, Pi.single_apply]
+  calc
+    (∑ a : ρ, ‖SegmentedVDM.spread f c a‖)
+        = ∑ a : ρ, ‖∑ i, c i * (if a = f i then (1 : ℂ) else 0)‖ := by simp only [happly]
+    _ ≤ ∑ a : ρ, ∑ i, ‖c i * (if a = f i then (1 : ℂ) else 0)‖ :=
+      Finset.sum_le_sum fun a _ => norm_sum_le _ _
+    _ = ∑ i : ι, ∑ a : ρ, ‖c i * (if a = f i then (1 : ℂ) else 0)‖ := Finset.sum_comm
+    _ = ∑ i : ι, ‖c i‖ := by
+      apply Finset.sum_congr rfl
+      intro i _
+      have h1 : ∀ a : ρ, ‖c i * (if a = f i then (1 : ℂ) else 0)‖
+          = if a = f i then ‖c i‖ else 0 := by
+        intro a
+        by_cases h : a = f i
+        · rw [if_pos h, if_pos h, mul_one]
+        · rw [if_neg h, if_neg h, mul_zero, norm_zero]
+      simp only [h1]
+      rw [Finset.sum_ite_eq' Finset.univ (f i) (fun _ => ‖c i‖)]
+      simp
+
+/-- Collecting a presentation by frequency does not change its coefficient
+energy when the frequencies of the presentation are pairwise distinct. -/
+theorem energy_coefficientVector_eq_of_injective {d m r : ℕ}
+    (P : SegmentedPacket d m r) (hinj : Function.Injective P.frequencyIndex) :
+    SegmentedVDM.energy P.coefficientVector = SegmentedVDM.energy P.coeff := by
+  classical
+  have hsum : (∑ β, ‖∑ i, if P.frequencyIndex i = β then P.coeff i else 0‖ ^ 2)
+      = ∑ i, ‖P.coeff i‖ ^ 2 := by
+    have hsplit : (∑ β, ‖∑ i, if P.frequencyIndex i = β then P.coeff i else 0‖ ^ 2)
+        = ∑ β ∈ Finset.univ.image P.frequencyIndex,
+            ‖∑ i, if P.frequencyIndex i = β then P.coeff i else 0‖ ^ 2 := by
+      refine (Finset.sum_subset (Finset.subset_univ _) fun β _ hβ => ?_).symm
+      have hz : ∀ i, (if P.frequencyIndex i = β then P.coeff i else 0) = (0 : ℂ) := by
+        intro i
+        apply if_neg
+        intro h
+        exact hβ (Finset.mem_image.mpr ⟨i, Finset.mem_univ i, h⟩)
+      simp only [hz, Finset.sum_const, zero_smul, norm_zero, ne_eq]
+      simp
+    rw [hsplit, Finset.sum_image (fun i _ j _ h => hinj h)]
+    apply Finset.sum_congr rfl
+    intro i _
+    have h1 : (∑ j, if P.frequencyIndex j = P.frequencyIndex i then P.coeff j else 0)
+        = P.coeff i := by
+      rw [Finset.sum_eq_single i]
+      · exact if_pos rfl
+      · intro b _ hb
+        exact if_neg (fun h => hb (hinj h))
+      · intro hi
+        exact absurd (Finset.mem_univ i) hi
+    rw [h1]
+  change SegmentedVDM.energy (fun β => ∑ i, if P.frequencyIndex i = β then P.coeff i else 0) = _
+  exact hsum
+
+/-- The NumDetect manuscript's `lem:neighborset_segmented` at full strength. The
+neighbor set `𝓤 ⊂ (-π, π]^d` of coordinatewise shortest representatives of torus
+differences is presented by its distinguished element `0` and the family
+`u : Fin (v - 1) → Point d` of its nonzero elements, so `v` is the cardinality of
+`𝓤` when `u` is injective; the exclusion of the zero representative is the
+hypothesis `0 < ‖u i‖_{p'}`. Here `q` is the Hölder conjugate exponent `p'` of
+`p`, `‖·‖_{p'}` is `LeanNumDetect.lpNorm q`, and the dimension factor `d^{1/p}`
+is `(d : ℝ) ^ p.toReal⁻¹`. If `‖u i‖_{p'} ≤ π/(2 D d^{1/p})` for all nodes and
+`2 d^{1/p} v ≤ M`, there is a polynomial `f ∈ 𝒫(m, M, D, d)`, presented by
+`P : SegmentedPacket d m M`, with `P.value D 0 = 1`, `P.value D (u i) = 0`, and
+
+`‖f‖_{L²(𝕋^d)} ≤ (√2)^{v-1} / √((M/v)^d (m+1)^d) * ∏ π v/(M D ‖u‖_{p'})`,
+
+the product running only over the near neighbors `0 < ‖u‖_{p'} ≤ π v/(M D)`
+(`SegmentedVDM.neighborScaleFactor`); each far neighbor costs only its share of
+`(√2)^{v-1}`. The `L²` norm is realized as
+`Real.sqrt (SegmentedVDM.energy P.coefficientVector)`, which is the manuscript's
+`‖f‖_{L²(𝕋^d)}` by Parseval on the unit torus with normalized measure (compare
+the documentation of `SegmentedVDM.singularValue_ge_of_interpolation`); the
+bridge lemma that will discharge this identification is the Parseval statement
+being formalized in `General.Fourier.TrigonometricPolynomialParseval`. The same
+witness satisfies the coefficient `ℓ¹` mass bound `P.mass ≤ (√2)^{v-1} ∏ …`
+without the normalizing denominator, which is the form retained by the
+worst-case corollary `segmentedNeighborProduct`.
+
+The hypothesis `m < D` is the manuscript's `D > m`; it makes the frequencies
+`D c + j` of a presentation pairwise distinct, so the Parseval identification
+applies, and is not used by the finite proof. As in
+`SegmentedVDM.frequency_quantization_of_shortest_representative`, the range
+condition `u i ∈ (-π, π]^d` of the manuscript is not used by the proof. -/
+theorem neighborSetSegmented_polynomial
+    {d v M m D : ℕ} {p q : ENNReal} (hpq : ENNReal.HolderConjugate p q)
+    (hv : 0 < v) (hmD : m < D)
+    (u : Fin (v - 1) → Point d)
+    (hun : ∀ i, 0 < LeanNumDetect.lpNorm q (u i))
+    (huro : ∀ i, LeanNumDetect.lpNorm q (u i) ≤
+      Real.pi / (2 * (D : ℝ) * (d : ℝ) ^ p.toReal⁻¹))
+    (hM : 2 * (d : ℝ) ^ p.toReal⁻¹ * v ≤ (M : ℝ)) :
+    ∃ P : SegmentedPacket d m M,
+      P.value D 0 = 1 ∧
+      (∀ i, P.value D (u i) = 0) ∧
+      P.mass ≤ (Real.sqrt 2) ^ (v - 1) *
+        ∏ i : Fin (v - 1), SegmentedVDM.neighborScaleFactor q (v : ℝ) (M : ℝ) (D : ℝ) (u i) ∧
+      Real.sqrt (SegmentedVDM.energy P.coefficientVector) ≤
+        ((Real.sqrt 2) ^ (v - 1) *
+          ∏ i : Fin (v - 1), SegmentedVDM.neighborScaleFactor q (v : ℝ) (M : ℝ) (D : ℝ) (u i)) /
+          Real.sqrt (((M : ℝ) / v) ^ d * ((m + 1 : ℕ) : ℝ) ^ d) := by
+  classical
+  have hDposN : 0 < D := by omega
+  have hDpos : (0 : ℝ) < D := by exact_mod_cast hDposN
+  have hvR : (0 : ℝ) < v := by exact_mod_cast hv
+  have hdim (i : Fin (v - 1)) : 0 < (d : ℝ) ^ p.toReal⁻¹ := by
+    by_contra hnd
+    have hz : (d : ℝ) ^ p.toReal⁻¹ = 0 :=
+      le_antisymm (le_of_not_gt hnd) (Real.rpow_nonneg (Nat.cast_nonneg d) _)
+    have h0 : Real.pi / (2 * (D : ℝ) * (d : ℝ) ^ p.toReal⁻¹) = 0 := by
+      rw [hz, mul_zero, div_zero]
+    have := huro i
+    rw [h0] at this
+    exact lt_irrefl 0 (lt_of_lt_of_le (hun i) this)
+  have hMpos (i : Fin (v - 1)) : 0 < (M : ℝ) :=
+    lt_of_lt_of_le (mul_pos (mul_pos (by norm_num) (hdim i)) hvR) hM
+  set w : Fin (v - 1) → ℝ := fun i => LeanNumDetect.lpNorm q (u i) with hwdef
+  set zN : ℕ := ⌊(M : ℝ) / v⌋₊ with hzNdef
+  have hwpos (i : Fin (v - 1)) : 0 < w i := by rw [hwdef]; exact hun i
+  have htmin (i : Fin (v - 1)) :
+      min ((M : ℝ) / v) (Real.pi / ((D : ℝ) * w i))
+        = min ((M : ℝ) / v) (Real.pi / ((D : ℝ) * LeanNumDetect.lpNorm q (u i))) := by
+    rw [hwdef]
+  have htb (i : Fin (v - 1)) : 2 * (d : ℝ) ^ p.toReal⁻¹
+      ≤ min ((M : ℝ) / v) (Real.pi / ((D : ℝ) * w i)) := by
+    refine le_min ?_ ?_
+    · exact (le_div_iff₀ hvR).mpr hM
+    · have hA : w i * (2 * (D : ℝ) * (d : ℝ) ^ p.toReal⁻¹) ≤ Real.pi := by
+        have hA0 := (le_div_iff₀
+          (mul_pos (mul_pos (by norm_num) hDpos) (hdim i))).mp (huro i)
+        exact hA0
+      have hA' : 2 * (d : ℝ) ^ p.toReal⁻¹ * ((D : ℝ) * w i) ≤ Real.pi := by
+        have he : 2 * (d : ℝ) ^ p.toReal⁻¹ * ((D : ℝ) * w i)
+            = w i * (2 * (D : ℝ) * (d : ℝ) ^ p.toReal⁻¹) := by ring
+        rw [he]
+        exact hA
+      exact (le_div_iff₀ (mul_pos hDpos (hwpos i))).2 hA'
+  have hut (i : Fin (v - 1)) : w i ≤ Real.pi / ((D : ℝ) * min ((M : ℝ) / v)
+      (Real.pi / ((D : ℝ) * w i))) := by
+    have hA : min ((M : ℝ) / v) (Real.pi / ((D : ℝ) * w i)) * ((D : ℝ) * w i) ≤ Real.pi :=
+      (le_div_iff₀ (mul_pos hDpos (hwpos i))).mp (min_le_right _ _)
+    have hA' : w i * ((D : ℝ) * min ((M : ℝ) / v)
+        (Real.pi / ((D : ℝ) * w i))) ≤ Real.pi := by
+      have he : w i * ((D : ℝ) * min ((M : ℝ) / v) (Real.pi / ((D : ℝ) * w i)))
+          = min ((M : ℝ) / v) (Real.pi / ((D : ℝ) * w i)) * ((D : ℝ) * w i) := by ring
+      rw [he]
+      exact hA
+    have hminpos : 0 < (D : ℝ) * min ((M : ℝ) / v) (Real.pi / ((D : ℝ) * w i)) :=
+      mul_pos hDpos (lt_min_iff.mpr ⟨div_pos (hMpos i) hvR,
+        div_pos Real.pi_pos (mul_pos hDpos (hwpos i))⟩)
+    exact (le_div_iff₀ hminpos).2 hA'
+  have hnode (i : Fin (v - 1)) : ∃ P : SegmentedPacket d 0 ⌊min ((M : ℝ) / v)
+      (Real.pi / ((D : ℝ) * w i))⌋₊,
+      P.value D 0 = 1 ∧ P.value D (u i) = 0 ∧
+      P.mass ≤ Real.sqrt 2 * Real.pi /
+        ((D : ℝ) * min ((M : ℝ) / v) (Real.pi / ((D : ℝ) * w i)) * w i) :=
+    neighborNodeFactor hpq hDposN (hdim i) (t := min ((M : ℝ) / v)
+      (Real.pi / ((D : ℝ) * w i))) (htb i) (u i) (hun i) (hut i)
+  choose F hF1 hF0 hFm using hnode
+  have htbud (i : Fin (v - 1)) :
+      ⌊min ((M : ℝ) / v) (Real.pi / ((D : ℝ) * w i))⌋₊ ≤ zN := by
+    apply Nat.floor_mono
+    exact min_le_left _ _
+  let G : Fin (v - 1) → SegmentedPacket d 0 zN := fun i => (F i).widen le_rfl (htbud i)
+  let Q : SegmentedPacket d ((v - 1) * 0) ((v - 1) * zN) := SegmentedPacket.prod G
+  let Q0 : SegmentedPacket d 0 ((v - 1) * zN) := Q.widen (by simp) le_rfl
+  have hzNv : zN * v ≤ M := by
+    have h1 : ((zN : ℕ) : ℝ) ≤ (M : ℝ) / v := by
+      rw [hzNdef]
+      exact Nat.floor_le (div_nonneg (Nat.cast_nonneg M) (Nat.cast_nonneg v))
+    have h2 : ((zN : ℕ) : ℝ) * v ≤ (M : ℝ) := (le_div_iff₀ hvR).mp h1
+    exact_mod_cast h2
+  have hzsplit : (v - 1) * zN + zN = v * zN := by
+    conv_rhs =>
+      rw [show v = v - 1 + 1 from (Nat.sub_add_cancel (Nat.succ_le_of_lt hv)).symm,
+        Nat.add_mul, one_mul]
+  have hzN1 : (M : ℝ) / v ≤ zN + 1 := by
+    have h := Nat.lt_floor_add_one ((M : ℝ) / v)
+    rw [← hzNdef] at h
+    exact h.le
+  have hdenle : ((M : ℝ) / v) ^ d * ((m + 1 : ℕ) : ℝ) ^ d
+      ≤ ((((zN + 1) * (m + 1)) ^ d : ℕ) : ℝ) := by
+    push_cast
+    rw [mul_pow]
+    gcongr
+  have hDnpos : 0 < ((M : ℝ) / v) ^ d * ((m + 1 : ℕ) : ℝ) ^ d := by
+    rcases Nat.eq_zero_or_pos d with hd | hd
+    · subst d
+      simp
+    · have hdim0 : 0 < (d : ℝ) ^ p.toReal⁻¹ :=
+        Real.rpow_pos_of_pos (by exact_mod_cast hd) _
+      have h1 : 0 < 2 * (d : ℝ) ^ p.toReal⁻¹ * (v : ℝ) :=
+        mul_pos (mul_pos (by norm_num) hdim0) hvR
+      have hMpos' : 0 < (M : ℝ) := lt_of_lt_of_le h1 hM
+      have h2 : 0 < (M : ℝ) / v := div_pos hMpos' hvR
+      exact mul_pos (pow_pos h2 d)
+        (pow_pos (by exact_mod_cast (by omega : 0 < m + 1)) d)
+  have hQ0 (x : Point d) : Q0.value D x = ∏ i, (F i).value D x := by
+    rw [SegmentedPacket.value_widen, SegmentedPacket.value_prod]
+    apply Finset.prod_congr rfl
+    intro i _
+    exact SegmentedPacket.value_widen (F i) le_rfl (htbud i) D x
+  have hQ01 : Q0.value D 0 = 1 := by
+    rw [hQ0]
+    exact Finset.prod_eq_one fun i _ => hF1 i
+  have hQz (j : Fin (v - 1)) : Q0.value D (u j) = 0 := by
+    rw [hQ0]
+    apply Finset.prod_eq_zero (Finset.mem_univ j)
+    exact hF0 j
+  let wvec : EuclideanSpace ℂ (SegmentedIndex d (0 + m) ((v - 1) * zN + zN)) :=
+    SegmentedPacket.smoothedSegmentedVector Q0 m zN D 0
+  have hstep (x : Point d) : Q0.value D x *
+      SegmentedPacket.segmentedMeanKernel d m zN D x =
+      ofLp wvec ⬝ᵥ SegmentedPacket.segmentedSteering d (0 + m) ((v - 1) * zN + zN) D x := by
+    have h := SegmentedPacket.smoothedSegmentedVector_evaluation Q0 m zN D 0 x
+    simp only [sub_zero] at h
+    rw [← h]
+  let P : SegmentedPacket d m M := {
+    Index := SegmentedIndex d (0 + m) ((v - 1) * zN + zN)
+    finite := inferInstance
+    coarse i k := (i k).1.val
+    fine i k := (i k).2.val
+    coarse_le i k := by
+      have h := (i k).1.isLt
+      have hz : (v - 1) * zN + zN ≤ M := by
+        rw [hzsplit, Nat.mul_comm]
+        exact hzNv
+      omega
+    fine_le i k := by
+      have h := (i k).2.isLt
+      omega
+    coeff i := ofLp wvec i }
+  have hval (x : Point d) : P.value D x =
+      Q0.value D x * SegmentedPacket.segmentedMeanKernel d m zN D x := by
+    have hstep' : P.value D x
+        = ofLp wvec ⬝ᵥ SegmentedPacket.segmentedSteering d (0 + m) ((v - 1) * zN + zN) D x := by
+      show (∑ i : SegmentedIndex d (0 + m) ((v - 1) * zN + zN),
+          ofLp wvec i * Complex.exp (Complex.I *
+            ((∑ k, ((D * (i k).1.val + (i k).2.val : ℕ) : ℝ) * x k : ℝ) : ℂ)))
+        = ofLp wvec ⬝ᵥ SegmentedPacket.segmentedSteering d (0 + m) ((v - 1) * zN + zN) D x
+      rfl
+    rw [hstep']
+    exact (hstep x).symm
+  have hP0 : P.value D 0 = 1 := by
+    rw [hval, hQ01, SegmentedPacket.segmentedMeanKernel_zero, one_mul]
+  have hPu (j : Fin (v - 1)) : P.value D (u j) = 0 := by
+    rw [hval, hQz j, zero_mul]
+  have hspreadle (i : Q0.Index) :
+      (∑ a : SegmentedIndex d (0 + m) ((v - 1) * zN + zN),
+        ‖SegmentedPacket.segmentedAveragingVector Q0 m zN D 0 i a‖) ≤ 1 := by
+    refine (spread_norm_sum_le (SegmentedPacket.shiftedSegmentedRow Q0 m zN i) _).trans ?_
+    have hexp (q : SegmentedPacket.SmoothingIndex d m zN) :
+        ‖Complex.exp (-Complex.I * (((∑ k,
+          (((D * (q k).1.val + (q k).2.val : ℕ) : ℝ) * (0 : Point d) k)) : ℝ) : ℂ))‖ = 1 := by
+      rw [Complex.norm_exp]
+      simp
+    have hcard : Fintype.card (SegmentedPacket.SmoothingIndex d m zN)
+        = ((zN + 1) * (m + 1)) ^ d := by
+      simp [SegmentedPacket.SmoothingIndex, SegmentedIndex, SegmentedCoordinateIndex]
+    have hsum : (∑ q : SegmentedPacket.SmoothingIndex d m zN,
+        ‖Complex.exp (-Complex.I * (((∑ k,
+          (((D * (q k).1.val + (q k).2.val : ℕ) : ℝ) * (0 : Point d) k)) : ℝ) : ℂ)) /
+          (((zN + 1) * (m + 1)) ^ d : ℕ)‖) = 1 := by
+      simp only [norm_div, hexp, Complex.norm_natCast, one_div]
+      rw [Finset.sum_const, Finset.card_univ, hcard, nsmul_eq_mul]
+      have hne : ((((zN + 1) * (m + 1)) ^ d : ℕ) : ℝ) ≠ 0 := by
+        exact_mod_cast (by positivity : (((zN + 1) * (m + 1)) ^ d : ℕ) ≠ 0)
+      field_simp
+    exact le_of_eq hsum
+  have hmassvec : P.mass ≤ Q0.mass := by
+    show (∑ a : SegmentedIndex d (0 + m) ((v - 1) * zN + zN), ‖ofLp wvec a‖) ≤ Q0.mass
+    have h1 : ∀ a : SegmentedIndex d (0 + m) ((v - 1) * zN + zN),
+        ‖ofLp wvec a‖ ≤ ∑ i : Q0.Index, ‖Q0.coeff i‖ *
+          ‖SegmentedPacket.segmentedAveragingVector Q0 m zN D 0 i a‖ := by
+      intro a
+      have hsum : ofLp wvec a = ∑ i : Q0.Index,
+          Q0.coeff i • ofLp (SegmentedPacket.segmentedAveragingVector Q0 m zN D 0 i) a := by
+        show (ofLp (∑ i : Q0.Index,
+            Q0.coeff i • SegmentedPacket.segmentedAveragingVector Q0 m zN D 0 i)) a = _
+        rw [WithLp.ofLp_sum, Finset.sum_apply]
+        rfl
+      rw [hsum]
+      refine (norm_sum_le _ _).trans ?_
+      exact Finset.sum_le_sum fun i _ => by
+        have h := norm_smul (Q0.coeff i)
+          (ofLp (SegmentedPacket.segmentedAveragingVector Q0 m zN D 0 i) a)
+        exact le_of_eq h
+    calc
+      (∑ a : SegmentedIndex d (0 + m) ((v - 1) * zN + zN), ‖ofLp wvec a‖)
+          ≤ ∑ a, ∑ i : Q0.Index, ‖Q0.coeff i‖ *
+            ‖SegmentedPacket.segmentedAveragingVector Q0 m zN D 0 i a‖ :=
+        Finset.sum_le_sum fun a _ => h1 a
+      _ = ∑ i : Q0.Index, ∑ a, ‖Q0.coeff i‖ *
+          ‖SegmentedPacket.segmentedAveragingVector Q0 m zN D 0 i a‖ := Finset.sum_comm
+      _ = ∑ i : Q0.Index, ‖Q0.coeff i‖ *
+          ∑ a, ‖SegmentedPacket.segmentedAveragingVector Q0 m zN D 0 i a‖ := by
+        apply Finset.sum_congr rfl
+        intro i _
+        rw [← Finset.mul_sum]
+      _ ≤ ∑ i : Q0.Index, ‖Q0.coeff i‖ * 1 :=
+        Finset.sum_le_sum fun i _ =>
+          mul_le_mul_of_nonneg_left (hspreadle i) (norm_nonneg _)
+      _ = Q0.mass := by simp [SegmentedPacket.mass]
+  have hinj : Function.Injective P.frequencyIndex := by
+    intro i j h
+    funext k
+    have hk := congrFun h k
+    apply Prod.ext
+    · apply Fin.ext
+      exact congrArg (fun a => a.1.val) hk
+    · apply Fin.ext
+      exact congrArg (fun a => a.2.val) hk
+  have henergy : SegmentedVDM.energy P.coefficientVector = ‖wvec‖ ^ 2 := by
+    rw [energy_coefficientVector_eq_of_injective P hinj]
+    show SegmentedVDM.energy (fun i => ofLp wvec i) = ‖wvec‖ ^ 2
+    simp only [SegmentedVDM.energy]
+    exact (EuclideanSpace.norm_sq_eq wvec).symm
+  have hnSF (i : Fin (v - 1)) :
+      0 ≤ SegmentedVDM.neighborScaleFactor q (v : ℝ) (M : ℝ) (D : ℝ) (u i) := by
+    unfold SegmentedVDM.neighborScaleFactor
+    split_ifs with h
+    · exact div_nonneg (by positivity)
+        (mul_nonneg (mul_nonneg (hMpos i).le hDpos.le) (hun i).le)
+    · exact zero_le_one
+  have hfac (i : Fin (v - 1)) :
+      Real.sqrt 2 * Real.pi /
+        ((D : ℝ) * min ((M : ℝ) / v) (Real.pi / ((D : ℝ) * w i)) * w i)
+        = Real.sqrt 2 * SegmentedVDM.neighborScaleFactor q (v : ℝ) (M : ℝ) (D : ℝ) (u i) := by
+    have hMDpos : 0 < (M : ℝ) * (D : ℝ) := mul_pos (hMpos i) hDpos
+    have hminpos : 0 < min ((M : ℝ) / v) (Real.pi / ((D : ℝ) * w i)) :=
+      lt_min_iff.mpr ⟨div_pos (hMpos i) hvR, div_pos Real.pi_pos (mul_pos hDpos (hwpos i))⟩
+    by_cases h : LeanNumDetect.lpNorm q (u i) ≤ Real.pi * (v : ℝ) / ((M : ℝ) * (D : ℝ))
+    · rw [SegmentedVDM.neighborScaleFactor_of_le h]
+      have h1 : min ((M : ℝ) / v) (Real.pi / ((D : ℝ) * w i)) = (M : ℝ) / v := by
+        refine min_eq_left ((le_div_iff₀ (mul_pos hDpos (hwpos i))).2 ?_)
+        have h2 : w i * ((M : ℝ) * (D : ℝ)) ≤ Real.pi * (v : ℝ) :=
+          (le_div_iff₀ hMDpos).mp h
+        have h3 : ((M : ℝ) / v) * ((D : ℝ) * w i) = w i * ((M : ℝ) * (D : ℝ)) / v := by ring
+        rw [h3]
+        have h4 : w i * ((M : ℝ) * (D : ℝ)) / v ≤ (Real.pi * (v : ℝ)) / v :=
+          div_le_div_of_nonneg_right h2 (Nat.cast_nonneg v)
+        have h5 : (Real.pi * (v : ℝ)) / v = Real.pi := mul_div_cancel_right₀ _ hvR.ne'
+        rwa [h5] at h4
+      rw [h1, show w i = LeanNumDetect.lpNorm q (u i) from rfl]
+      field_simp [(hwpos i).ne', hDpos.ne', hvR.ne', (hMpos i).ne'] <;> try ring
+    · rw [SegmentedVDM.neighborScaleFactor_of_lt (lt_of_not_ge h)]
+      have h1 : min ((M : ℝ) / v) (Real.pi / ((D : ℝ) * w i))
+          = Real.pi / ((D : ℝ) * w i) := by
+        apply min_eq_right
+        have h2 : Real.pi * (v : ℝ) < w i * ((M : ℝ) * (D : ℝ)) :=
+          (div_lt_iff₀ hMDpos).mp (lt_of_not_ge h)
+        have h3 : Real.pi ≤ ((M : ℝ) / v) * ((D : ℝ) * w i) := by
+          have h4 : Real.pi = Real.pi * (v : ℝ) / v := (mul_div_cancel_right₀ _ hvR.ne').symm
+          rw [h4]
+          have h5 : (Real.pi * (v : ℝ)) / v ≤ w i * ((M : ℝ) * (D : ℝ)) / v :=
+            div_le_div_of_nonneg_right h2.le (Nat.cast_nonneg v)
+          have h6 : w i * ((M : ℝ) * (D : ℝ)) / v = ((M : ℝ) / v) * ((D : ℝ) * w i) := by ring
+          rwa [h6] at h5
+        exact (div_le_iff₀ (mul_pos hDpos (hwpos i))).2 h3
+      rw [h1]
+      field_simp [(hwpos i).ne', hDpos.ne'] <;> try ring
+  have hBpos : 0 ≤ (Real.sqrt 2) ^ (v - 1) *
+      ∏ i : Fin (v - 1), SegmentedVDM.neighborScaleFactor q (v : ℝ) (M : ℝ) (D : ℝ) (u i) :=
+    mul_nonneg (pow_nonneg (Real.sqrt_nonneg 2) _) (Finset.prod_nonneg fun i _ => hnSF i)
+  have hprod : Q0.mass ≤ (Real.sqrt 2) ^ (v - 1) *
+      ∏ i : Fin (v - 1), SegmentedVDM.neighborScaleFactor q (v : ℝ) (M : ℝ) (D : ℝ) (u i) := by
+    have hmassQ : Q0.mass = ∏ i : Fin (v - 1), (F i).mass := by
+      simp only [Q0, Q, G, SegmentedPacket.mass_widen, SegmentedPacket.mass_prod]
+    calc
+      Q0.mass = ∏ i : Fin (v - 1), (F i).mass := hmassQ
+      _ ≤ ∏ i : Fin (v - 1), Real.sqrt 2 * Real.pi /
+          ((D : ℝ) * min ((M : ℝ) / v) (Real.pi / ((D : ℝ) * w i)) * w i) :=
+        Finset.prod_le_prod (fun i _ => (F i).mass_nonneg) (fun i _ => hFm i)
+      _ = ∏ i : Fin (v - 1), Real.sqrt 2 *
+          SegmentedVDM.neighborScaleFactor q (v : ℝ) (M : ℝ) (D : ℝ) (u i) :=
+        Finset.prod_congr rfl fun i _ => hfac i
+      _ = (Real.sqrt 2) ^ (v - 1) *
+          ∏ i : Fin (v - 1), SegmentedVDM.neighborScaleFactor q (v : ℝ) (M : ℝ) (D : ℝ) (u i) := by
+        rw [Finset.prod_mul_distrib, Finset.prod_const, Finset.card_univ, Fintype.card_fin]
+  have hnorm : Real.sqrt (SegmentedVDM.energy P.coefficientVector) ≤
+      ((Real.sqrt 2) ^ (v - 1) *
+        ∏ i : Fin (v - 1), SegmentedVDM.neighborScaleFactor q (v : ℝ) (M : ℝ) (D : ℝ) (u i)) /
+        Real.sqrt (((M : ℝ) / v) ^ d * ((m + 1 : ℕ) : ℝ) ^ d) := by
+    have h1 : ‖wvec‖ ≤ Q0.mass / Real.sqrt ((((zN + 1) * (m + 1)) ^ d : ℕ) : ℝ) :=
+      SegmentedPacket.smoothedSegmentedVector_norm_le Q0 m zN D 0
+    have h2 : Real.sqrt (((M : ℝ) / v) ^ d * ((m + 1 : ℕ) : ℝ) ^ d)
+        ≤ Real.sqrt ((((zN + 1) * (m + 1)) ^ d : ℕ) : ℝ) :=
+      Real.sqrt_le_sqrt hdenle
+    rw [henergy, Real.sqrt_sq (norm_nonneg wvec)]
+    calc
+      ‖wvec‖ ≤ Q0.mass / Real.sqrt ((((zN + 1) * (m + 1)) ^ d : ℕ) : ℝ) := h1
+      _ ≤ ((Real.sqrt 2) ^ (v - 1) *
+          ∏ i : Fin (v - 1), SegmentedVDM.neighborScaleFactor q (v : ℝ) (M : ℝ) (D : ℝ) (u i)) /
+          Real.sqrt ((((zN + 1) * (m + 1)) ^ d : ℕ) : ℝ) :=
+        div_le_div_of_nonneg_right hprod (Real.sqrt_nonneg _)
+      _ ≤ ((Real.sqrt 2) ^ (v - 1) *
+          ∏ i : Fin (v - 1), SegmentedVDM.neighborScaleFactor q (v : ℝ) (M : ℝ) (D : ℝ) (u i)) /
+          Real.sqrt (((M : ℝ) / v) ^ d * ((m + 1 : ℕ) : ℝ) ^ d) :=
+        div_le_div_of_nonneg_left hBpos (Real.sqrt_pos.mpr hDnpos) h2
+  exact ⟨P, hP0, hPu, hmassvec.trans hprod, hnorm⟩
+
+/-- The `p = ∞`, worst-case-factor corollary of `lem:neighborset_segmented`
+(`neighborSetSegmented_polynomial`): a product of recentered two-point factors
+annihilating a finite family of short wrapped differences, with every
+near-neighbor factor `π v/(MD‖u‖_{p'})` flattened to its worst case
+`π/(T D Δ)` over the scale range `Δ ≤ ‖u‖₁ ≤ π/(2 D)`. The `L²` normalization of
+`neighborSetSegmented_polynomial` is dropped in favor of the coefficient `ℓ¹`
+mass bound. -/
 theorem segmentedNeighborProduct
     {d q D : ℕ} {T Δ : ℝ}
     (hT : 2 ≤ T) (hD : 0 < D) (hΔ : 0 < Δ)
@@ -1006,39 +1574,120 @@ theorem segmentedNeighborProduct
         (Real.sqrt 2 / (T * D * Δ / Real.pi)) ^ q := by
   classical
   have hDR : (0 : ℝ) < D := by exact_mod_cast hD
-  have huNonneg (i : Fin q) : 0 ≤ l1Norm (u i) := by
-    unfold l1Norm
-    positivity
-  choose F hF using fun i =>
-    SegmentedVDM.neighbor_factor (u := l1Norm (u i)) hT hDR hΔ
-      (by simpa only [abs_of_nonneg (huNonneg i)] using hΔu i)
-      (by simpa only [abs_of_nonneg (huNonneg i)] using hu i)
-      hscale
+  have hpq : ENNReal.HolderConjugate ⊤ 1 := inferInstance
+  have hdim : (0 : ℝ) < (d : ℝ) ^ ((⊤ : ENNReal).toReal)⁻¹ := by simp
+  have hL1 (i : Fin q) : LeanNumDetect.lpNorm 1 (u i) = l1Norm (u i) := by
+    rw [LeanNumDetect.lpNorm_one]
+    rfl
+  have hLpos (i : Fin q) : 0 < LeanNumDetect.lpNorm 1 (u i) := by
+    rw [hL1 i]
+    exact lt_of_lt_of_le hΔ (hΔu i)
+  have hLΔ (i : Fin q) : Δ ≤ LeanNumDetect.lpNorm 1 (u i) := by
+    rw [hL1 i]
+    exact hΔu i
+  have htu (i : Fin q) : 2 ≤ Real.pi / (D * LeanNumDetect.lpNorm 1 (u i)) := by
+    rw [hL1 i]
+    apply (le_div_iff₀ (mul_pos hDR (lt_of_lt_of_le hΔ (hΔu i)))).2
+    have h2 : l1Norm (u i) * (2 * (D : ℝ)) ≤ Real.pi :=
+      (le_div_iff₀ (mul_pos (by norm_num : (0 : ℝ) < 2) hDR)).mp (hu i)
+    have he : 2 * ((D : ℝ) * l1Norm (u i)) = l1Norm (u i) * (2 * (D : ℝ)) := by ring
+    rw [he]
+    exact h2
+  choose F hF1 hF0 hFm using fun i =>
+    neighborNodeFactor hpq hD hdim
+      (t := min T (Real.pi / (D * LeanNumDetect.lpNorm 1 (u i))))
+      (by
+        have h1 : 2 * (d : ℝ) ^ ((⊤ : ENNReal).toReal)⁻¹ = 2 := by simp
+        rw [h1]
+        exact le_min hT (htu i))
+      (u i) (hLpos i)
+      (by
+        have h1 := min_le_right T (Real.pi / (D * LeanNumDetect.lpNorm 1 (u i)))
+        have h2 : min T (Real.pi / (D * LeanNumDetect.lpNorm 1 (u i))) *
+            (D * LeanNumDetect.lpNorm 1 (u i)) ≤ Real.pi :=
+          (le_div_iff₀ (mul_pos hDR (hLpos i))).mp h1
+        have h3 : LeanNumDetect.lpNorm 1 (u i) *
+            (D * min T (Real.pi / (D * LeanNumDetect.lpNorm 1 (u i))))
+            = min T (Real.pi / (D * LeanNumDetect.lpNorm 1 (u i))) *
+              (D * LeanNumDetect.lpNorm 1 (u i)) := by ring
+        have h3' : LeanNumDetect.lpNorm 1 (u i) *
+            (D * min T (Real.pi / (D * LeanNumDetect.lpNorm 1 (u i)))) ≤ Real.pi := by
+          rw [h3]
+          exact h2
+        have hminpos : 0 < D * min T (Real.pi / (D * LeanNumDetect.lpNorm 1 (u i))) :=
+          mul_pos hDR (lt_min_iff.mpr ⟨lt_of_lt_of_le (by norm_num : (0 : ℝ) < 2) hT,
+            div_pos Real.pi_pos (mul_pos hDR (hLpos i))⟩)
+        exact (le_div_iff₀ hminpos).2 h3')
+  have htd (i : Fin q) : T * D * Δ ≤
+      D * min T (Real.pi / (D * LeanNumDetect.lpNorm 1 (u i))) *
+        LeanNumDetect.lpNorm 1 (u i) := by
+    have h0 : T * D * Δ ≤ min T (Real.pi / (D * LeanNumDetect.lpNorm 1 (u i))) * D *
+        LeanNumDetect.lpNorm 1 (u i) := by
+      rw [min_mul_of_nonneg _ _ hDR.le,
+        min_mul_of_nonneg _ _ (hLpos i).le]
+      apply le_min
+      · have h := hLΔ i
+        gcongr
+      · have he : Real.pi / (D * LeanNumDetect.lpNorm 1 (u i)) * D *
+            LeanNumDetect.lpNorm 1 (u i) = Real.pi := by
+          rw [mul_assoc, div_mul_cancel₀ Real.pi (mul_ne_zero hDR.ne' (hLpos i).ne')]
+        rwa [he]
+    have he : D * min T (Real.pi / (D * LeanNumDetect.lpNorm 1 (u i))) *
+        LeanNumDetect.lpNorm 1 (u i)
+        = min T (Real.pi / (D * LeanNumDetect.lpNorm 1 (u i))) * D *
+          LeanNumDetect.lpNorm 1 (u i) := by ring
+    rw [he]
+    exact h0
+  have hfac (i : Fin q) : Real.sqrt 2 * Real.pi /
+      (D * min T (Real.pi / (D * LeanNumDetect.lpNorm 1 (u i))) * LeanNumDetect.lpNorm 1 (u i))
+      ≤ Real.sqrt 2 / (T * D * Δ / Real.pi) := by
+    have hnum : 0 ≤ Real.sqrt 2 * Real.pi := by positivity
+    have hTDΔpos : 0 < T * D * Δ :=
+      mul_pos (mul_pos (lt_of_lt_of_le (by norm_num : (0 : ℝ) < 2) hT) hDR) hΔ
+    have hdenpos : 0 < D * min T (Real.pi / (D * LeanNumDetect.lpNorm 1 (u i))) *
+        LeanNumDetect.lpNorm 1 (u i) :=
+      mul_pos (mul_pos hDR (lt_min_iff.mpr ⟨lt_of_lt_of_le (by norm_num : (0 : ℝ) < 2) hT,
+        div_pos Real.pi_pos (mul_pos hDR (hLpos i))⟩)) (hLpos i)
+    calc
+      Real.sqrt 2 * Real.pi /
+          (D * min T (Real.pi / (D * LeanNumDetect.lpNorm 1 (u i))) *
+            LeanNumDetect.lpNorm 1 (u i))
+          ≤ Real.sqrt 2 * Real.pi / (T * D * Δ) :=
+        div_le_div_of_nonneg_left hnum hTDΔpos (htd i)
+      _ = Real.sqrt 2 / (T * D * Δ / Real.pi) := by
+        field_simp [(hLpos i).ne', hDR.ne', hΔ.ne',
+          (lt_of_lt_of_le (by norm_num : (0 : ℝ) < 2) hT).ne'] <;> try ring
+  have hpos (i : Fin q) : 0 ≤ Real.sqrt 2 * Real.pi /
+      (D * min T (Real.pi / (D * LeanNumDetect.lpNorm 1 (u i))) * LeanNumDetect.lpNorm 1 (u i)) := by
+    refine div_nonneg (by positivity) ?_
+    have hmin : 0 ≤ min T (Real.pi / (D * LeanNumDetect.lpNorm 1 (u i))) :=
+      le_min (le_of_lt (lt_of_lt_of_le (by norm_num : (0 : ℝ) < 2) hT))
+        (div_nonneg Real.pi_pos.le (mul_nonneg hDR.le (hLpos i).le))
+    exact mul_nonneg (mul_nonneg hDR.le hmin) (hLpos i).le
   let Q (i : Fin q) : SegmentedPacket d 0 ⌊T⌋₊ :=
-    SegmentedPacket.liftScalarRecentered (u i) (F i)
+    (F i).widen le_rfl (Nat.floor_mono (min_le_left _ _))
   let P : SegmentedPacket d 0 (q * ⌊T⌋₊) :=
     (SegmentedPacket.prod Q).widen (by simp) le_rfl
+  have hQ (x : Point d) : P.value D x = ∏ i, (F i).value D x := by
+    simp only [P, Q, SegmentedPacket.value_widen, SegmentedPacket.value_prod]
+  have hmassQ : P.mass = ∏ i, (F i).mass := by
+    simp only [P, Q, SegmentedPacket.mass_widen, SegmentedPacket.mass_prod]
   refine ⟨P, ?_, ?_, ?_⟩
-  · simp only [P, SegmentedPacket.value_widen, SegmentedPacket.value_prod]
-    apply Finset.prod_eq_one
-    intro i _
-    simpa only [Q, SegmentedPacket.value_liftScalarRecentered_zero] using
-      (hF i).1
+  · rw [hQ]
+    exact Finset.prod_eq_one fun i _ => hF1 i
   · intro j
-    simp only [P, SegmentedPacket.value_widen, SegmentedPacket.value_prod]
+    rw [hQ]
     apply Finset.prod_eq_zero (Finset.mem_univ j)
-    change
-      (SegmentedPacket.liftScalarRecentered (u j) (F j)).value D (u j) = 0
-    rw [SegmentedPacket.value_liftScalarRecentered]
-    rw [(hF j).2.1, mul_zero]
-  · simp only [P, SegmentedPacket.mass_widen, SegmentedPacket.mass_prod,
-      Q, SegmentedPacket.mass_liftScalarRecentered]
+    exact hF0 j
+  · rw [hmassQ]
     calc
-      _ ≤ ∏ _i : Fin q,
-          Real.sqrt 2 / (T * D * Δ / Real.pi) :=
-        Finset.prod_le_prod
-          (fun i _ => (F i).mass_nonneg)
-          (fun i _ => (hF i).2.2)
+      (∏ i : Fin q, (F i).mass)
+          ≤ ∏ i : Fin q, Real.sqrt 2 * Real.pi /
+            (D * min T (Real.pi / (D * LeanNumDetect.lpNorm 1 (u i))) *
+              LeanNumDetect.lpNorm 1 (u i)) :=
+        Finset.prod_le_prod (fun i _ => (F i).mass_nonneg) (fun i _ => hFm i)
+      _ ≤ ∏ _i : Fin q, Real.sqrt 2 / (T * D * Δ / Real.pi) :=
+        Finset.prod_le_prod (fun i _ => hpos i) (fun i _ => hfac i)
       _ = _ := by
         rw [Finset.prod_const, Finset.card_univ, Fintype.card_fin]
 
