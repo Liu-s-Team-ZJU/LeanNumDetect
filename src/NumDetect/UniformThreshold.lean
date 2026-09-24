@@ -47,22 +47,35 @@ theorem uniform_query_in_band
       _ ≤ Ω / s * (s : ℝ) := this
       _ = Ω := by field_simp
 
+/-- A band measurement restricts to the contiguous sampling set. -/
+theorem isUniformMeasurement_of_band
+    {d n s : ℕ} {Ω σ : ℝ} (μ : AtomicMeasure d n)
+    (Y : Point d → ℂ) (hΩ : 0 ≤ Ω) (hs : 0 < s)
+    (hmeasurement : IsBandMeasurement μ Ω σ Y) :
+    IsUniformMeasurement μ s Ω σ Y := by
+  rcases hmeasurement with ⟨W, hW, hY⟩
+  refine ⟨W, ?_, ?_⟩
+  · intro ω hω
+    rcases hω with ⟨α, β, rfl⟩
+    exact hW _ (uniform_query_in_band hΩ hs α β)
+  · intro ω hω
+    rcases hω with ⟨α, β, rfl⟩
+    exact hY _ (uniform_query_in_band hΩ hs α β)
+
 /-- The contiguous measurement perturbation is pointwise strictly below `σ`. -/
 theorem uniformMeasurementMatrix_sub_fourier_entry_lt
     {d n s : ℕ} {Ω σ : ℝ}
     (μ : AtomicMeasure d n) (Y : Point d → ℂ)
-    (hΩ : 0 ≤ Ω) (hs : 0 < s)
-    (hmeasurement : IsBandMeasurement μ Ω σ Y)
+    (hmeasurement : IsUniformMeasurement μ s Ω σ Y)
     (α β : UniformIndex d s) :
     ‖(uniformMeasurementMatrix s Ω Y -
         uniformMeasurementMatrix s Ω (fourier μ)) α β‖ < σ := by
   rcases hmeasurement with ⟨W, hW, hY⟩
   let ω : Point d := fun k =>
     Ω / s * ((α k : ℝ) + (β k : ℝ) - s)
-  have hband : InFrequencyBand Ω ω :=
-    uniform_query_in_band hΩ hs α β
-  have hvalue := hY ω hband
-  have hnoise := hW ω hband
+  have hquery : InUniformSamplingSet d s Ω ω := ⟨α, β, rfl⟩
+  have hvalue := hY ω hquery
+  have hnoise := hW ω hquery
   simp only [uniformMeasurementMatrix, Matrix.sub_apply]
   rw [hvalue, add_sub_cancel_left]
   exact hnoise
@@ -289,7 +302,7 @@ theorem uniformGHM_singularValueThreshold_support
     (hcluster : ∀ j, InOpenL1Ball (Real.pi * n / Ω) 0 (μ.node j))
     (hs : 4 * n ≤ s) (hseven : Even s)
     (hnoise : σ < mMin)
-    (hmeasurement : IsBandMeasurement μ Ω σ Y) :
+    (hmeasurement : IsUniformMeasurement μ s Ω σ Y) :
     (∀ j, n ≤ j → j < (s + 1) ^ d →
       matrixSingularValue (uniformMeasurementMatrix s Ω Y) j ≤
         ((s + 1 : ℕ) : ℝ) ^ d * σ) ∧
@@ -321,7 +334,7 @@ theorem uniformGHM_singularValueThreshold_support
     intro α β
     rw [← hGfourier]
     exact uniformMeasurementMatrix_sub_fourier_entry_lt
-      μ Y hΩ.le hspos hmeasurement α β
+      μ Y hmeasurement α β
   have hΔnorm : matrixSpectralNorm Δ ≤ sampleCount * σ := by
     have h := matrixSpectralNorm_le_card_sqrt_mul_of_lt Δ hΔentry
     have hsqrt :
@@ -383,7 +396,7 @@ theorem uniformGHM_singularValueThreshold_support
     have hV :
         B ≤ matrixSingularValue (uniformVandermonde s Ω μ.node) (n - 1) := by
       exact uniformVandermonde_minimumSingularValue
-        μ hd hn hΩ hcluster hs hseven
+        μ.node hd hn hΩ hcluster hs hseven
     have hnoiseless :
         2 * sampleCount * σ < matrixSingularValue G₀ (n - 1) := by
       exact uniformNoiseless_singularValue_gt_of_lowerBound_sq
@@ -685,7 +698,8 @@ theorem noAdmissibleMeasureWithFewerSupports_support
       sampleCount * σ < matrixSingularValue G (n - 1) := by
     have hmain :=
       uniformGHM_singularValueThreshold_support
-        μ Y hd hn hΩ hσ hmMin hcluster hslarge hseven hnoise hmeasurement
+        μ Y hd hn hΩ hσ hmMin hcluster hslarge hseven hnoise
+          (isUniformMeasurement_of_band μ Y hΩ.le hspos hmeasurement)
     have := hmain.2 hthresholdSep
     simpa only [G, sampleCount, s, Nat.cast_pow] using this
   have hfactor :

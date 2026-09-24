@@ -21,7 +21,7 @@ theorem uniformGHM_singularValueThreshold
     (hcluster : ∀ j, InOpenL1Ball (Real.pi * n / Ω) 0 (μ.node j))
     (hs : 4 * n ≤ s) (hseven : Even s)
     (hnoise : σ < mMin)
-    (hmeasurement : IsBandMeasurement μ Ω σ Y) :
+    (hmeasurement : IsUniformMeasurement μ s Ω σ Y) :
     (∀ j, n ≤ j → j < (s + 1) ^ d →
       matrixSingularValue (uniformMeasurementMatrix s Ω Y) j ≤
         ((s + 1 : ℕ) : ℝ) ^ d * σ) ∧

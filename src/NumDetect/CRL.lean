@@ -1,5 +1,7 @@
 import NumDetect.Uniform
 import NumDetect.CRLLowerBound
+import NumDetect.CRLFeasible
+import NumDetect.CRLAttainment
 
 /-! Computational resolution limit bounds from the NumDetect manuscript. -/
 
@@ -57,6 +59,137 @@ private theorem sInf_nonnegative_predicate_le
       intro E hE
       exact hE.1⟩
   · exact ⟨hT.trans hTD.le, hP D hTD⟩
+
+/-- A nonempty upward-closed feasible set contains its infimum when failure
+persists at some strictly larger threshold. -/
+private theorem sInf_nonnegative_predicate_attained
+    {P : ℝ → Prop}
+    (hne : ∃ D : ℝ, 0 ≤ D ∧ P D)
+    (hmono : ∀ {D E : ℝ}, D ≤ E → P D → P E)
+    (hfailure : ∀ D : ℝ, ¬P D → ∃ E : ℝ, D < E ∧ ¬P E) :
+    0 ≤ sInf {D : ℝ | 0 ≤ D ∧ P D} ∧
+      P (sInf {D : ℝ | 0 ≤ D ∧ P D}) := by
+  have hset : ({D : ℝ | 0 ≤ D ∧ P D} : Set ℝ).Nonempty := hne
+  constructor
+  · exact le_csInf hset (fun D hD => hD.1)
+  · by_contra hnot
+    obtain ⟨E, hlt, hnotE⟩ := hfailure _ hnot
+    have hE : E ≤ sInf {D : ℝ | 0 ≤ D ∧ P D} := by
+      apply le_csInf hset
+      intro D hD
+      by_contra hED
+      exact hnotE (hmono (le_of_lt (lt_of_not_ge hED)) hD.2)
+    exact (not_lt_of_ge hE) hlt
+
+/-- Increasing the required separation preserves a number-detection guarantee. -/
+private theorem numberDetectionGuarantee_mono
+    {d n : ℕ} {p : LpIndex} {Ω σ mMin D E : ℝ} {hn : 0 < n}
+    (hDE : D ≤ E)
+    (hD : NumberDetectionGuarantee d n p Ω σ mMin D hn) :
+    NumberDetectionGuarantee d n p Ω σ mMin E hn := by
+  intro μ hmMin hcluster hseparation Y hmeasurement k ν hadmissible
+  apply hD μ hmMin hcluster
+  · intro i j hij
+    exact hDE.trans (hseparation i j hij)
+  · exact hmeasurement
+  · exact hadmissible
+
+/-- Increasing the required separation preserves a positive-amplitude guarantee. -/
+private theorem positiveNumberDetectionGuarantee_mono
+    {d n : ℕ} {p : LpIndex} {Ω σ mMin D E : ℝ} {hn : 0 < n}
+    (hDE : D ≤ E)
+    (hD : PositiveNumberDetectionGuarantee d n p Ω σ mMin D hn) :
+    PositiveNumberDetectionGuarantee d n p Ω σ mMin E hn := by
+  intro μ hpositive hmMin hcluster hseparation Y hmeasurement k ν hadmissible
+  apply hD μ hpositive hmMin hcluster
+  · intro i j hij
+    exact hDE.trans (hseparation i j hij)
+  · exact hmeasurement
+  · exact hadmissible
+
+private theorem numberDetectionCRL_isSmallest_of_failure_extension
+    {d n : ℕ} (p : LpIndex) {Ω σ mMin : ℝ}
+    (hn : 2 ≤ n) (hΩ : 0 < Ω)
+    (hfailure : ∀ D : ℝ,
+      ¬NumberDetectionGuarantee d n p Ω σ mMin D (Nat.zero_lt_of_lt hn) →
+      ∃ E : ℝ, D < E ∧
+        ¬NumberDetectionGuarantee d n p Ω σ mMin E (Nat.zero_lt_of_lt hn)) :
+    0 ≤ numberDetectionCRL d n p Ω σ mMin (Nat.zero_lt_of_lt hn) ∧
+      NumberDetectionGuarantee d n p Ω σ mMin
+        (numberDetectionCRL d n p Ω σ mMin (Nat.zero_lt_of_lt hn))
+        (Nat.zero_lt_of_lt hn) ∧
+      ∀ D : ℝ, 0 ≤ D →
+        NumberDetectionGuarantee d n p Ω σ mMin D (Nat.zero_lt_of_lt hn) →
+        numberDetectionCRL d n p Ω σ mMin (Nat.zero_lt_of_lt hn) ≤ D := by
+  unfold numberDetectionCRL
+  have hne : ∃ D : ℝ, 0 ≤ D ∧
+      NumberDetectionGuarantee d n p Ω σ mMin D (Nat.zero_lt_of_lt hn) :=
+    exists_numberDetectionGuarantee p hΩ (Nat.zero_lt_of_lt hn) hn
+  have hatt := sInf_nonnegative_predicate_attained hne
+    (fun hDE hD => numberDetectionGuarantee_mono hDE hD) hfailure
+  refine ⟨hatt.1, hatt.2, ?_⟩
+  intro D hD hguarantee
+  exact csInf_le ⟨0, fun E hE => hE.1⟩ ⟨hD, hguarantee⟩
+
+private theorem positiveNumberDetectionCRL_isSmallest_of_failure_extension
+    {d n : ℕ} (p : LpIndex) {Ω σ mMin : ℝ}
+    (hn : 2 ≤ n) (hΩ : 0 < Ω)
+    (hfailure : ∀ D : ℝ,
+      ¬PositiveNumberDetectionGuarantee d n p Ω σ mMin D
+        (Nat.zero_lt_of_lt hn) →
+      ∃ E : ℝ, D < E ∧
+        ¬PositiveNumberDetectionGuarantee d n p Ω σ mMin E
+          (Nat.zero_lt_of_lt hn)) :
+    0 ≤ positiveNumberDetectionCRL d n p Ω σ mMin (Nat.zero_lt_of_lt hn) ∧
+      PositiveNumberDetectionGuarantee d n p Ω σ mMin
+        (positiveNumberDetectionCRL d n p Ω σ mMin (Nat.zero_lt_of_lt hn))
+        (Nat.zero_lt_of_lt hn) ∧
+      ∀ D : ℝ, 0 ≤ D →
+        PositiveNumberDetectionGuarantee d n p Ω σ mMin D
+          (Nat.zero_lt_of_lt hn) →
+        positiveNumberDetectionCRL d n p Ω σ mMin (Nat.zero_lt_of_lt hn) ≤ D := by
+  unfold positiveNumberDetectionCRL
+  have hne : ∃ D : ℝ, 0 ≤ D ∧
+      PositiveNumberDetectionGuarantee d n p Ω σ mMin D (Nat.zero_lt_of_lt hn) :=
+    exists_positiveNumberDetectionGuarantee p hΩ (Nat.zero_lt_of_lt hn) hn
+  have hatt := sInf_nonnegative_predicate_attained hne
+    (fun hDE hD => positiveNumberDetectionGuarantee_mono hDE hD) hfailure
+  refine ⟨hatt.1, hatt.2, ?_⟩
+  intro D hD hguarantee
+  exact csInf_le ⟨0, fun E hE => hE.1⟩ ⟨hD, hguarantee⟩
+
+/-- The general number-detection CRL attains the manuscript's smallest
+nonnegative feasible separation, for every finite `p ≥ 1` and `p = ∞`. -/
+theorem numberDetectionCRL_isSmallest
+    {d n : ℕ} (p : LpIndex) {Ω σ mMin : ℝ}
+    (hn : 2 ≤ n) (hΩ : 0 < Ω) (hσ : 0 < σ) :
+    0 ≤ numberDetectionCRL d n p Ω σ mMin (Nat.zero_lt_of_lt hn) ∧
+      NumberDetectionGuarantee d n p Ω σ mMin
+        (numberDetectionCRL d n p Ω σ mMin (Nat.zero_lt_of_lt hn))
+        (Nat.zero_lt_of_lt hn) ∧
+      ∀ D : ℝ, 0 ≤ D →
+        NumberDetectionGuarantee d n p Ω σ mMin D (Nat.zero_lt_of_lt hn) →
+        numberDetectionCRL d n p Ω σ mMin (Nat.zero_lt_of_lt hn) ≤ D := by
+  apply numberDetectionCRL_isSmallest_of_failure_extension p hn hΩ
+  intro D hfail
+  exact exists_larger_not_numberDetectionGuarantee hn hΩ hσ p hfail
+
+/-- The positive-amplitude number-detection CRL also attains the smallest
+nonnegative feasible separation for every allowed norm index. -/
+theorem positiveNumberDetectionCRL_isSmallest
+    {d n : ℕ} (p : LpIndex) {Ω σ mMin : ℝ}
+    (hn : 2 ≤ n) (hΩ : 0 < Ω) (hσ : 0 < σ) :
+    0 ≤ positiveNumberDetectionCRL d n p Ω σ mMin (Nat.zero_lt_of_lt hn) ∧
+      PositiveNumberDetectionGuarantee d n p Ω σ mMin
+        (positiveNumberDetectionCRL d n p Ω σ mMin (Nat.zero_lt_of_lt hn))
+        (Nat.zero_lt_of_lt hn) ∧
+      ∀ D : ℝ, 0 ≤ D →
+        PositiveNumberDetectionGuarantee d n p Ω σ mMin D
+          (Nat.zero_lt_of_lt hn) →
+        positiveNumberDetectionCRL d n p Ω σ mMin (Nat.zero_lt_of_lt hn) ≤ D := by
+  apply positiveNumberDetectionCRL_isSmallest_of_failure_extension p hn hΩ
+  intro D hfail
+  exact exists_larger_not_positiveNumberDetectionGuarantee hn hΩ hσ p hfail
 
 /-- Manuscript equation `eq:crl-number-upper`: the number-detection CRL for
 `p = 1` is bounded by the explicit separation threshold. -/

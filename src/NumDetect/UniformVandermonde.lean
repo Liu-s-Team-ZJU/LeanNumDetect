@@ -196,10 +196,10 @@ private theorem centeredPackets_of_unitTorus
       change (Q k).value (2 * Real.pi) (y k j) = 0
       exact (hQ k).2.1 (y k j) hymem hy0
 
-/-- Manuscript Lemma `lem:uniform-Vandermonde`. -/
-theorem uniformVandermonde_minimumSingularValue
+/-- Auxiliary measure presentation of the contiguous-grid Vandermonde estimate. -/
+theorem uniformVandermonde_minimumSingularValue_of_atomicMeasure
     {d n s : ℕ} {Ω : ℝ} (μ : AtomicMeasure d n)
-    (hd : 1 ≤ d) (hn : 2 ≤ n)
+    (_hd : 1 ≤ d) (hn : 2 ≤ n)
     (hΩ : 0 < Ω)
     (hcluster : ∀ j, InOpenL1Ball (Real.pi * n / Ω) 0 (μ.node j))
     (hs : 4 * n ≤ s) (hseven : Even s) :
@@ -321,6 +321,48 @@ theorem uniformVandermonde_minimumSingularValue
   rw [hnormalize]
   rw [hcenter.2.2.1 (n - 1)]
   exact hsv'
+
+/-- Manuscript Lemma `lem:uniform-Vandermonde`: the matrix bound depends only on
+the nodes, independently of source amplitudes. Repeated nodes give the trivial
+zero lower bound. -/
+theorem uniformVandermonde_minimumSingularValue
+    {d n s : ℕ} {Ω : ℝ} (node : Fin n → Point d)
+    (hd : 1 ≤ d) (hn : 2 ≤ n)
+    (hΩ : 0 < Ω)
+    (hcluster : ∀ j, InOpenL1Ball (Real.pi * n / Ω) 0 (node j))
+    (hs : 4 * n ≤ s) (hseven : Even s) :
+    uniformVandermondeLowerBound s Ω node hn ≤
+      matrixSingularValue (uniformVandermonde s Ω node) (n - 1) := by
+  by_cases hnode : Function.Injective node
+  · let μ : AtomicMeasure d n := {
+      amplitude := fun _ => 1
+      node := node
+      amplitude_ne_zero := by intro _; exact one_ne_zero
+      node_injective := hnode
+    }
+    exact uniformVandermonde_minimumSingularValue_of_atomicMeasure
+      μ hd hn hΩ hcluster hs hseven
+  · change ¬ ∀ i j, node i = node j → i = j at hnode
+    obtain ⟨i, hi⟩ := not_forall.mp hnode
+    obtain ⟨j, hj⟩ := not_forall.mp hi
+    obtain ⟨heq, hij⟩ := Classical.not_imp.mp hj
+    have hmin_nonneg : 0 ≤ minimumL1Separation node hn := by
+      rw [minimumL1Separation, minimumOverDistinctPairs,
+        Finset.le_inf'_iff (distinctPairs_nonempty hn)]
+      intro ij _
+      unfold l1Norm
+      positivity
+    have hmin_le : minimumL1Separation node hn ≤ 0 := by
+      have h := CenteredPacket.minimumL1Separation_le node hn hij
+      simpa [heq, l1Norm] using h
+    have hmin_zero : minimumL1Separation node hn = 0 :=
+      le_antisymm hmin_le hmin_nonneg
+    have hbound_zero : uniformVandermondeLowerBound s Ω node hn = 0 := by
+      have hn1 : n - 1 ≠ 0 := by omega
+      simp [uniformVandermondeLowerBound, normalizedMinimumSeparation,
+        hmin_zero, hn1]
+    simpa [hbound_zero] using
+      matrixSingularValue_nonneg (uniformVandermonde s Ω node) (n - 1)
 
 end
 

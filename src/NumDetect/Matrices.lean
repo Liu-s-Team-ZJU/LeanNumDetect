@@ -85,6 +85,18 @@ def AdmitsGeneralizedVandermondeDecomposition {d : ℕ} {ι κ : Type*}
 /-- Multi-index set `{0, …, s}^d` for the contiguous construction. -/
 abbrev UniformIndex (d s : ℕ) := Fin d → Fin (s + 1)
 
+/-- Membership in the frequencies queried by the contiguous GHM, `Γ_s`. -/
+def InUniformSamplingSet (d s : ℕ) (Ω : ℝ) (ω : Point d) : Prop :=
+  ∃ α β : UniformIndex d s,
+    ω = fun k => Ω / s * ((α k : ℝ) + (β k : ℝ) - s)
+
+/-- Bounded-noise Fourier measurements on `Γ_s` only. -/
+def IsUniformMeasurement {d n : ℕ} (μ : AtomicMeasure d n)
+    (s : ℕ) (Ω σ : ℝ) (Y : Point d → ℂ) : Prop :=
+  ∃ W : Point d → ℂ,
+    (∀ ω, InUniformSamplingSet d s Ω ω → ‖W ω‖ < σ) ∧
+    ∀ ω, InUniformSamplingSet d s Ω ω → Y ω = fourier μ ω + W ω
+
 /-- Physical row frequency `(Ω/s) α` of the contiguous Vandermonde matrix. -/
 def uniformFrequency (d s : ℕ) (Ω : ℝ) (α : UniformIndex d s) : Point d :=
   fun k => Ω / s * α k
