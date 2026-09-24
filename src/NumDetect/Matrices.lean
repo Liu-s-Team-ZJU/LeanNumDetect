@@ -143,6 +143,24 @@ def segmentedColumnVandermonde {d n : ℕ} (m r D : ℕ)
     Matrix (SegmentedIndex d m r) (Fin n) ℂ :=
   generalizedVandermonde (segmentedFrequency d m r D) node
 
+/-- A frequency in the segmented sampling set `Γ_seg = Λ^d + Λ^d - Ω 1`. -/
+def segmentedQueryFrequency (d m r D : ℕ)
+    (α β : SegmentedIndex d m r) : Point d :=
+  fun k =>
+    segmentedFrequency d m r D α k + segmentedFrequency d m r D β k -
+      segmentedCutoff m r D
+
+/-- Membership in the frequencies queried by the segmented GHM. -/
+def InSegmentedSamplingSet (d m r D : ℕ) (ω : Point d) : Prop :=
+  ∃ α β : SegmentedIndex d m r, ω = segmentedQueryFrequency d m r D α β
+
+/-- Bounded-noise Fourier measurements on `Γ_seg` only. -/
+def IsSegmentedMeasurement {d n : ℕ} (μ : AtomicMeasure d n)
+    (m r D : ℕ) (σ : ℝ) (Y : Point d → ℂ) : Prop :=
+  ∃ W : Point d → ℂ,
+    (∀ ω, InSegmentedSamplingSet d m r D ω → ‖W ω‖ < σ) ∧
+    ∀ ω, InSegmentedSamplingSet d m r D ω → Y ω = fourier μ ω + W ω
+
 /-- The segmented measurement matrix `GH(m,r,D)`. -/
 def segmentedMeasurementMatrix {d : ℕ} (m r D : ℕ)
     (Y : Point d → ℂ) :

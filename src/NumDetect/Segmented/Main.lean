@@ -170,7 +170,7 @@ theorem segmentedGHM_singularValueThreshold_of_fineCubeFrame
     (hmMin : minAmplitude μ (Nat.zero_lt_of_lt hn) = mMin)
     (hnoise : σ < mMin)
     (hmeasurement :
-      IsBandMeasurement μ (segmentedCutoff m r D) σ Y) :
+      IsSegmentedMeasurement μ m r D σ Y) :
     (∀ j, n ≤ j → j < (segmentedLength m r) ^ d →
       matrixSingularValue (segmentedMeasurementMatrix m r D Y) j ≤
         ((segmentedLength m r : ℕ) : ℝ) ^ d * σ) ∧
@@ -214,7 +214,7 @@ theorem segmentedGHM_singularValueThreshold
     (hmMin : minAmplitude μ (Nat.zero_lt_of_lt hn) = mMin)
     (hnoise : σ < mMin)
     (hmeasurement :
-      IsBandMeasurement μ (segmentedCutoff m r D) σ Y) :
+      IsSegmentedMeasurement μ m r D σ Y) :
     (∀ j, n ≤ j → j < (segmentedLength m r) ^ d →
       matrixSingularValue (segmentedMeasurementMatrix m r D Y) j ≤
         ((segmentedLength m r : ℕ) : ℝ) ^ d * σ) ∧
@@ -251,7 +251,7 @@ theorem segmentedGHM_singularValueThreshold_oneDimensional_of_halfFrameRange
     (hmMin : minAmplitude μ (Nat.zero_lt_of_lt hn) = mMin)
     (hnoise : σ < mMin)
     (hmeasurement :
-      IsBandMeasurement μ (segmentedCutoff m r D) σ Y) :
+      IsSegmentedMeasurement μ m r D σ Y) :
     (∀ j, n ≤ j → j < segmentedLength m r →
       matrixSingularValue (segmentedMeasurementMatrix m r D Y) j ≤
         (segmentedLength m r : ℝ) * σ) ∧

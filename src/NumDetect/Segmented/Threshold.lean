@@ -66,11 +66,10 @@ noncomputable section
 /-- Every frequency queried by the segmented GHM lies in its declared band. -/
 theorem segmentedThreshold_query_in_band
     {d m r D : ℕ} (α β : SegmentedIndex d m r) :
-    InFrequencyBand (segmentedCutoff m r D) (fun k =>
-      segmentedFrequency d m r D α k +
-        segmentedFrequency d m r D β k - segmentedCutoff m r D) := by
+    InFrequencyBand (segmentedCutoff m r D)
+      (segmentedQueryFrequency d m r D α β) := by
   intro k
-  simp only [segmentedFrequency, segmentedCutoff]
+  simp only [segmentedQueryFrequency, segmentedFrequency, segmentedCutoff]
   have hαr : (α k).1.val ≤ r := Nat.le_of_lt_succ (α k).1.isLt
   have hβr : (β k).1.val ≤ r := Nat.le_of_lt_succ (β k).1.isLt
   have hαm : (α k).2.val ≤ m := Nat.le_of_lt_succ (α k).2.isLt
@@ -89,23 +88,37 @@ theorem segmentedThreshold_query_in_band
     nlinarith [show (0 : ℝ) ≤ D * (α k).1.val + (α k).2.val by positivity,
       show (0 : ℝ) ≤ D * (β k).1.val + (β k).2.val by positivity]
 
+/-- A band measurement restricts to the segmented sampling set. -/
+theorem isSegmentedMeasurement_of_isBandMeasurement
+    {d n m r D : ℕ} {σ : ℝ}
+    (μ : AtomicMeasure d n) (Y : Point d → ℂ)
+    (hmeasurement : IsBandMeasurement μ (segmentedCutoff m r D) σ Y) :
+    IsSegmentedMeasurement μ m r D σ Y := by
+  rcases hmeasurement with ⟨W, hW, hY⟩
+  refine ⟨W, ?_, ?_⟩
+  · intro ω hω
+    rcases hω with ⟨α, β, rfl⟩
+    exact hW _ (segmentedThreshold_query_in_band α β)
+  · intro ω hω
+    rcases hω with ⟨α, β, rfl⟩
+    exact hY _ (segmentedThreshold_query_in_band α β)
+
 /-- The segmented measurement perturbation is pointwise strictly below `σ`. -/
 theorem segmentedThreshold_entrywise_perturbation
     {d n m r D : ℕ} {σ : ℝ}
     (μ : AtomicMeasure d n) (Y : Point d → ℂ)
-    (hmeasurement : IsBandMeasurement μ (segmentedCutoff m r D) σ Y)
+    (hmeasurement : IsSegmentedMeasurement μ m r D σ Y)
     (α β : SegmentedIndex d m r) :
     ‖(segmentedMeasurementMatrix m r D Y -
         segmentedMeasurementMatrix m r D (fourier μ)) α β‖ < σ := by
   rcases hmeasurement with ⟨W, hW, hY⟩
-  let ω : Point d := fun k =>
-    segmentedFrequency d m r D α k +
-      segmentedFrequency d m r D β k - segmentedCutoff m r D
-  have hband : InFrequencyBand (segmentedCutoff m r D) ω :=
-    segmentedThreshold_query_in_band α β
-  have hvalue := hY ω hband
-  have hnoise := hW ω hband
+  let ω := segmentedQueryFrequency d m r D α β
+  have hsample : InSegmentedSamplingSet d m r D ω :=
+    ⟨α, β, rfl⟩
+  have hvalue := hY ω hsample
+  have hnoise := hW ω hsample
   simp only [segmentedMeasurementMatrix, Matrix.sub_apply]
+  change ‖Y ω - fourier μ ω‖ < σ
   rw [hvalue, add_sub_cancel_left]
   exact hnoise
 
@@ -140,7 +153,7 @@ theorem segmentedThreshold_noiseless_singularValue_eq_zero
 theorem segmentedThreshold_perturbation_spectralNorm_le
     {d n m r D : ℕ} {σ : ℝ}
     (μ : AtomicMeasure d n) (Y : Point d → ℂ)
-    (hmeasurement : IsBandMeasurement μ (segmentedCutoff m r D) σ Y) :
+    (hmeasurement : IsSegmentedMeasurement μ m r D σ Y) :
     matrixSpectralNorm
         (segmentedMeasurementMatrix m r D Y -
           segmentedMeasurementMatrix m r D (fourier μ)) ≤
@@ -242,8 +255,8 @@ measured singular value. -/
 theorem segmentedThreshold_signal_weyl
     {d n m r D : ℕ} {σ : ℝ}
     (μ : AtomicMeasure d n) (Y : Point d → ℂ)
-    (_hn : 0 < n)
-    (hmeasurement : IsBandMeasurement μ (segmentedCutoff m r D) σ Y)
+    (_hn : 0 < n) (hσ : 0 < σ)
+    (hmeasurement : IsSegmentedMeasurement μ m r D σ Y)
     (hgap :
       2 * (((segmentedLength m r) ^ d : ℕ) : ℝ) * σ <
         matrixSingularValue (segmentedNoiselessMatrix m r D μ) (n - 1)) :
@@ -266,15 +279,6 @@ theorem segmentedThreshold_signal_weyl
       exact (Matrix.rank_le_card_width
         (segmentedNoiselessMatrix m r D μ)).trans (Nat.le_of_not_gt h)
     rw [hz] at hgap
-    have hσnonneg : 0 ≤ σ := by
-      rcases hmeasurement with ⟨W, hW, _⟩
-      have hband :
-          InFrequencyBand (segmentedCutoff m r D) (0 : Point d) := by
-        intro k
-        simp only [Pi.zero_apply, abs_zero]
-        positivity
-      exact (norm_nonneg (W (0 : Point d))).trans
-        (hW (0 : Point d) hband).le
     have hbudget :
         0 ≤ 2 * (((segmentedLength m r) ^ d : ℕ) : ℝ) * σ := by
       positivity
@@ -295,10 +299,10 @@ lower bound and its squared signal gap. -/
 theorem segmentedGHM_singularValueThreshold_of_lowerBound
     {d n m r D : ℕ} {σ mMin B : ℝ}
     (μ : AtomicMeasure d n) (Y : Point d → ℂ)
-    (hn : 2 ≤ n) (_hσ : 0 < σ)
+    (hn : 2 ≤ n) (hσ : 0 < σ)
     (hmMin : minAmplitude μ (Nat.zero_lt_of_lt hn) = mMin)
     (hmeasurement :
-      IsBandMeasurement μ (segmentedCutoff m r D) σ Y)
+      IsSegmentedMeasurement μ m r D σ Y)
     (hBpos : 0 < B)
     (hB : B ≤
       matrixSingularValue (segmentedVandermonde m r D μ.node) (n - 1))
@@ -350,7 +354,7 @@ theorem segmentedGHM_singularValueThreshold_of_lowerBound
   refine ⟨hnoise, ?_⟩
   simpa only [Nat.cast_pow, Nat.cast_ofNat] using
     segmentedThreshold_signal_weyl μ Y (Nat.zero_lt_of_lt hn)
-      hmeasurement hnoiseless
+      hσ hmeasurement hnoiseless
 
 /-- The elementary growth estimate used to dominate the segmented grid size. -/
 theorem two_mul_add_one_le_five_pow_sub_one
@@ -819,7 +823,7 @@ theorem segmentedThreshold_noise_singularValue_le
     {d n m r D : ℕ} {σ : ℝ}
     (μ : AtomicMeasure d n) (Y : Point d → ℂ)
     (hmeasurement :
-      IsBandMeasurement μ (segmentedCutoff m r D) σ Y)
+      IsSegmentedMeasurement μ m r D σ Y)
     {j : ℕ} (hj : n ≤ j) (hjcard : j < (segmentedLength m r) ^ d) :
     matrixSingularValue (segmentedMeasurementMatrix m r D Y) j ≤
       ((segmentedLength m r : ℕ) : ℝ) ^ d * σ := by
@@ -906,7 +910,7 @@ theorem segmentedGHM_singularValueThreshold_of_segmentedLowerBound
     (hmMin : minAmplitude μ (Nat.zero_lt_of_lt hn) = mMin)
     (_hnoise : σ < mMin)
     (hmeasurement :
-      IsBandMeasurement μ (segmentedCutoff m r D) σ Y)
+      IsSegmentedMeasurement μ m r D σ Y)
     (hExplicit :
       segmentedVandermondeLowerBound d n nStar m r D β
           (periodicMinimumL1Separation μ.node hn) ≤ B)

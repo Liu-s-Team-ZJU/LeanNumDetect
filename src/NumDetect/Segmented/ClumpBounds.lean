@@ -817,51 +817,6 @@ namespace NumDetect
 
 noncomputable section
 
-/-- Every frequency queried by a segmented GHM lies in its declared band. -/
-theorem segmented_query_in_band
-    {d m r D : ℕ} (α β : SegmentedIndex d m r) :
-    InFrequencyBand (segmentedCutoff m r D) (fun k =>
-      segmentedFrequency d m r D α k +
-        segmentedFrequency d m r D β k - segmentedCutoff m r D) := by
-  intro k
-  simp only [segmentedFrequency, segmentedCutoff]
-  have hαr : (α k).1.val ≤ r := Nat.le_of_lt_succ (α k).1.isLt
-  have hβr : (β k).1.val ≤ r := Nat.le_of_lt_succ (β k).1.isLt
-  have hαm : (α k).2.val ≤ m := Nat.le_of_lt_succ (α k).2.isLt
-  have hβm : (β k).2.val ≤ m := Nat.le_of_lt_succ (β k).2.isLt
-  have hα : D * (α k).1.val + (α k).2.val ≤ r * D + m := by
-    nlinarith [Nat.mul_le_mul_left D hαr]
-  have hβ : D * (β k).1.val + (β k).2.val ≤ r * D + m := by
-    nlinarith [Nat.mul_le_mul_left D hβr]
-  push_cast
-  rw [abs_le]
-  have hαR : (D : ℝ) * (α k).1.val + (α k).2.val ≤
-      (r : ℝ) * D + m := by exact_mod_cast hα
-  have hβR : (D : ℝ) * (β k).1.val + (β k).2.val ≤
-      (r : ℝ) * D + m := by exact_mod_cast hβ
-  constructor <;> nlinarith [show (0 : ℝ) ≤ D * (α k).1.val + (α k).2.val by positivity,
-    show (0 : ℝ) ≤ D * (β k).1.val + (β k).2.val by positivity]
-
-/-- Pointwise perturbation bound for the segmented measurement matrix. -/
-theorem segmentedMeasurementMatrix_sub_fourier_entry_lt
-    {d n m r D : ℕ} {σ : ℝ}
-    (μ : AtomicMeasure d n) (Y : Point d → ℂ)
-    (hmeasurement : IsBandMeasurement μ (segmentedCutoff m r D) σ Y)
-    (α β : SegmentedIndex d m r) :
-    ‖(segmentedMeasurementMatrix m r D Y -
-        segmentedMeasurementMatrix m r D (fourier μ)) α β‖ < σ := by
-  rcases hmeasurement with ⟨W, hW, hY⟩
-  let ω : Point d := fun k =>
-    segmentedFrequency d m r D α k +
-      segmentedFrequency d m r D β k - segmentedCutoff m r D
-  have hband : InFrequencyBand (segmentedCutoff m r D) ω :=
-    segmented_query_in_band α β
-  have hvalue := hY ω hband
-  have hnoise := hW ω hband
-  simp only [segmentedMeasurementMatrix, Matrix.sub_apply]
-  rw [hvalue, add_sub_cancel_left]
-  exact hnoise
-
 /-- Every singular value at or beyond the rank vanishes. -/
 theorem matrixSingularValue_eq_zero_of_rank_le'
     {m n : Type*} [Fintype m] [Fintype n] [DecidableEq n]

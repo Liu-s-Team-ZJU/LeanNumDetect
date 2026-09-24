@@ -347,22 +347,26 @@ theorem randomGHM_singularValueThreshold
           Matrix.diagonal μ.amplitude *
           randomColumnVandermonde columnFrequency μ :=
     randomMeasurementMatrix_fourier_factorization rowFrequency columnFrequency μ
-  have hzero : ∀ j, n ≤ j → matrixSingularValue G₀ j = 0 := by
-    intro j hj
-    rw [hfactor]
-    exact matrixSingularValue_three_mul_eq_zero_of_card_le
-      (randomRowVandermonde rowFrequency μ)
-      (Matrix.diagonal μ.amplitude)
-      (randomColumnVandermonde columnFrequency μ) (by simpa using hj)
   have hnoise :
       ∀ j, n ≤ j → j < M₂ →
         matrixSingularValue G j < σ * Real.sqrt (M₁ * M₂) := by
-    intro j hj hjM₂
-    have hperturb :=
-      matrixSingularValue_le_add_spectralNorm_sub G G₀
-        (i := j) (by simpa using hjM₂)
-    rw [hzero j hj, zero_add] at hperturb
-    exact hperturb.trans_lt hΔnorm
+    let row : Fin M₁ → Fin 1 → ℤ := fun i _ => rowFrequency i
+    let column : Fin M₂ → Fin 1 → ℤ := fun j _ => columnFrequency j
+    have hrow : Function.Injective row := by
+      intro i j hij
+      apply _hrowInjective
+      exact congrFun hij 0
+    have hcolumn : Function.Injective column := by
+      intro i j hij
+      apply _hcolumnInjective
+      exact congrFun hij 0
+    have hband' : ∀ i j k,
+        |((row i k + column j k : ℤ) : ℝ)| ≤ Ω := by
+      intro i j k
+      fin_cases k
+      exact hband i j
+    exact realizedRandomGHM_tail_singularValue_lt
+      row column μ Y hM₁ hM₂ hrow hcolumn hmeasurement hband'
   have hminNonneg : 0 ≤ minAmplitude μ (Nat.zero_lt_of_lt hn) :=
     (minAmplitude_pos μ (Nat.zero_lt_of_lt hn)).le
   have hrowNonneg :
@@ -564,12 +568,12 @@ theorem atomicMeasure_nodeCoordinate_injective {n : ℕ} (μ : AtomicMeasure 1 n
   fin_cases k
   exact hij
 
-/-- Manuscript Theorem `thm:resolutionrandghmnumber1`.  The existential
-constants `C₂(n)` and `C₃(n)` precede every realized sampling family, source,
-and noise level, so their dependence is only on `n`.  For each realization the
-proof then chooses a positive local scale `ε`; the theorem uses the actual
-minimum source separation as `θ_min`. -/
-theorem randomGHM_singularValueThreshold_of_separation (n : ℕ) (hn : 2 ≤ n) :
+/-- Signal singular-value estimate in manuscript Theorem
+`thm:resolutionrandghmnumber1`.  The constants `C₂(n)` and `C₃(n)` precede
+every realized sampling family, source, and noise level, so they depend only on
+`n`.  For each realization the proof chooses a positive local scale `ε`; the
+separate noise bound is `realizedRandomGHM_tail_singularValue_lt`. -/
+theorem randomGHM_signalThreshold_of_separation (n : ℕ) (hn : 2 ≤ n) :
     ∃ C₂ C₃ : ℝ, 0 < C₂ ∧ 0 < C₃ ∧
       ∀ {M₁ M₂ : ℕ}
         (rowFrequency : Fin M₁ → ℤ) (columnFrequency : Fin M₂ → ℤ)
@@ -596,10 +600,6 @@ theorem randomGHM_singularValueThreshold_of_separation (n : ℕ) (hn : 2 ≤ n) 
                 (σ / minAmplitude μ (Nat.zero_lt_of_lt hn)) ^
                   (1 / (2 * (n : ℝ) - 2)) ≤
             minimumSeparation1D (fun j => μ.node j 0) hn →
-          (∀ j, n ≤ j → j < M₂ →
-            matrixSingularValue
-                (randomMeasurementMatrix rowFrequency columnFrequency Y) j ≤
-              σ * Real.sqrt (M₁ * M₂)) ∧
           σ * Real.sqrt (M₁ * M₂) <
             matrixSingularValue
               (randomMeasurementMatrix rowFrequency columnFrequency Y) (n - 1)) := by
@@ -710,8 +710,8 @@ theorem randomGHM_singularValueThreshold_of_separation (n : ℕ) (hn : 2 ≤ n) 
         ring
   rcases randomGHM_singularValueThreshold rowFrequency columnFrequency μ Y
       hn hM₁ hM₂ hrowInjective hcolumnInjective hΩ hσ hmeasurement hband
-      (hmodelGap.trans_le hsignalLower) with ⟨htail, _hlower, hsignal⟩
-  exact ⟨fun j hj hjM₂ => (htail j hj hjM₂).le, hsignal⟩
+      (hmodelGap.trans_le hsignalLower) with ⟨_htail, _hlower, hsignal⟩
+  exact hsignal
 
 end
 

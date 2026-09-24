@@ -1,111 +1,64 @@
 # NumDetect
 
-This directory contains the manuscript-facing definitions and main theoretical
-results for source-number detection with generalized Hankel and Toeplitz
-matrices. The modules are kept in one directory and grouped by descriptive
-prefixes. Import [Main.lean](Main.lean) for the complete public interface.
+This directory formalizes the NumDetect manuscript. Import [Main.lean](Main.lean)
+for the public interface. The table follows the order of active definition,
+theorem, lemma, corollary, and proposition environments in `main.tex`. It omits
+commented-out statements and separately labeled equations. Only declarations
+that directly encode a manuscript statement are listed; supporting declarations
+are omitted. Names are in `LeanNumDetect.NumDetect` unless another namespace is
+shown.
 
-## Main results and entry points
+## Manuscript correspondence
 
-| Main result | Exact Lean location |
+| TeX type and label | Subject | Direct Lean declaration | Relationship |
+| --- | --- | --- | --- |
+| Definition `def:generalized-hankel-toeplitz` | Generalized Hankel and Toeplitz matrices | [Matrices.lean](Matrices.lean): `generalizedHankelOn`, `generalizedToeplitzOn` | **Equivalent**; ordered frequency sets are represented by indexed families, with domain membership explicit. |
+| Definition `generalized vandermonde` | Generalized Vandermonde matrix and steering vector | [Matrices.lean](Matrices.lean): `generalizedVandermonde`, `steeringVector` | **Equivalent**; finite indices represent the ordered rows and columns. |
+| Definition `def:generalized-vandermonde-decomposition` | Hankel/Toeplitz type Vandermonde decomposition | [Matrices.lean](Matrices.lean): `AdmitsGeneralizedVandermondeDecomposition` | **Equivalent**; `AtomicMeasure` carries distinct nodes and nonzero coefficients. |
+| Definition `def:sigma-admissible-measure` | $\sigma$-admissible and positive $\sigma$-admissible measures | [Basic.lean](Basic.lean): `IsAdmissible`, `IsPositiveAdmissible` | **Equivalent**. |
+| Definition `def:crl-number` | General and positive number-detection CRL | [Basic.lean](Basic.lean): `numberDetectionCRL`, `positiveNumberDetectionCRL` | **Infimum formulation**; Lean uses `sInf` over nonnegative feasible thresholds. Attainment of the manuscript’s smallest threshold has not been proved. |
+| Theorem `thm:li-resolution` | Exclusion of admissible measures with fewer supports | [Uniform.lean](Uniform.lean): `noAdmissibleMeasureWithFewerSupports` | **Equivalent**. |
+| Lemma `lem:uniform-Vandermonde` | Contiguous-grid minimum singular value | [UniformVandermonde.lean](UniformVandermonde.lean): `uniformVandermonde_minimumSingularValue` | **Equivalent**; the manuscript’s $n$th singular value has Lean index `n - 1`. |
+| Theorem `liuthm5.1v2` | Contiguous-grid singular-value threshold | [Uniform.lean](Uniform.lean): `uniformGHM_singularValueThreshold` | **Equivalent**; Lean singular-value indices start at zero. |
+| Definition `defi:metric_separation` | Periodic distance and minimum separation | [Basic.lean](Basic.lean): `periodicDistance`, `extendedPeriodicMinimumSeparation` | **Equivalent**; `WithTop ℝ` represents the $+\infty$ convention for a singleton. |
+| Definition `defi:local_sparsity` | Local neighborhood and sparsity | [Basic.lean](Basic.lean): `localNeighborhood`, `localSparsity` | **Equivalent** for a nonempty finite indexed node family. |
+| Definition `defi:high_dim_clumps` | Multidimensional clump structure | [Basic.lean](Basic.lean): `IsAngularClumpStructure` | **Equivalent** for injectively indexed node sets. |
+| Theorem `thm:segmented-vandermonde` | Segmented-grid minimum singular value | [Segmented/Main.lean](Segmented/Main.lean): `segmentedVandermonde_minimumSingularValue` | **Equivalent**; no additional frame hypothesis is required. |
+| Theorem `thm:segmented_threshold` | Segmented-grid singular-value threshold | [Segmented/Main.lean](Segmented/Main.lean): `segmentedGHM_singularValueThreshold` | **Equivalent**; the observation equation and strict noise budget are assumed only on $\Gamma_{\mathrm{seg}}$. The signal bound retains the additional local geometry condition. |
+| Theorem `thm:resolutionrandghmnumber1` | Random-GHM noise and signal thresholds | [Random.lean](Random.lean): `realizedRandomGHM_tail_singularValue_lt` (noise), `randomGHM_signalThreshold_of_separation` (signal) | **Equivalent**. |
+| Theorem `thm:nonuniform_vdm_scaling` | Nonuniform one-dimensional Vandermonde scaling | [RandSamp/NonuniformVandermonde.lean](../RandSamp/NonuniformVandermonde.lean): `RandSamp.nonuniformVandermonde_minimumSingularValue` | **Stronger**; permits distinct real frequencies, gives an explicit positive small-separation threshold, and does not require $\tau<\pi/\theta_{\min}$. |
+| Lemma `lem:stability_ghm_music` | General GHM-MUSIC perturbation | [MUSIC.lean](MUSIC.lean): `ghmMUSIC_correlation_stability` | **Equivalent**; the perturbed noise space is the fixed-rank trailing left singular subspace. |
+| Corollary `cor:stability_multidim_segmented` | Segmented-grid MUSIC perturbation | [MUSIC.lean](MUSIC.lean): `segmentedMUSIC_correlation_stability` | **Equivalent**. |
+| Lemma `lem:nonnegative_to_centered` | Unitary conversion from nonnegative to centered frequency grid | [UniformCentering.lean](UniformCentering.lean): `uniformVandermonde_centering` | **Equivalent**; proves the diagonal unitary factorization, equality of every singular value, and the noiseless matrix identity. |
+| Lemma `lem2:uniform-Vandermonde` | Centered interpolation polynomial with a neighbor-product bound | [UniformInterpolation.lean](UniformInterpolation.lean): `CenteredPacket.exists_centeredUnitTorusInterpolation` | **Equivalent**; the integer-frequency presentation has the stated real cube support and the original pointwise neighbor-product bound. |
+| Definition `defi:high_dim_uniform_poly` | Multivariate segmented trigonometric polynomials | [Segmented/Polynomial.lean](Segmented/Polynomial.lean): `SegmentedPolynomial`, `SegmentedPolynomial.eval` | **Equivalent**; `m < D` is stored in the polynomial structure. |
+| Definition `defi:high_dim_lagrange` | Lagrange interpolant family | [Segmented/Polynomial.lean](Segmented/Polynomial.lean): `SegmentedPolynomial.IsLagrangeFamily` | **Equivalent**; `angularValue` evaluates $f(y/(2\pi))$. |
+| Lemma `lem:minsvd_bound_by_lagInterp_high_dim` | Interpolants bound inverse minimum singular value | [Segmented/Interpolation.lean](Segmented/Interpolation.lean): `segmentedPolynomial_lagrange_minimumSingularValue` | **Equivalent**; positivity of the minimum singular value is also proved. |
+| Lemma `lem:interpolation_via_svd` | Full-rank interpolation and $L^2/L^\infty$ bounds | [Segmented/Interpolation.lean](Segmented/Interpolation.lean): `segmentedPolynomial_interpolation_of_fullColumnRank` | **Equivalent**. |
+| Theorem `thm:well_separated_segmented` | Two-sided singular-value estimate for separated nodes | [WellSeparatedSegmented.lean](WellSeparatedSegmented.lean): `wellSeparatedSegmented_singularValue_bounds` | **Equivalent**; includes $n=1$ and the endpoint $\beta=1/(2\log 2)$. |
+| Proposition `prop:decomposition` | Partition of a subset into separated classes | [Segmented/ClumpBasics.lean](Segmented/ClumpBasics.lean): `angularClump_decomposition` | **Equivalent**; subsets are finite sets of node indices. |
+| Lemma `lem:localization` | Polynomial vanishing outside an anchor neighborhood | [Segmented/ClumpBounds.lean](Segmented/ClumpBounds.lean): `localizationPolynomial_of_angularClumpStructure` | **Equivalent**; uses the manuscript’s $L^\infty$ norm bound. |
+| Lemma `lem:freq_quantization` | Quantized integer frequency with phase separation | [Segmented/NeighborFactors.lean](Segmented/NeighborFactors.lean): `frequency_quantization_manuscript` | **Equivalent**; Hölder-conjugate exponents include the endpoints $1$ and $\infty$. |
+| Lemma `lem:neighborset_segmented` | Neighbor-set interpolation polynomial and $L^2$ bound | [Segmented/Interpolation.lean](Segmented/Interpolation.lean): `neighborSetSegmented_polynomial_finiteSet` | **Equivalent**; the finite set and the short-neighbor product are stated explicitly. |
+
+## Organization and conventions
+
+| Modules | Contents |
 | --- | --- |
-| Contiguous-grid VDM minimum-singular-value estimate (`lem:uniform-Vandermonde`) | [UniformVandermonde.lean](UniformVandermonde.lean): theorem `uniformVandermonde_minimumSingularValue` |
-| Multidimensional number-detection resolution (`thm:li-resolution`) | [Uniform.lean](Uniform.lean): theorem `noAdmissibleMeasureWithFewerSupports` |
-| Number-detection CRL upper bound (`eq:crl-number-upper`) | [CRL.lean](CRL.lean): theorem `numberDetectionCRL_le_numberDetectionSeparationThreshold` |
-| Segmented-grid VDM minimum-singular-value estimate (`thm:segmented-vandermonde`) | [Segmented.lean](Segmented.lean): theorem `segmentedVandermonde_minimumSingularValue` |
-| Well-separated segmented VDM two-sided singular-value estimate (`thm:well_separated_segmented`) | [WellSeparatedSegmented.lean](WellSeparatedSegmented.lean): theorem `wellSeparatedSegmented_singularValue_bounds` |
-| Segmented-grid number-detection singular-value threshold (`thm:segmented_threshold`) | [Segmented.lean](Segmented.lean): theorem `segmentedGHM_singularValueThreshold` |
-| Random-GHM number-detection threshold (`thm:resolutionrandghmnumber1`) | [Random.lean](Random.lean): theorem `randomGHM_singularValueThreshold_of_separation` |
-| General GHM-MUSIC stability (`lem:stability_ghm_music`) | [MUSIC.lean](MUSIC.lean): theorem `ghmMUSIC_correlation_stability` |
-| Segmented-grid MUSIC stability (`cor:stability_multidim_segmented`) | [MUSIC.lean](MUSIC.lean): theorem `segmentedMUSIC_correlation_stability` |
+| [Basic.lean](Basic.lean), [Matrices.lean](Matrices.lean), [MatrixFacts.lean](MatrixFacts.lean) | Atomic measures, Fourier observations, GHM/GTM definitions, factorizations, and matrix estimates |
+| [UniformDefinitions.lean](UniformDefinitions.lean), [UniformInterpolation.lean](UniformInterpolation.lean), [UniformCentering.lean](UniformCentering.lean), [UniformVandermonde.lean](UniformVandermonde.lean), [UniformThreshold.lean](UniformThreshold.lean), [Uniform.lean](Uniform.lean) | Contiguous-grid interpolation, frequency centering, singular-value bounds, and number detection |
+| [Segmented/](Segmented/), [WellSeparatedSegmented.lean](WellSeparatedSegmented.lean) | Clump geometry, segmented polynomials, interpolation, and segmented-grid estimates |
+| [RandomMatrixBounds.lean](RandomMatrixBounds.lean), [Random.lean](Random.lean), [RandSamp/](../RandSamp/) | Fixed realized random-frequency draws and nonuniform Vandermonde bounds |
+| [MUSICPerturbation.lean](MUSICPerturbation.lean), [MUSIC.lean](MUSIC.lean) | MUSIC noise spaces and stability |
+| [CRLLowerBound.lean](CRLLowerBound.lean), [CRL.lean](CRL.lean) | CRL bounds, including the two-sided and positive-amplitude results corresponding to the manuscript's equation labels |
 
-The exact GHM/GTM factorizations are structural foundations rather than main
-theorems. The uniform threshold `uniformGHM_singularValueThreshold` is the
-matrix-level input to the final number-detection resolution theorem. The exact
-noiseless MUSIC characterization supports the perturbation result. The random-GHM
-results are conditional on explicit properties of the realized frequency
-draws; their scope is described below.
+The equation-only CRL bounds are in [CRL.lean](CRL.lean) and
+[CRLLowerBound.lean](CRLLowerBound.lean). The latter proves the constant-$2$
+lower bound by a direct finite-difference construction.
 
-[CRL.lean](CRL.lean) also contains the two-sided and positive-amplitude CRL
-statements. [Segmented.lean](Segmented.lean) provides one-dimensional variants
-under the proved consecutive-block frame range in addition to the
-multidimensional manuscript statements.
+## Verification
 
-## Model and indexing conventions
-
-`AtomicMeasure d n` implements the manuscript's reduced representation:
-amplitudes are nonzero and nodes are pairwise distinct. `IsBandMeasurement`
-contains the Fourier observation equation and the strict pointwise noise bound
-on $[-\Omega,\Omega]^d$. `IsAdmissible` uses the same strict inequality.
-`LpIndex` represents all $p\in[1,\infty]$, including a separate infinity case
-for the resolution-limit definitions.
-
-`IsAngularClumpStructure` represents a finite clump partition. It records a
-surjective clump label, an upper bound $n^\star$ on every clump size, attainment
-of that bound by at least one clump, a same-clump periodic $\ell^\infty$
-diameter bound, and separation between different clumps.
-`localSparsity_eq_of_angularClumpStructure` proves the resulting identity
-$\nu_\infty(\tau,\mathcal X)=n^\star$.
-
-Lean singular-value indices are zero-based. Thus the manuscript's
-$\hat\sigma_n$ is `matrixSingularValue A (n - 1)`, and the paper range
-$j=n+1,\ldots,L^d$ is represented by `n ≤ j ∧ j < L ^ d`.
-
-## Proof organization
-
-| Modules | Role |
-| --- | --- |
-| [Basic.lean](Basic.lean), [Matrices.lean](Matrices.lean), [MatrixFacts.lean](MatrixFacts.lean) | Atomic measures, measurements, admissibility, GHM/GTM and Vandermonde matrices, exact Fourier factorizations, and shared matrix estimates |
-| [UniformDefinitions.lean](UniformDefinitions.lean), [UniformInterpolation.lean](UniformInterpolation.lean), [UniformVandermonde.lean](UniformVandermonde.lean), [UniformThreshold.lean](UniformThreshold.lean), [Uniform.lean](Uniform.lean) | Contiguous-grid interpolation, Vandermonde lower bounds, singular-value thresholding, and number-detection uniqueness |
-| [Segmented/](Segmented/), [WellSeparatedSegmented.lean](WellSeparatedSegmented.lean) | Angular clumps, canonical segmented trigonometric polynomials, one-sided and two-sided Vandermonde bounds, and segmented GHM thresholding |
-| [RandomMatrixBounds.lean](RandomMatrixBounds.lean), [Random.lean](Random.lean) | Matrix estimates and deterministic consequences for fixed realized random-frequency draws |
-| [MUSICPerturbation.lean](MUSICPerturbation.lean), [MUSIC.lean](MUSIC.lean) | Fixed-rank trailing singular subspaces, noiseless MUSIC, general GHM stability, and the segmented specialization |
-| [CRLLowerBound.lean](CRLLowerBound.lean), [CRL.lean](CRL.lean) | Finite-difference obstructions, upper guarantees, and two-sided computational resolution limits |
-| [Main.lean](Main.lean) | Aggregate public import for all groups above |
-
-The Appendix B construction is organized under `Segmented/`:
-[Polynomial.lean](Segmented/Polynomial.lean) defines Definition B.1 and its
-coefficient algebra; [NeighborFactors.lean](Segmented/NeighborFactors.lean)
-constructs the quantized factors; [Interpolation.lean](Segmented/Interpolation.lean)
-states the Lagrange and neighbor interpolation lemmas;
-[ClumpBasics.lean](Segmented/ClumpBasics.lean) proves the independent
-decomposition proposition; and [ClumpBounds.lean](Segmented/ClumpBounds.lean)
-proves localization and the singular-value bounds. The polynomial type stores $m<D$.
-Its multiplication collects all contributions to each output frequency in one
-coefficient, with output fine budget $m_1+m_2<D$. The threshold and final
-consequences are in [Threshold.lean](Segmented/Threshold.lean) and
-[Main.lean](Segmented/Main.lean).
-
-The multidimensional segmented proof uses the translated-cube Fourier frame in
-[General/Fourier/TranslatedCubeFourier.lean](../General/Fourier/TranslatedCubeFourier.lean).
-Its conversion to the manuscript's angular one-sided cube is proved in
-[General/Fourier/BartonCubeFrame.lean](../General/Fourier/BartonCubeFrame.lean).
-The real cube is centered at `K / 2` with radius `(K + 1) / 2`, so its integer
-points are exactly `{0, ..., K}^d` for either parity of `K`; this preserves the
-manuscript denominator `K + 1` without rounding the radius.
-
-## Formalization choices and manuscript gaps
-
-| Topic | Formalized statement |
-| --- | --- |
-| Random GHM | `randomGHM_singularValueThreshold_of_separation` uses the actual minimum source separation and existential positive constants `C₂(n)`, `C₃(n)`. Their quantifiers precede the realized draws, sources, and noise level, so they depend only on `n`; a positive small-cluster scale is chosen after the realized draws. The sampling-spread hypothesis is imposed on those realized draws, as in the manuscript theorem. |
-| MUSIC perturbation | The perturbed noise space is the trailing left singular subspace with the source rank fixed. Using the kernel of the perturbed adjoint would make the claimed stability false under arbitrarily small full-rank perturbations. The required perturbation theorem is proved in [MUSICSubspacePerturbation.lean](../General/MatrixAnalysis/MUSICSubspacePerturbation.lean). |
-| CRL lower constant | The constant-$2$ lower bound, including the positive-amplitude case, is proved directly by finite differences. The cited Liu--Zhang result has the different constant $0.81e^{-3/2}$ for general complex amplitudes and does not supply the displayed constant-$2$ formula. |
-| CRL endpoint | The CRL is defined with `sInf`. The upper-bound proof gives guarantees at every separation strictly above the displayed threshold, but does not prove that the endpoint is itself admissible; the manuscript's word “smallest” would require this additional attainment result. |
-
-The translated-cube estimate is no longer an external admission. Barton's box
-minorant, its exact mass, the modulated lattice sums, and the final exponential
-relaxation are all proved in Lean. The one-dimensional Vaaler--Selberg and
-Poisson-summation dependency is vendored with its source and license under
-[vendor/vaaler](../../vendor/vaaler/README.md).
-
-## Dependencies and verification
-
-There are no admitted results in the current project. `src/External/` contains
-only the repository's admission policy, and the CI audit rejects direct
-admissions or project axioms elsewhere.
-
-From the repository root, run:
+There are no admitted results in the current project. From the repository root:
 
 ```sh
 python3 .github/ci/setup_mathlib.py --verify
@@ -113,7 +66,6 @@ lake build
 python3 .github/ci/check.py
 ```
 
-The final command explicitly builds every source module and checks declaration
-bodies for `sorryAx` and project-defined axioms. See the
-[repository guide](../../README.md) and [CI guide](../../.github/ci/README.md)
-for environment and verification details.
+The final command checks every source module and audits declaration bodies for
+`sorryAx` and project-defined axioms. See the [repository guide](../../README.md)
+and [CI guide](../../.github/ci/README.md).

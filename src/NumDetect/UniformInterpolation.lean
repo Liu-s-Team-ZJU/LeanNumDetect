@@ -194,6 +194,30 @@ theorem l1Norm_sub_le {d : ℕ} (x y : Point d) :
   exact Finset.sum_le_sum fun k _ => by
     simpa using abs_sub_le (x k) 0 (y k)
 
+theorem l1Norm_scale {d : ℕ} (t : ℝ) (ht : 0 ≤ t) (x : Point d) :
+    l1Norm (fun k => t * x k) = t * l1Norm x := by
+  simp only [l1Norm, abs_mul, abs_of_nonneg ht, Finset.mul_sum]
+
+theorem value_scale {d h : ℕ} (P : CenteredPacket d h)
+    (D t : ℝ) (hDt : 2 * Real.pi * t = D) (x : Point d) :
+    P.value (2 * Real.pi) (fun k => t * x k) = P.value D x := by
+  unfold value
+  apply Finset.sum_congr rfl
+  intro i _
+  congr 2
+  have hsum :
+      (∑ k, (P.frequency i k : ℝ) * (t * x k)) =
+        t * ∑ k, (P.frequency i k : ℝ) * x k := by
+    rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro k _
+    ring
+  have hreal :
+      (2 * Real.pi) * (∑ k, (P.frequency i k : ℝ) * (t * x k)) =
+        D * ∑ k, (P.frequency i k : ℝ) * x k := by
+    rw [hsum, ← mul_assoc, hDt]
+  exact congrArg (fun a : ℝ => Complex.I * (a : ℂ)) hreal
+
 /-- Distinct points have strictly positive `ℓ¹` distance. -/
 theorem l1Norm_sub_pos {d : ℕ} {x y : Point d} (hxy : x ≠ y) :
     0 < l1Norm (x - y) := by
@@ -274,85 +298,248 @@ def widen {d h h' : ℕ} (P : CenteredPacket d h) (hh : h ≤ h') :
     (hh : h ≤ h') :
     (P.widen hh).mass = P.mass := rfl
 
-/-- For every anchor, multiply signed-direction two-point factors which
-annihilate all other nodes.  Each factor uses bandwidth `floor (s/(2n))`. -/
-theorem exists_centeredInterpolationPackets
-    {d n s : ℕ} (hn : 2 ≤ n) {D Δ θ : ℝ} (x : Fin n → Point d)
-    (hs : 4 * n ≤ s) (hD : 0 < D) (hΔ : 0 < Δ)
-    (hsep : ∀ i j, i ≠ j → Δ ≤ l1Norm (x i - x j))
-    (hdiam : ∀ i j, l1Norm (x i - x j) ≤ Real.pi / (2 * D))
-    (hscale : ((s : ℝ) / (2 * n)) * D * Δ ≤ Real.pi)
-    (htheta : ((s : ℝ) / (2 * n)) * D * Δ / Real.pi = θ) :
-    ∃ P : Fin n → CenteredPacket d ((n - 1) * (s / (2 * n))),
-      (∀ k, (P k).mass ≤
-        Real.sqrt ((2 : ℝ) ^ (n - 1)) * θ⁻¹ ^ (n - 1)) ∧
-      ∀ k j, (P k).value D (x j - x k) =
-        if k = j then 1 else 0 := by
+/-- A two-point unit-torus factor, with the manuscript's individual
+near-neighbor cost rather than a global separation bound. -/
+theorem exists_unitTorusNeighborFactor {T v : ℝ}
+    (hT : 2 ≤ T) (hv : 0 < v) (hvmax : v ≤ 1 / 4) :
+    ∃ Q : SegmentedVDM.Packet 0 ⌊T⌋₊,
+      Q.value (2 * Real.pi) 0 = 1 ∧
+      Q.value (2 * Real.pi) v = 0 ∧
+      Q.mass ≤ Real.sqrt 2 *
+        (if v ≤ 1 / (2 * T) then 1 / (2 * T * v) else 1) := by
+  have hD : 0 < 2 * Real.pi := by positivity
+  have hvm : v ≤ Real.pi / (2 * (2 * Real.pi)) := by
+    rw [show Real.pi / (2 * (2 * Real.pi)) = (1 : ℝ) / 4 by
+      field_simp
+      ring]
+    exact hvmax
+  by_cases hnear : v ≤ 1 / (2 * T)
+  · obtain ⟨Q, hQ0, hQv, hQmass⟩ :=
+      SegmentedVDM.neighbor_factor (Δ := v) (u := v) hT hD hv
+        (by simpa [abs_of_pos hv])
+        (by simpa [abs_of_pos hv] using hvm)
+        (by
+          have hTpos : 0 < T := by linarith
+          have h := (le_div_iff₀ (by positivity : (0 : ℝ) < 2 * T)).mp hnear
+          nlinarith [Real.pi_pos])
+    refine ⟨Q, hQ0, hQv, ?_⟩
+    rw [if_pos hnear]
+    convert hQmass using 1 <;> field_simp
+  · have hfar : 1 / (2 * T) ≤ v := le_of_lt (lt_of_not_ge hnear)
+    have hΔ : 0 < 1 / (2 * T) := by positivity
+    obtain ⟨Q, hQ0, hQv, hQmass⟩ :=
+      SegmentedVDM.neighbor_factor (Δ := 1 / (2 * T)) (u := v) hT hD hΔ
+        (by simpa [abs_of_pos hv] using hfar)
+        (by simpa [abs_of_pos hv] using hvm)
+        (by
+          have hTpos : 0 < T := by linarith
+          field_simp
+          norm_num)
+    refine ⟨Q, hQ0, hQv, ?_⟩
+    rw [if_neg hnear, mul_one]
+    convert hQmass using 1 <;> field_simp
+
+/-- Centered interpolation on a finite unit-torus node set, retaining the
+individual near-neighbor factors. -/
+theorem exists_unitTorusInterpolation
+    {d : ℕ} (U : Finset (Point d)) (hzero : 0 ∈ U)
+    (T : ℝ) (hT : 2 ≤ T)
+    (hshort : ∀ u ∈ U, l1Norm u ≤ 1 / 4) :
+    ∃ P : CenteredPacket d ((U.card - 1) * ⌊T⌋₊),
+      P.value (2 * Real.pi) 0 = 1 ∧
+      (∀ u ∈ U, u ≠ 0 → P.value (2 * Real.pi) u = 0) ∧
+      P.mass ≤
+        Real.sqrt ((2 : ℝ) ^ (U.card - 1)) *
+          ∏ u ∈ U.filter (fun u =>
+            0 < l1Norm u ∧ l1Norm u ≤ 1 / (2 * T)),
+            1 / (2 * T * l1Norm u) ∧
+      unitTorusLInfNorm (P.value (2 * Real.pi)) ≤
+        Real.sqrt ((2 : ℝ) ^ (U.card - 1)) *
+          ∏ u ∈ U.filter (fun u =>
+            0 < l1Norm u ∧ l1Norm u ≤ 1 / (2 * T)),
+            1 / (2 * T * l1Norm u) := by
   classical
-  let T : ℝ := (s : ℝ) / (2 * n)
-  have hT : 2 ≤ T := by
-    have hsR : (4 * n : ℝ) ≤ s := by exact_mod_cast hs
-    have hnR : 0 < (n : ℝ) := by positivity
-    dsimp [T]
-    rw [le_div_iff₀ (by positivity : (0 : ℝ) < 2 * n)]
-    nlinarith
-  have hfloor : ⌊T⌋₊ = s / (2 * n) := by
-    dsimp [T]
-    rw [show (2 : ℝ) * n = ((2 * n : ℕ) : ℝ) by norm_num]
-    rw [Nat.floor_div_natCast, Nat.floor_natCast]
-  have hl1_nonneg (i j : Fin n) : 0 ≤ l1Norm (x i - x j) := by
-    unfold l1Norm
-    exact Finset.sum_nonneg fun _ _ => abs_nonneg _
-  let Other (k : Fin n) := {j : Fin n // j ≠ k}
-  have hcard (k : Fin n) : Fintype.card (Other k) = n - 1 := by
-    simp [Other]
-  have hfactor (k : Fin n) (j : Other k) :
+  have hcard : Fintype.card ↥(U.erase 0) = U.card - 1 := by
+    simpa only [Fintype.card_coe] using Finset.card_erase_of_mem hzero
+  have hfactor (u : ↥(U.erase 0)) :
       ∃ Q : SegmentedVDM.Packet 0 ⌊T⌋₊,
-        Q.value D 0 = 1 ∧
-        Q.value D (l1Norm (x j.1 - x k)) = 0 ∧
-        Q.mass ≤ Real.sqrt 2 / θ := by
-    have hjk : j.1 ≠ k := j.2
-    obtain ⟨Q, hQ0, hQj, hQmass⟩ := SegmentedVDM.neighbor_factor
-      (u := l1Norm (x j.1 - x k)) hT hD hΔ
-      (by simpa [abs_of_nonneg (hl1_nonneg j.1 k)] using hsep j.1 k hjk)
-      (by simpa [abs_of_nonneg (hl1_nonneg j.1 k)] using hdiam j.1 k)
-      (by simpa [T] using hscale)
-    refine ⟨Q, hQ0, hQj, ?_⟩
-    simpa [T, htheta] using hQmass
+        Q.value (2 * Real.pi) 0 = 1 ∧
+        Q.value (2 * Real.pi) (l1Norm u.val) = 0 ∧
+        Q.mass ≤ Real.sqrt 2 *
+          (if l1Norm u.val ≤ 1 / (2 * T)
+           then 1 / (2 * T * l1Norm u.val) else 1) := by
+    have hu0 : u.val ≠ 0 := (Finset.mem_erase.mp u.property).1
+    have hpos : 0 < l1Norm u.val := by
+      simpa using l1Norm_sub_pos (x := u.val) (y := 0) (by simpa using hu0)
+    exact exists_unitTorusNeighborFactor hT hpos
+      (hshort u.val (Finset.mem_erase.mp u.property).2)
   choose Q hQ using hfactor
-  let F (k : Fin n) (j : Other k) : CenteredPacket d ⌊T⌋₊ :=
-    liftScalar (x j.1 - x k) (Q k j)
-  have hbudget (k : Fin n) :
-      Fintype.card (Other k) * ⌊T⌋₊ ≤ (n - 1) * (s / (2 * n)) := by
-    rw [hcard, hfloor]
-  let P (k : Fin n) : CenteredPacket d ((n - 1) * (s / (2 * n))) :=
-    (prod (F k)).widen (hbudget k)
-  refine ⟨P, ?_, ?_⟩
-  · intro k
-    simp only [P, mass_widen, mass_prod]
+  let F (u : ↥(U.erase 0)) : CenteredPacket d ⌊T⌋₊ := liftScalar u.val (Q u)
+  let P : CenteredPacket d ((U.card - 1) * ⌊T⌋₊) :=
+    (prod F).widen (by rw [hcard])
+  have hmass : P.mass ≤
+      Real.sqrt ((2 : ℝ) ^ (U.card - 1)) *
+        ∏ u ∈ U.filter (fun u =>
+          0 < l1Norm u ∧ l1Norm u ≤ 1 / (2 * T)),
+          1 / (2 * T * l1Norm u) := by
+    have hbound :
+        (∏ u : ↥(U.erase 0), (F u).mass) ≤
+        ∏ u : ↥(U.erase 0),
+          Real.sqrt 2 *
+            (if l1Norm u.val ≤ 1 / (2 * T)
+             then 1 / (2 * T * l1Norm u.val) else 1) := by
+      exact Finset.prod_le_prod
+        (fun u _ => mass_nonneg (F u))
+        (fun u _ => by simpa [F, mass_liftScalar] using (hQ u).2.2)
+    have hprod :
+        (∏ u : ↥(U.erase 0),
+          if l1Norm u.val ≤ 1 / (2 * T)
+          then 1 / (2 * T * l1Norm u.val) else 1) =
+        ∏ u ∈ U.filter (fun u =>
+          0 < l1Norm u ∧ l1Norm u ≤ 1 / (2 * T)),
+          1 / (2 * T * l1Norm u) := by
+      rw [← Finset.prod_subtype (U.erase 0)
+        (fun u => by rfl)
+        (fun u => if l1Norm u ≤ 1 / (2 * T)
+          then 1 / (2 * T * l1Norm u) else 1)]
+      rw [← Finset.prod_filter
+        (s := U.erase 0) (fun u => l1Norm u ≤ 1 / (2 * T))
+        (fun u => 1 / (2 * T * l1Norm u))]
+      congr 1
+      ext u
+      simp only [Finset.mem_filter, Finset.mem_erase]
+      constructor
+      · intro hu
+        have hu0 : u ≠ 0 := hu.1.1
+        have hp : 0 < l1Norm u := by
+          simpa using l1Norm_sub_pos (x := u) (y := 0) (by simpa using hu0)
+        exact ⟨hu.1.2, hp, hu.2⟩
+      · intro hu
+        exact ⟨⟨by
+          intro heq
+          subst u
+          simpa [l1Norm] using hu.2.1, hu.1⟩, hu.2.2⟩
     calc
-      ∏ j : Other k, (F k j).mass ≤
-          ∏ _j : Other k, Real.sqrt 2 / θ :=
-        Finset.prod_le_prod
-          (fun j _ => mass_nonneg (F k j))
-          (fun j _ => by simpa [F, mass_liftScalar] using (hQ k j).2.2)
-      _ = (Real.sqrt 2 / θ) ^ (n - 1) := by
+      P.mass = ∏ u : ↥(U.erase 0), (F u).mass := by
+        simp only [P, mass_widen, mass_prod]
+      _ ≤ _ := hbound
+      _ = _ := by
+        rw [Finset.prod_mul_distrib]
         rw [Finset.prod_const, Finset.card_univ, hcard]
-      _ = Real.sqrt ((2 : ℝ) ^ (n - 1)) * θ⁻¹ ^ (n - 1) :=
-        sqrtTwo_div_pow
-  · intro k j
+        rw [hprod]
+        rw [show (Real.sqrt 2) ^ (U.card - 1) =
+          Real.sqrt ((2 : ℝ) ^ (U.card - 1)) by
+          simpa using (sqrtTwo_div_pow (q := U.card - 1) (θ := (1 : ℝ)))]
+  refine ⟨P, ?_, ?_, hmass, ?_⟩
+  · simp only [P, value_widen, value_prod]
+    apply Finset.prod_eq_one
+    intro u _
+    simpa [F, value_liftScalar]
+      using (hQ u).1
+  · intro u hu hu0
+    have humem : u ∈ U.erase 0 := Finset.mem_erase.mpr ⟨hu0, hu⟩
     simp only [P, value_widen, value_prod]
-    by_cases hkj : k = j
-    · subst j
-      rw [if_pos rfl]
-      apply Finset.prod_eq_one
-      intro i _
-      simp only [F, value_liftScalar]
-      simpa using (hQ k i).1
-    · rw [if_neg hkj]
-      apply Finset.prod_eq_zero (Finset.mem_univ (⟨j, Ne.symm hkj⟩ : Other k))
-      simp only [F, value_liftScalar, coordinateSign_dot]
-      exact (hQ k ⟨j, Ne.symm hkj⟩).2.1
+    apply Finset.prod_eq_zero (Finset.mem_univ (⟨u, humem⟩ : ↥(U.erase 0)))
+    simpa only [F, value_liftScalar, coordinateSign_dot]
+      using (hQ ⟨u, humem⟩).2.1
+  · have hlinf : unitTorusLInfNorm (P.value (2 * Real.pi)) ≤ P.mass := by
+      change unitTorusLInfNorm
+        (unitTorusTrigPolynomial P.frequency P.coeff) ≤ ∑ i, ‖P.coeff i‖
+      exact unitTorusLInfNorm_le P.frequency P.coeff
+    exact hlinf.trans hmass
+
+/-- Manuscript Lemma `lem2:uniform-Vandermonde`: interpolation on the centered
+integer-frequency cube, with the exact product over nearby nodes. -/
+theorem exists_centeredUnitTorusInterpolation_withMass
+    {d : ℕ} (U : Finset (Point d)) (r : ℕ) (h : ℝ)
+    (_hcube : ∀ u ∈ U, ∀ k, -(1 / 2 : ℝ) ≤ u k ∧ u k < 1 / 2)
+    (hcard : U.card ≤ r) (hzero : 0 ∈ U)
+    (hshort : ∀ u ∈ U, l1Norm u ≤ 1 / 4)
+    (hh : 2 * (r : ℝ) ≤ h) :
+    ∃ P : CenteredPacket d ((U.card - 1) * ⌊h / r⌋₊),
+      (∀ i k, |(P.frequency i k : ℝ)| ≤ h * (r - 1) / r) ∧
+      P.value (2 * Real.pi) 0 = 1 ∧
+      (∀ u ∈ U, u ≠ 0 → P.value (2 * Real.pi) u = 0) ∧
+      P.mass ≤
+        Real.sqrt ((2 : ℝ) ^ (U.card - 1)) *
+          ∏ u ∈ U.filter (fun u =>
+            0 < l1Norm u ∧ l1Norm u ≤ r / (2 * h)),
+            r / (2 * h * l1Norm u) ∧
+      unitTorusLInfNorm (P.value (2 * Real.pi)) ≤
+        Real.sqrt ((2 : ℝ) ^ (U.card - 1)) *
+          ∏ u ∈ U.filter (fun u =>
+            0 < l1Norm u ∧ l1Norm u ≤ r / (2 * h)),
+            r / (2 * h * l1Norm u) := by
+  classical
+  have hr : 0 < r := by
+    have hu : 0 < U.card := Finset.card_pos.mpr ⟨0, hzero⟩
+    omega
+  have hrR : 0 < (r : ℝ) := by exact_mod_cast hr
+  have hhpos : 0 < h := lt_of_lt_of_le (by positivity : 0 < 2 * (r : ℝ)) hh
+  have hT : 2 ≤ h / r := by
+    rw [le_div_iff₀ hrR]
+    exact hh
+  obtain ⟨P, hP0, hPvan, hPmass, hPbound⟩ :=
+    exists_unitTorusInterpolation U hzero (h / r) hT hshort
+  refine ⟨P, ?_, hP0, hPvan, ?_, ?_⟩
+  · intro i k
+    have hfreq : |(P.frequency i k : ℝ)| ≤
+        (((U.card - 1) * ⌊h / r⌋₊ : ℕ) : ℝ) := by
+      rw [← Int.cast_abs, Int.abs_eq_natAbs]
+      exact_mod_cast P.frequency_le i k
+    have hcardR : ((U.card - 1 : ℕ) : ℝ) ≤ (r : ℝ) - 1 := by
+      have : U.card - 1 ≤ r - 1 := Nat.sub_le_sub_right hcard 1
+      have hcast : ((U.card - 1 : ℕ) : ℝ) ≤ ((r - 1 : ℕ) : ℝ) := by
+        exact_mod_cast this
+      simpa [Nat.cast_sub (Nat.one_le_iff_ne_zero.mpr hr.ne')]
+        using hcast
+    have hfloor : (⌊h / r⌋₊ : ℝ) ≤ h / r := Nat.floor_le (by positivity)
+    calc
+      |(P.frequency i k : ℝ)| ≤
+          ((U.card - 1 : ℕ) : ℝ) * (⌊h / r⌋₊ : ℝ) := by
+            simpa only [Nat.cast_mul] using hfreq
+      _ ≤ ((r : ℝ) - 1) * (h / r) := by
+        apply mul_le_mul hcardR hfloor (Nat.cast_nonneg _)
+        have : (1 : ℝ) ≤ r := by exact_mod_cast hr
+        linarith
+      _ = h * (r - 1) / r := by ring
+  · have hthreshold : (1 : ℝ) / (2 * (h / r)) = r / (2 * h) := by
+      field_simp
+    rw [hthreshold] at hPmass
+    convert hPmass using 1
+    congr 1
+    apply Finset.prod_congr rfl
+    intro u _
+    field_simp
+  · have hthreshold : (1 : ℝ) / (2 * (h / r)) = r / (2 * h) := by
+      field_simp
+    rw [hthreshold] at hPbound
+    convert hPbound using 1
+    congr 1
+    apply Finset.prod_congr rfl
+    intro u _
+    field_simp
+
+/-- The exact existential statement of manuscript Lemma
+`lem2:uniform-Vandermonde`. -/
+theorem exists_centeredUnitTorusInterpolation
+    {d : ℕ} (U : Finset (Point d)) (r : ℕ) (h : ℝ)
+    (hcube : ∀ u ∈ U, ∀ k, -(1 / 2 : ℝ) ≤ u k ∧ u k < 1 / 2)
+    (hcard : U.card ≤ r) (hzero : 0 ∈ U)
+    (hshort : ∀ u ∈ U, l1Norm u ≤ 1 / 4)
+    (hh : 2 * (r : ℝ) ≤ h) :
+    ∃ P : CenteredPacket d ((U.card - 1) * ⌊h / r⌋₊),
+      (∀ i k, |(P.frequency i k : ℝ)| ≤ h * (r - 1) / r) ∧
+      P.value (2 * Real.pi) 0 = 1 ∧
+      (∀ u ∈ U, u ≠ 0 → P.value (2 * Real.pi) u = 0) ∧
+      unitTorusLInfNorm (P.value (2 * Real.pi)) ≤
+        Real.sqrt ((2 : ℝ) ^ (U.card - 1)) *
+          ∏ u ∈ U.filter (fun u =>
+            0 < l1Norm u ∧ l1Norm u ≤ r / (2 * h)),
+            r / (2 * h * l1Norm u) := by
+  obtain ⟨P, hsupport, hzero', hvan, _, hbound⟩ :=
+    exists_centeredUnitTorusInterpolation_withMass U r h hcube hcard hzero hshort hh
+  exact ⟨P, hsupport, hzero', hvan, hbound⟩
 
 /-- Integer points in the centered cube `[-b,b]^d`, represented by
 coordinates in `{0, ..., 2b}`. -/
