@@ -609,9 +609,6 @@ theorem randomGHM_signalThreshold_of_separation (n : ℕ) (hn : 2 ≤ n) :
     hrowInjective hcolumnInjective Ω σ τ center hΩ hσ hτlower
     hmeasurement hband
   have hnPos : 0 < n := by omega
-  have hτ : 0 < τ := by
-    have hnReal : 1 < (n : ℝ) := by exact_mod_cast hn
-    linarith
   have hrowRealInjective :
       Function.Injective (realizedRealFrequency rowFrequency) :=
     realizedRealFrequency_injective hrowInjective
@@ -622,16 +619,16 @@ theorem randomGHM_signalThreshold_of_separation (n : ℕ) (hn : 2 ≤ n) :
       (realizedRealFrequency rowFrequency) (fun j => μ.node j 0) center
       hM₁.le hn hrowRealInjective
       (realizedFrequencyRadius_pos rowFrequency)
-      (abs_realizedRealFrequency_le_radius rowFrequency) hτ with
+      (abs_realizedRealFrequency_le_radius rowFrequency) hτlower with
     ⟨εrow, hεrow, hrowBound⟩
   rcases RandSamp.nonuniformVandermonde_minimumSingularValue
       (realizedRealFrequency columnFrequency) (fun j => μ.node j 0) center
       hM₂.le hn hcolumnRealInjective
       (realizedFrequencyRadius_pos columnFrequency)
-      (abs_realizedRealFrequency_le_radius columnFrequency) hτ with
+      (abs_realizedRealFrequency_le_radius columnFrequency) hτlower with
     ⟨εcolumn, hεcolumn, hcolumnBound⟩
   refine ⟨min εrow εcolumn, lt_min hεrow hεcolumn, ?_⟩
-  intro hθsmall _hτupper hcluster hspread hseparation
+  intro hθsmall hτupper hcluster hspread hseparation
   let θ := minimumSeparation1D (fun j => μ.node j 0) hn
   have hnodeCoordinateInjective : Function.Injective (fun j => μ.node j 0) :=
     atomicMeasure_nodeCoordinate_injective μ
@@ -646,8 +643,8 @@ theorem randomGHM_signalThreshold_of_separation (n : ℕ) (hn : 2 ≤ n) :
   have hnodeSep : ∀ i j, i ≠ j → θ ≤ |μ.node i 0 - μ.node j 0| := by
     intro i j hij
     exact minimumSeparation1D_le (fun j => μ.node j 0) hn hij
-  have hrowVDM := hrowBound hθ hθrow hcluster' hnodeSep
-  have hcolumnVDM := hcolumnBound hθ hθcolumn hcluster' hnodeSep
+  have hrowVDM := hrowBound hθ hθrow hτupper hcluster' hnodeSep
+  have hcolumnVDM := hcolumnBound hθ hθcolumn hτupper hcluster' hnodeSep
   rw [← randomRowVandermonde_eq_fourierVandermonde] at hrowVDM hcolumnVDM
   let γrow := RandSamp.finiteFamilySamplingSpread
     (realizedRealFrequency rowFrequency) n hM₁.le hn

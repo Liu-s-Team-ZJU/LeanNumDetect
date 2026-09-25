@@ -190,6 +190,28 @@ theorem finiteFamilySamplingSpread_pos {M n : ℕ} (frequency : Fin M → ℝ)
   rw [← hselect]
   exact selectionSpacing_pos frequency hfrequency select hn
 
+/-- The spread of frequencies in `[-W, W]` is at most `2 W`. -/
+theorem finiteFamilySamplingSpread_le_two_mul_radius {M n : ℕ}
+    (frequency : Fin M → ℝ) (hnM : n ≤ M) (hn : 2 ≤ n)
+    {W : ℝ} (hfreq : ∀ i, |frequency i| ≤ W) :
+    finiteFamilySamplingSpread frequency n hnM hn ≤ 2 * W := by
+  obtain ⟨select, hselect⟩ :=
+    exists_selectionSpacing_eq_finiteFamilySamplingSpread frequency hnM hn
+  rw [← hselect]
+  let i : Fin n := ⟨0, by omega⟩
+  let j : Fin n := ⟨1, by omega⟩
+  have hij : i ≠ j := by
+    intro h
+    have := congrArg Fin.val h
+    simp [i, j] at this
+  calc
+    selectionSpacing frequency select hn ≤
+        |frequency (select i) - frequency (select j)| :=
+      selectionSpacing_le frequency select hn hij
+    _ ≤ |frequency (select i)| + |frequency (select j)| := by
+      simpa using (abs_sub_le (frequency (select i)) 0 (frequency (select j)))
+    _ ≤ 2 * W := by linarith [hfreq (select i), hfreq (select j)]
+
 /-- Sampling-spread form with an explicit cluster radius. -/
 theorem nonuniformVandermonde_minimumSingularValue_of_radius {M n : ℕ}
     (frequency : Fin M → ℝ) (node : Fin n → ℝ) (center : ℝ)
@@ -224,27 +246,23 @@ theorem nonuniformVandermonde_minimumSingularValue_of_radius {M n : ℕ}
   · exact hremainder
 
 /-- An explicit admissible upper bound for the source separation in manuscript
-theorem `thm:nonuniform_vdm_scaling`.  The first term places the cluster in the
-Taylor regime; the second absorbs the Taylor remainder into half of the
-principal lower bound. -/
+theorem `thm:nonuniform_vdm_scaling`, obtained by absorbing the Taylor
+remainder into half of the principal lower bound. -/
 noncomputable def nonuniformVandermondeSmallnessThreshold
     (n : ℕ) (W τ γ : ℝ) : ℝ :=
-  min (2 / (W * τ))
-    (((1 / 2 : ℝ) * nonuniformVandermondeConstant n * γ ^ (n - 1)) /
-      ((n : ℝ) * (W * τ / 2) ^ n * exponentialRemainderCoefficient n))
+  ((1 / 2 : ℝ) * nonuniformVandermondeConstant n * γ ^ (n - 1)) /
+    ((n : ℝ) * (W * τ / 2) ^ n * exponentialRemainderCoefficient n)
 
 theorem nonuniformVandermondeSmallnessThreshold_pos
     {n : ℕ} (hn : 0 < n) {W τ γ : ℝ}
     (hW : 0 < W) (hτ : 0 < τ) (hγ : 0 < γ) :
     0 < nonuniformVandermondeSmallnessThreshold n W τ γ := by
   unfold nonuniformVandermondeSmallnessThreshold
-  apply lt_min
-  · positivity
-  · have hc := nonuniformVandermondeConstant_pos hn
-    have hR : 0 < exponentialRemainderCoefficient n := by
-      unfold exponentialRemainderCoefficient
-      positivity
+  have hc := nonuniformVandermondeConstant_pos hn
+  have hR : 0 < exponentialRemainderCoefficient n := by
+    unfold exponentialRemainderCoefficient
     positivity
+  positivity
 
 /-- Quantitative form of manuscript theorem `thm:nonuniform_vdm_scaling` for
 a separation below the explicit smallness threshold. -/
@@ -252,7 +270,7 @@ theorem nonuniformVandermonde_minimumSingularValue_of_lt_threshold {M n : ℕ}
     (frequency : Fin M → ℝ) (node : Fin n → ℝ) (center : ℝ)
     (hnM : n ≤ M) (hn : 2 ≤ n) (hfrequency : Function.Injective frequency)
     {W τ Δ : ℝ} (hW : 0 < W) (hfreq : ∀ i, |frequency i| ≤ W)
-    (hτ : 0 < τ) (hΔ : 0 < Δ)
+    (hτ : 0 < τ) (hτlower : (n : ℝ) - 1 ≤ τ) (hΔ : 0 < Δ)
     (hcluster : ∀ j, |node j - center| ≤ τ * Δ / 2)
     (hnodeSep : ∀ i j, i ≠ j → Δ ≤ |node i - node j|)
     (hsmall :
@@ -264,14 +282,18 @@ theorem nonuniformVandermonde_minimumSingularValue_of_lt_threshold {M n : ℕ}
   let γ := finiteFamilySamplingSpread frequency n hnM hn
   have hnPos : 0 < n := by omega
   have hγ : 0 < γ := finiteFamilySamplingSpread_pos frequency hfrequency hnM hn
-  have hsmallScale : Δ < 2 / (W * τ) :=
-    hsmall.trans_le (min_le_left _ _)
-  have hWτ : 0 < W * τ := mul_pos hW hτ
-  have hprod : Δ * (W * τ) < 2 := (lt_div_iff₀ hWτ).mp hsmallScale
-  have hscale : W * (τ * Δ / 2) ≤ 1 := by
-    nlinarith
+  let α : ℝ := W * τ / 2
+  have hα : 0 < α := by dsimp [α]; positivity
+  have hτone : 1 ≤ τ := by
+    have hnReal : (2 : ℝ) ≤ n := by exact_mod_cast hn
+    linarith
+  have hγUpper : γ ≤ 2 * W :=
+    finiteFamilySamplingSpread_le_two_mul_radius frequency hnM hn hfreq
+  have hγα : γ ≤ 4 * α := by
+    dsimp [α]
+    nlinarith [mul_nonneg hW.le (sub_nonneg.mpr hτone)]
   let A : ℝ :=
-    (n : ℝ) * (W * τ / 2) ^ n * exponentialRemainderCoefficient n
+    (n : ℝ) * α ^ n * exponentialRemainderCoefficient n
   let B : ℝ :=
     (1 / 2 : ℝ) * nonuniformVandermondeConstant n * γ ^ (n - 1)
   have hR : 0 < exponentialRemainderCoefficient n := by
@@ -281,9 +303,71 @@ theorem nonuniformVandermonde_minimumSingularValue_of_lt_threshold {M n : ℕ}
     dsimp [A]
     positivity
   have hsmallRemainder : Δ < B / A := by
-    exact hsmall.trans_le (min_le_right _ _)
+    exact hsmall
   have hAB : A * Δ < B := by
     have := (lt_div_iff₀ hA).mp hsmallRemainder
+    nlinarith
+  have hnFact : (n.factorial : ℝ) = (n : ℝ) * ((n - 1).factorial : ℝ) := by
+    rw [show n = n - 1 + 1 by omega, Nat.factorial_succ]
+    push_cast
+    ring
+  have hconstant :
+      (1 / 2 : ℝ) * nonuniformVandermondeConstant n * 4 ^ (n - 1) ≤
+        (n : ℝ) * exponentialRemainderCoefficient n := by
+    have hnR : (0 : ℝ) < n := by exact_mod_cast hnPos
+    have hnTwo : (2 : ℝ) ≤ n := by exact_mod_cast hn
+    have hF : (0 : ℝ) < ((n - 1).factorial : ℝ) := by positivity
+    have hFour : (0 : ℝ) < (4 : ℝ) ^ (n - 1) := by positivity
+    dsimp [nonuniformVandermondeConstant, exponentialRemainderCoefficient]
+    push_cast
+    rw [hnFact]
+    field_simp
+    have hmul : (1 : ℝ) ≤ (n : ℝ) ^ 2 * ((n : ℝ) + 1) := calc
+      1 ≤ (n : ℝ) ^ 2 := by nlinarith
+      _ = (n : ℝ) ^ 2 * 1 := by ring
+      _ ≤ (n : ℝ) ^ 2 * ((n : ℝ) + 1) :=
+        mul_le_mul_of_nonneg_left (by linarith) (sq_nonneg _)
+    nlinarith
+  have hC : 0 < nonuniformVandermondeConstant n :=
+    nonuniformVandermondeConstant_pos hnPos
+  have hBbound :
+      B ≤ (n : ℝ) * exponentialRemainderCoefficient n * α ^ (n - 1) := by
+    dsimp [B]
+    calc
+      (1 / 2 : ℝ) * nonuniformVandermondeConstant n * γ ^ (n - 1) ≤
+          (1 / 2 : ℝ) * nonuniformVandermondeConstant n *
+            (4 * α) ^ (n - 1) := by
+        exact mul_le_mul_of_nonneg_left
+          (pow_le_pow_left₀ hγ.le hγα (n - 1))
+          (mul_nonneg (by norm_num) hC.le)
+      _ = ((1 / 2 : ℝ) * nonuniformVandermondeConstant n * 4 ^ (n - 1)) *
+            α ^ (n - 1) := by rw [mul_pow]; ring
+      _ ≤ (n : ℝ) * exponentialRemainderCoefficient n * α ^ (n - 1) := by
+        exact mul_le_mul_of_nonneg_right hconstant (pow_nonneg hα.le _)
+  have hcoef : 0 < (n : ℝ) * exponentialRemainderCoefficient n * α ^ (n - 1) := by
+    positivity
+  have hscale : W * (τ * Δ / 2) ≤ 1 := by
+    have hAeq : A =
+        ((n : ℝ) * exponentialRemainderCoefficient n * α ^ (n - 1)) * α := by
+      dsimp [A]
+      have hαpow : α ^ n = α ^ (n - 1) * α := by
+        conv_lhs => rw [← Nat.sub_add_cancel (by omega : 1 ≤ n), pow_succ]
+      rw [hαpow]
+      ring
+    have hmul :
+        ((n : ℝ) * exponentialRemainderCoefficient n * α ^ (n - 1)) *
+          (α * Δ) <
+        ((n : ℝ) * exponentialRemainderCoefficient n * α ^ (n - 1)) * 1 := by
+      calc
+        _ = A * Δ := by rw [hAeq]; ring
+        _ < B := hAB
+        _ ≤ _ := by simpa using hBbound
+    have hαΔ : α * Δ < 1 := by
+      by_contra h
+      have hge : 1 ≤ α * Δ := le_of_not_gt h
+      have := mul_le_mul_of_nonneg_left hge hcoef.le
+      nlinarith
+    dsimp [α] at hαΔ
     nlinarith
   have hmul := mul_le_mul_of_nonneg_right (le_of_lt hAB)
     (pow_nonneg hΔ.le (n - 1))
@@ -293,23 +377,25 @@ theorem nonuniformVandermonde_minimumSingularValue_of_lt_threshold {M n : ℕ}
       (n : ℝ) * ((W * (τ * Δ / 2)) ^ n * exponentialRemainderCoefficient n) ≤
         (1 / 2 : ℝ) * nonuniformVandermondeConstant n *
           (γ * Δ) ^ (n - 1) := by
-    rw [show W * (τ * Δ / 2) = (W * τ / 2) * Δ by ring,
+    rw [show W * (τ * Δ / 2) = α * Δ by dsimp [α]; ring,
       mul_pow, hpow, mul_pow]
     dsimp [A, B] at hmul
     simpa only [mul_assoc, mul_left_comm, mul_comm] using hmul
   exact nonuniformVandermonde_minimumSingularValue_of_radius frequency node center
     hnM hn hfrequency hW hfreq (by positivity) hcluster hΔ hnodeSep hscale hremainder
 
-/-- Manuscript theorem `thm:nonuniform_vdm_scaling`.  There is an explicit
+/-- Manuscript theorem `thm:nonuniform_vdm_scaling`. There is an explicit
 positive threshold below which every cluster with minimum separation `Δ`
-obeys the stated singular-value scaling law. -/
+obeys the stated singular-value scaling law, under the manuscript's bounds
+`n - 1 ≤ τ < π / Δ`. -/
 theorem nonuniformVandermonde_minimumSingularValue {M n : ℕ}
     (frequency : Fin M → ℝ) (node : Fin n → ℝ) (center : ℝ)
     (hnM : n ≤ M) (hn : 2 ≤ n) (hfrequency : Function.Injective frequency)
     {W τ : ℝ} (hW : 0 < W) (hfreq : ∀ i, |frequency i| ≤ W)
-    (hτ : 0 < τ) :
+    (hτlower : (n : ℝ) - 1 ≤ τ) :
     ∃ ε : ℝ, 0 < ε ∧
       ∀ {Δ : ℝ}, 0 < Δ → Δ < ε →
+        τ < Real.pi / Δ →
         (∀ j, |node j - center| ≤ τ * Δ / 2) →
         (∀ i j, i ≠ j → Δ ≤ |node i - node j|) →
         (1 / 2 : ℝ) * nonuniformVandermondeConstant n *
@@ -318,10 +404,14 @@ theorem nonuniformVandermonde_minimumSingularValue {M n : ℕ}
   let γ := finiteFamilySamplingSpread frequency n hnM hn
   let ε := nonuniformVandermondeSmallnessThreshold n W τ γ
   have hγ : 0 < γ := finiteFamilySamplingSpread_pos frequency hfrequency hnM hn
+  have hτ : 0 < τ := by
+    have hnReal : (2 : ℝ) ≤ n := by exact_mod_cast hn
+    linarith
   refine ⟨ε, nonuniformVandermondeSmallnessThreshold_pos (by omega) hW hτ hγ, ?_⟩
-  intro Δ hΔ hsmall hcluster hnodeSep
+  intro Δ hΔ hsmall _hτupper hcluster hnodeSep
   exact nonuniformVandermonde_minimumSingularValue_of_lt_threshold
-    frequency node center hnM hn hfrequency hW hfreq hτ hΔ hcluster hnodeSep hsmall
+    frequency node center hnM hn hfrequency hW hfreq hτ hτlower hΔ
+      hcluster hnodeSep hsmall
 
 end
 

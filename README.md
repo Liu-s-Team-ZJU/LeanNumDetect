@@ -25,8 +25,7 @@ nonuniform Fourier--Vandermonde estimate.
 | General GHM-MUSIC stability (`lem:stability_ghm_music`) | [MUSIC.lean](src/NumDetect/MUSIC.lean): theorem `ghmMUSIC_correlation_stability` |
 | Segmented-grid MUSIC stability (`cor:stability_multidim_segmented`) | [MUSIC.lean](src/NumDetect/MUSIC.lean): theorem `segmentedMUSIC_correlation_stability` |
 
-The [NumDetect guide](src/NumDetect/README.md) gives the hypotheses, indexing
-conventions, proof organization, and formalization choices for these results.
+See more in [NumDetect guide](src/NumDetect/README.md).
 
 ## Repository structure
 
