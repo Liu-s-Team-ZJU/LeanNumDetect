@@ -1,18 +1,25 @@
-# External admission policy
+# External result registry
 
-`src/External/` is reserved for original theorems or formulas from external
-literature whose proofs have not yet been formalized. Only Lean files in this
-directory may use `sorry`; proved definitions, lemmas, and conversions belong
-under `src/General/` or the directory for the theorem that uses them.
+There are currently **no admitted external results**. Both exact matrix Chernoff
+tails are fully proved in [General/Probability/MatrixChernoff.lean](../General/Probability/MatrixChernoff.lean),
+and the former `External.MatrixChernoff` module has been removed.
 
-Every admitted result must be registered here with its exact source, theorem
-or formula identifier, and Lean declaration. Preserve the source's full
-statement, hypotheses, parameters, and normalization. For an unnumbered result,
-record a section, page, or nearby numbered formula instead of inventing a
-number. Update the registry, imports, and repository audits together whenever
-an external result is added, changed, proved, or removed.
+| Fully proved result | Original source | Lean declaration |
+| --- | --- | --- |
+| Lower matrix Chernoff tail, without replacement | J. A. Tropp, *Improved analysis of the subsampled randomized Hadamard transform* (2011), [Theorem 2.2, p. 4](https://arxiv.org/pdf/1011.1595) | `LeanNumDetect.FiniteMatrixSampling.matrixChernoff_withoutReplacement_lower` |
+| Upper matrix Chernoff tail, without replacement | Same source, Theorem 2.2 | `LeanNumDetect.FiniteMatrixSampling.matrixChernoff_withoutReplacement_upper` |
 
-There are currently no admitted results and therefore no Lean files in this
-directory. [Repository-wide CI](../../.github/ci/README.md) enforces the
-admission policy and rejects project axioms; the complete proof and attribution
-rules are in [AGENTS.md](../../AGENTS.md).
+The statements preserve the exact Chernoff factors, full parameter ranges,
+labelled populations (including repeated values), uniform sampling without
+replacement, and extreme eigenvalues expressed through Rayleigh values.
+
+The complete proof includes finite convex comparison, the Golden--Thompson
+inequality, the Lie--Trotter product formula, spectral exponential bounds,
+and scalar Laplace optimization. These results and the final one-dimensional
+and higher-dimensional RandSamp theorems depend only on `propext`,
+`Classical.choice`, and `Quot.sound`.
+
+[RandSamp/Audit.lean](../RandSamp/Audit.lean) rejects every admission or project
+axiom in its imported project dependencies, including this directory. The
+repository's general source-attribution requirements remain documented in
+[AGENTS.md](../../AGENTS.md).

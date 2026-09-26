@@ -10,6 +10,7 @@ not import the theorem-specific `SegmentedVDM` directory.
 | [Finite](Finite/README.md) | Finite sums, node sorting, and periodic geometry |
 | [Fourier](Fourier/README.md) | Parseval identities, cosine windows, and separated sampling |
 | [MatrixAnalysis](MatrixAnalysis/README.md) | Gram matrices, singular values, pseudoinverses, and Hermitian variational tools |
+| [Probability](Probability/README.md) | Uniform finite sampling, exact Chernoff-factor estimates, and matrix concentration conversions |
 | [SpectralPerturbation](SpectralPerturbation/README.md) | Eigenvalue enumeration, resolvent discs, and perturbation matching |
 
 The initial import is deliberately scoped to the dependency closure of the
