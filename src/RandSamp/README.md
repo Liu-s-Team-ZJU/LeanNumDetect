@@ -90,7 +90,7 @@ complete build and admission audit.
 | Positivity and reduction of constants at $d=1$ | [CubeConstants.lean](CubeConstants.lean): `cubeSeparated_lower_bound_pos`, `cubeSeparatedLower_one`, `cubeSeparatedUpper_one` |
 
 The theorem retains $d,M\geq1$, $s\geq2$, $1\leq m\leq(M+1)^d$,
-$0<\delta,\eta<1$, and $2\pi(2d-1)/M<\Delta\leq\pi$. With $c=2\pi/\Delta$,
+$0<\rho,\eta<1$, and $2\pi(2d-1)/M<\Delta\leq\pi$. With $c=2\pi/\Delta$,
 the definitions `cubeSeparatedLower` and `cubeSeparatedUpper` are exactly
 
 $$
@@ -98,12 +98,12 @@ a_d=\frac{(M+c)^{d-1}(M-(2d-1)c)}{(M+1)^d},
 \qquad b_d=\frac{(M+c)^d}{(M+1)^d}.
 $$
 
-Under the manuscript's condition $m\geq3s(a_d\delta^2)^{-1}\log(2s/\eta)$,
+Under the manuscript's condition $m\geq3s(a_d\rho^2)^{-1}\log(2s/\eta)$,
 the event
 
 $$
-\sqrt{(1-\delta)a_d}\leq\sigma_{\min}(A_\Omega(Y))
-\leq\sigma_{\max}(A_\Omega(Y))\leq\sqrt{(1+\delta)b_d}
+\sqrt{(1-\rho)a_d}\leq\sigma_{\min}(A_\Omega(Y))
+\leq\sigma_{\max}(A_\Omega(Y))\leq\sqrt{(1+\rho)b_d}
 $$
 
 has probability at least $1-\eta$. The lower endpoint is strictly positive.
