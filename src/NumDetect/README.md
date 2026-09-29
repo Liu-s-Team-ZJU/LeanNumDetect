@@ -30,7 +30,7 @@ shown.
 | Theorem `thm:nonuniform_vdm_scaling` | Nonuniform one-dimensional Vandermonde scaling | [RandSamp/NonuniformVandermonde.lean](../RandSamp/NonuniformVandermonde.lean): `RandSamp.nonuniformVandermonde_minimumSingularValue` | **Equivalent**. |
 | Lemma `lem:stability_ghm_music` | General GHM-MUSIC perturbation | [MUSIC.lean](MUSIC.lean): `ghmMUSIC_correlation_stability` | **Equivalent**. |
 | Corollary `cor:stability_multidim_segmented` | Segmented-grid MUSIC perturbation | [MUSIC.lean](MUSIC.lean): `segmentedMUSIC_correlation_stability` | **Equivalent**. |
-| Theorem `thm:random-ghm-music-well-separated` | Fixed-support high-probability random-GHM MUSIC correlation bound | [RandomCubeMUSIC.lean](RandomCubeMUSIC.lean): `positiveCubeMUSIC_correlation_stability_highProbability` | **Equivalent**. |
+| Corollary `cor:random-ghm-music-well-separated` | Fixed-support high-probability random-GHM MUSIC correlation bound | [RandomCubeMUSIC.lean](RandomCubeMUSIC.lean): `positiveCubeMUSIC_correlation_stability_highProbability` | **Equivalent**. |
 | Lemma `lem:nonnegative_to_centered` | Unitary conversion from nonnegative to centered frequency grid | [UniformCentering.lean](UniformCentering.lean): `uniformVandermonde_centering` | **Equivalent**. |
 | Lemma `lem2:uniform-Vandermonde` | Centered interpolation polynomial with a neighbor-product bound | [UniformInterpolation.lean](UniformInterpolation.lean): `CenteredPacket.exists_centeredUnitTorusInterpolation` | **Equivalent**. |
 | Definition `defi:high_dim_uniform_poly` | Multivariate segmented trigonometric polynomials | [Segmented/Polynomial.lean](Segmented/Polynomial.lean): `SegmentedPolynomial`, `SegmentedPolynomial.eval` | **Equivalent**. |
