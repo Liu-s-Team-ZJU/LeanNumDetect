@@ -37,6 +37,9 @@ argument at the critical separation.
 | One-dimensional periodic-Hilbert reduction | [OneDimensionalFineCubeFrame.lean](OneDimensionalFineCubeFrame.lean) |
 | Vaaler--Selberg translated-cube lower frame | [TranslatedCubeFourier.lean](TranslatedCubeFourier.lean) |
 | Translated centered-cube conversion | [BartonCubeFrame.lean](BartonCubeFrame.lean) |
+| Open-endpoint Selberg lattice minorants and tensor correction | [LatticeSelbergMinorant.lean](LatticeSelbergMinorant.lean) |
+| Integer phase periodicity and exact Lipschitz bounds | [PhaseEstimates.lean](PhaseEstimates.lean) |
+| Finite torus grids, covering radius, and cardinality bounds | [FiniteTorusGrid.lean](FiniteTorusGrid.lean) |
 
 All frequencies in this chain are angular frequencies with period $2\pi$ and
 phase $e^{ikx_j}$.

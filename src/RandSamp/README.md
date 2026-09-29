@@ -1,6 +1,6 @@
 # RandSamp
 
-This directory formalizes fixed-support random Fourier sampling from the
+This directory formalizes uniform separated-node, fixed-support, and Cartesian DFT-grid random Fourier sampling from the
 RandSamp manuscript, together with the existing nonuniform Fourier--Vandermonde
 estimate from the NumDetect manuscript. Import [Main.lean](Main.lean) for the
 complete interface. Declarations are in `LeanNumDetect.RandSamp`.
@@ -63,10 +63,9 @@ There is no separate concentration or full-Gram argument in the corollary.
   equivalent bounds on every Euclidean quadratic form. A positive node count
   is explicit, as required for the extreme singular values and $\log(2s/\eta)$.
 
-The scope is the dependency chain of the fixed well-separated theorem.
-The earlier uniform-over-all-node-sets theorem, random-kernel theorem,
-pairwise-separation theorem, and later DFT-grid theorem are separate results
-and are not formalized by this addition.
+The fixed-support development covers the dependency chain of the fixed
+well-separated theorem. The uniform separated-node and Cartesian DFT-grid
+theorems are formalized below.
 
 ### Proof boundary
 
@@ -83,12 +82,76 @@ the Lie--Trotter product formula, spectral exponential bounds, and scalar
 Laplace optimization. Their statements preserve the exact factors and full
 parameter ranges of [Tropp (2011), Theorem 2.2](https://arxiv.org/pdf/1011.1595).
 
-There are no admitted external results. Both final probability theorems and
+There are no admitted external results. The final probability theorems and
 their prerequisites depend only on `propext`, `Classical.choice`, and
 `Quot.sound`. [Audit.lean](Audit.lean) rejects admissions and project axioms
 throughout the imported project dependencies and checks the final theorems'
 transitive axioms. Run `lake build` and `python3 .github/ci/check.py` for the
 complete build and admission audit.
+
+## Uniformly over separated nodes in arbitrary dimension
+
+| Manuscript result | Exact Lean location |
+| --- | --- |
+| Improved full-Gram bound (`eq:uniform-separated-higher-dimensional-full-gram`) | [UniformCubeFullGram.lean](UniformCubeFullGram.lean): `uniform_cube_full_gram_bounds` |
+| Exact constants and their one-dimensional reduction | [UniformCubeFullGram.lean](UniformCubeFullGram.lean): `uniformCubeLower`, `uniformCubeLower_pos`, `uniformCubeLower_one` |
+| Phase, kernels, normalization, and Gram-entry identities | [UniformKernelModel.lean](UniformKernelModel.lean) |
+| Uniform kernel concentration on the entire torus | [UniformKernel.lean](UniformKernel.lean): `uniformCubeKernel_probability` |
+| Conversion of a single kernel event to singular-value bounds | [UniformSeparatedEvents.lean](UniformSeparatedEvents.lean): `cube_singularValues_of_uniform_kernel` |
+| Main theorem (`thm:uniform-separated-singular-values-higher-dimensional`) | [UniformSeparatedCube.lean](UniformSeparatedCube.lean): `uniformSeparatedCube_singularValues`, `uniformCube_lower_bound_pos` |
+| One-dimensional corollary (`thm:uniform-separated-singular-values`) | [UniformSeparated.lean](UniformSeparated.lean): `uniformSeparated_singularValues`, `uniformSeparated_lower_bound_pos` |
+
+The theorem assumes $d\geq1$, $M\geq2$, $s\geq2$,
+$1\leq m\leq(M+1)^d$, $0<\rho,\eta<1$, and
+
+$$
+\frac{2\pi(2d-1)}{M+\frac32d}<\Delta\leq\pi.
+$$
+
+With $c=2\pi/\Delta$, the constants are exactly
+
+$$
+a_d^{\mathrm u}=\frac{(M+c)^{d-1}(M+\frac32d-(2d-1)c)}{(M+1)^d},
+\qquad b_d=\frac{(M+c)^d}{(M+1)^d}.
+$$
+
+The sufficient sample size is
+
+$$
+m\geq\frac{16(s-1)^2}{\rho^2(a_d^{\mathrm u})^2}
+\log\!\left[\frac{4(1+8\pi dM(s-1)/(\rho a_d^{\mathrm u}))^d}{\eta}\right].
+$$
+
+The conclusion has probability at least $1-\eta$ and contains the quantifier
+over **all** $Y : \mathrm{Fin}\ s\to\mathrm{Fin}\ d\to\mathbb R$
+satisfying `CubeAngularSeparated Δ Y` inside the random event. On this event,
+
+$$
+\sqrt{(1-\rho)a_d^{\mathrm u}}\leq\sigma_{\min}(A_\Omega(Y))
+\leq\sigma_{\max}(A_\Omega(Y))\leq\sqrt{b_d+\rho a_d^{\mathrm u}}.
+$$
+
+The deterministic proof uses Selberg's majorant for $[0,M]$ and minorant for
+$(-1,M+1)$. The minorant's nonpositive endpoint values are proved explicitly,
+so the lattice sandwich uses exactly $0,\ldots,M$. The tensor correction has
+mass $(M+c)^{d-1}(M+2d-(2d-1)c)$, which implies the displayed lower constant.
+Poisson summation and closed-band cancellation include separation exactly
+$\Delta$. All analytic prerequisites are proved; the final theorem takes no
+unproved full-Gram or concentration estimate as an assumption.
+
+The random proof covers the torus with $n^d$ points,
+$n=\lceil8\pi dM/\varepsilon\rceil$, and uses the exact centered complex
+Hoeffding bound $4\exp(-mu^2/4)$ for uniform sampling without replacement.
+The kernel error is $2M$-Lipschitz in coordinate sum distance. This gives the
+uniform event at $\varepsilon=\rho a_d^{\mathrm u}/(s-1)$; the Gram
+perturbation has zero diagonal and norm at most $(s-1)\varepsilon$.
+
+At $d=1$, `uniformCubeLower_one` gives exactly
+$(M+3/2-2\pi/\Delta)/(M+1)$. The one-dimensional corollary retains the original
+condition $2\pi/(M+3/2)<\Delta\leq2\pi/s$, the identical sample-size formula,
+and the identical singular-value endpoints. Its proof invokes the
+higher-dimensional theorem and transports the actual subset distribution
+through `Equiv.funUnique`; it contains no independent one-dimensional proof.
 
 ## Fixed separated nodes in arbitrary dimension
 
@@ -140,6 +203,55 @@ hypotheses. The probability proof uses the proved finite-population reindexing
 interface and the fully proved Chernoff bounds. The one-dimensional probability
 result is obtained only afterward as its $d=1$ corollary. The entire dependency
 chain is free of admissions and project axioms.
+
+## Cartesian DFT-grid RIP and its one-dimensional corollary
+
+| Manuscript result | Exact Lean location |
+| --- | --- |
+| Cartesian grid, characters, and normalized sampled DFT matrix | [DFTGridModel.lean](DFTGridModel.lean): `DFTIndex`, `dftCharacter`, `dftSampledMatrix` |
+| Literal Fourier entries and agreement with the existing cube matrix | [DFTGridModel.lean](DFTGridModel.lean): `dftSampledMatrix_apply_exp`, `dftSampledMatrix_eq_cubeSampledVandermonde` |
+| Nonzero offsets have zero full mean; there are exactly $N^d-1$ of them | [DFTGridModel.lean](DFTGridModel.lean): `sum_dftCharacter_eq_zero`, `card_nonzero_dftIndex` |
+| Uniform coherence probability and exact logarithmic threshold | [DFTGrid.lean](DFTGrid.lean): `dftGrid_coherence_probability`; [DFTGridSamplingRate.lean](DFTGridSamplingRate.lean): `dft_failure_bound_of_sample_size` |
+| Arbitrary-dimensional theorem (`thm:dft-grid-rip-higher-dimensional`) | [DFTGrid.lean](DFTGrid.lean): `dftGrid_singularValues`, `dftGrid_restrictedIsometry` |
+| Equivalence with the order-$r$ RIP energy formulation | [DFTGridEvents.lean](DFTGridEvents.lean): `dftGridSingularValueEvent_iff_energy` |
+| One-dimensional corollary (`thm:dft-grid-rip`) | [DFTGridOne.lean](DFTGridOne.lean): `dftGridOne_singularValues`, `dftGridOne_restrictedIsometry` |
+| Exact one-coordinate identification of matrices and support events | [DFTGridOne.lean](DFTGridOne.lean): `dftGridOneSingularValueEvent_iff`, `dftSupportMatrixOne_singularValue` |
+
+The theorem assumes $d,M\geq1$, $N=M+1$, $L=N^d$,
+$1\leq m\leq L$, $2\leq r\leq L$, and $0<\rho,\eta<1$.
+Its sampling condition is exactly
+
+$$
+m\geq\frac{4(r-1)^2}{\rho^2}\log\!\left(\frac{4(L-1)}{\eta}\right).
+$$
+
+`DFTIndex d N` is `Fin d → ZMod N`, identified with
+$\{0,\ldots,N-1\}^d$ through the canonical residue representatives.
+`dftSampledMatrix` has entries $m^{-1/2}\exp(2\pi i k\cdot j/N)$,
+and `FiniteSample` consists of the actual $m$-element frequency subsets.
+The full matrix uses the Cartesian grid, while its support $S$ can be any
+subset of columns; no Cartesian-product or separation restriction is imposed
+on $S$.
+
+The conclusion places the quantifier over every support $1\leq|S|\leq r$
+inside a single event of probability at least $1-\eta$. Every such matrix has
+extremal singular values in $[\sqrt{1-\rho},\sqrt{1+\rho}]$.
+`DFTGridEnergyEvent` is the equivalent statement
+$\rho_r(A_\Omega^{(d)})\leq\rho$, expressed by the usual energy bounds for
+every vector on each support. The equivalence of these two events is proved.
+
+The complex Hoeffding estimate used here is fully proved in
+[FiniteScalarConcentration.lean](../General/Probability/FiniteScalarConcentration.lean).
+The proof takes a union over $L-1$ nonzero offsets, then applies Gershgorin
+to each support Gram matrix. All scalar constants, probability conversions,
+and singular-value steps are verified in Lean.
+
+At $d=1$, `dftOneIndexEquiv` and `finiteSampleEquiv` recover scalar frequency
+subsets and supports in `Fin (M+1)`. The original `sampledVandermonde`
+normalization is retained, and row/column bijections preserve every singular
+value. Thus the corollary has the original $N-1$ logarithmic factor, the same
+assumptions, and the same endpoints. Its proof invokes the higher-dimensional
+theorem; there is no independent one-dimensional probability proof.
 
 ## Nonuniform VDM scaling
 

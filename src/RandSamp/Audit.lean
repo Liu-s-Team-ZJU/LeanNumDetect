@@ -1,6 +1,8 @@
 import RandSamp.FixedSeparated
 import RandSamp.FixedSeparatedCube
 import RandSamp.FixedSupport
+import RandSamp.DFTGridOne
+import RandSamp.UniformSeparated
 import RandSamp.NonuniformVandermonde
 import General.Probability.UniformCounting
 import Lean.Util.CollectAxioms
@@ -30,6 +32,11 @@ open Lean Elab Command
 #print axioms LeanNumDetect.FiniteMatrixSampling.finiteSample_probability_eq_uniform_toOuterMeasure
 #print axioms LeanNumDetect.RandSamp.cubeFixedSupport_singularValues
 #print axioms LeanNumDetect.RandSamp.fixedSeparatedCube_singularValues
+#print axioms LeanNumDetect.FiniteMatrixSampling.finiteSample_complex_norm_probability_le
+#print axioms LeanNumDetect.RandSamp.dftGrid_singularValues
+#print axioms LeanNumDetect.RandSamp.dftGrid_restrictedIsometry
+#print axioms LeanNumDetect.RandSamp.dftGridOne_singularValues
+#print axioms LeanNumDetect.RandSamp.dftGridOne_restrictedIsometry
 
 run_cmd do
   let roots : Array Name := #[`External, `General, `RandSamp, `SegmentedVDM, `NumDetect]
@@ -76,6 +83,40 @@ run_cmd do
       ``LeanNumDetect.singularValues_eq_of_norm_eq,
       ``LeanNumDetect.RandSamp.cubeFourierRow_one,
       ``LeanNumDetect.RandSamp.cubeSampledVandermonde_one_singularValue,
+      ``LeanNumDetect.matrixSingularValue_sq_sub_one_le_of_coherence,
+      ``LeanNumDetect.matrixSingularValue_bounds_of_coherence,
+      ``LeanNumDetect.matrix_norm_sq_bounds_of_coherence,
+      ``LeanNumDetect.matrixSingularValue_interval_iff_norm_sq_bounds,
+      ``LeanNumDetect.matrixSingularValue_submatrix_equiv,
+      ``LeanNumDetect.FiniteMatrixSampling.probability_exists_finset_le,
+      ``LeanNumDetect.FiniteMatrixSampling.probability_forall_finset_ge,
+      ``LeanNumDetect.FiniteMatrixSampling.finiteSample_complex_norm_probability_le,
+      ``LeanNumDetect.FiniteMatrixSampling.finiteSample_complex_centered_norm_probability_le,
+      ``LeanNumDetect.FiniteMatrixSampling.finiteSample_uniform_complex_probability_ge,
+      ``LeanNumDetect.FiniteMatrixSampling.finite_net_failure_bound_of_sample_size,
+      ``LeanNumDetect.exists_torusGridPoint_near,
+      ``LeanNumDetect.torusGrid_card_le,
+      ``LeanNumDetect.matrixSingularValue_bounds_of_gram_perturbation,
+      ``LeanNumDetect.LatticeSelbergMinorant.intervalMinorant_le_openIndicator,
+      ``LeanNumDetect.RandSamp.uniform_cube_full_energy_bounds,
+      ``LeanNumDetect.RandSamp.uniform_cube_full_gram_bounds,
+      ``LeanNumDetect.RandSamp.uniformCubeLower_one,
+      ``LeanNumDetect.RandSamp.uniformCube_lower_bound_pos,
+      ``LeanNumDetect.RandSamp.uniformSeparated_lower_bound_pos,
+      ``LeanNumDetect.RandSamp.norm_cubeKernelError_sub_le,
+      ``LeanNumDetect.RandSamp.cubeGram_difference_entry,
+      ``LeanNumDetect.RandSamp.cube_singularValues_of_uniform_kernel,
+      ``LeanNumDetect.RandSamp.dftCharacter_exp,
+      ``LeanNumDetect.RandSamp.sum_dftCharacter_eq_zero,
+      ``LeanNumDetect.RandSamp.dftSampledMatrix_gram,
+      ``LeanNumDetect.RandSamp.dftSampledMatrix_eq_cubeSampledVandermonde,
+      ``LeanNumDetect.RandSamp.card_nonzero_dftIndex,
+      ``LeanNumDetect.RandSamp.dft_failure_bound_of_sample_size,
+      ``LeanNumDetect.RandSamp.dftGrid_coherence_probability,
+      ``LeanNumDetect.RandSamp.dftGridSingularValueEvent_iff_energy,
+      ``LeanNumDetect.RandSamp.dftSupportMatrixOne_singularValue,
+      ``LeanNumDetect.RandSamp.dftGridOneSingularValueEvent_iff,
+      ``LeanNumDetect.RandSamp.dftGridOne_singularValueEvent_iff_energyEvent,
       ``LeanNumDetect.RandSamp.card_cubeFrequency,
       ``LeanNumDetect.RandSamp.cubeSampledVandermonde_energy,
       ``LeanNumDetect.RandSamp.cubeFourierRowGram_posSemidef,
@@ -102,6 +143,13 @@ run_cmd do
       ``LeanNumDetect.FiniteMatrixSampling.sampleMean_bounds_probability,
       ``LeanNumDetect.RandSamp.fixedSupport_singularValues,
       ``LeanNumDetect.RandSamp.fixedSeparated_singularValues,
+      ``LeanNumDetect.RandSamp.uniformCubeKernel_probability,
+      ``LeanNumDetect.RandSamp.uniformSeparatedCube_singularValues,
+      ``LeanNumDetect.RandSamp.uniformSeparated_singularValues,
+      ``LeanNumDetect.RandSamp.dftGrid_singularValues,
+      ``LeanNumDetect.RandSamp.dftGrid_restrictedIsometry,
+      ``LeanNumDetect.RandSamp.dftGridOne_singularValues,
+      ``LeanNumDetect.RandSamp.dftGridOne_restrictedIsometry,
       ``LeanNumDetect.FiniteMatrixSampling.finiteSampleMean_bounds_probability,
       ``LeanNumDetect.RandSamp.cubeFixedSupport_singularValues,
       ``LeanNumDetect.RandSamp.fixedSeparatedCube_singularValues] do

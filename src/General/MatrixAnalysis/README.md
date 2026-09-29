@@ -12,6 +12,10 @@ thresholding and MUSIC arguments.
 | [MoorePenrose.lean](MoorePenrose.lean) | Moore-Penrose inverse at arbitrary rank, uniqueness, Gram formula, and unitary covariance |
 | [HermitianVariational.lean](HermitianVariational.lean) | Finite-dimensional Courant-Fischer and Hermitian eigenvalue bounds |
 | [SingularValueBounds.lean](SingularValueBounds.lean) | Singular-value product, perturbation, and variational estimates |
+| [Coherence.lean](Coherence.lean) | Gershgorin bounds for all singular values and action energies from unit columns and bounded off-diagonal Gram entries |
+| [GramPerturbation.lean](GramPerturbation.lean) | Exact additive singular-value and energy bounds from equal Gram diagonals and bounded off-diagonal differences |
+| [SpectralInterval.lean](SpectralInterval.lean) | Exact equivalence between extremal singular-value intervals and uniform energy bounds for arbitrary finite row and column indices |
+| [Reindex.lean](Reindex.lean) | Preservation of every singular value under row and column bijections |
 | [MUSICSubspacePerturbation.lean](MUSICSubspacePerturbation.lean) | Proved fixed-rank perturbation bound for trailing left singular subspaces |
 | [TraceExponential.lean](TraceExponential.lean) | Spectral expansion, Jensen, convexity, and detection of Rayleigh events by the trace exponential |
 | [TraceExponentialBounds.lean](TraceExponentialBounds.lean) | PSD exponential chord and weighted trace bounds |
