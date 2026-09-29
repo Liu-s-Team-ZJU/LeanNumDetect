@@ -1,8 +1,8 @@
 import General.Fourier.TranslatedCubeFourier
 
 /-!
-The full consecutive-frequency frame bounds used in
-`thm:fixed-separated-singular-values`.  The proof specializes the proved
+The full consecutive-frequency frame bounds for the one-dimensional support
+interface. The proof specializes the proved
 Vaaler--Selberg majorant and minorant to the interval `[0,M]`.  In particular,
 it includes non-strict separation without an additional external theorem.
 -/

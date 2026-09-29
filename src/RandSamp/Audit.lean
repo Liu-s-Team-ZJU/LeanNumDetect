@@ -1,5 +1,6 @@
 import RandSamp.FixedSeparated
 import RandSamp.FixedSeparatedCube
+import RandSamp.FixedSupport
 import RandSamp.NonuniformVandermonde
 import General.Probability.UniformCounting
 import Lean.Util.CollectAxioms
@@ -22,6 +23,7 @@ open Lean Elab Command
 #print axioms LeanNumDetect.RandSamp.nonuniformVandermonde_minimumSingularValue
 #print axioms LeanNumDetect.RandSamp.fixedSupport_singularValues
 #print axioms LeanNumDetect.RandSamp.fixedSeparated_singularValues
+#print axioms LeanNumDetect.RandSamp.cubeSampledVandermonde_one_singularValue
 #print axioms LeanNumDetect.RandSamp.cube_separated_full_energy_bounds
 #print axioms LeanNumDetect.RandSamp.cube_separated_full_gram_bounds
 #print axioms LeanNumDetect.RandSamp.cubeSeparated_lower_bound_pos
@@ -70,6 +72,10 @@ run_cmd do
       ``LeanNumDetect.RandSamp.cubeSeparated_lower_bound_pos,
       ``LeanNumDetect.RandSamp.cubeSeparatedLower_one,
       ``LeanNumDetect.RandSamp.cubeSeparatedUpper_one,
+      ``LeanNumDetect.RandSamp.fixedSeparated_lower_bound_pos,
+      ``LeanNumDetect.singularValues_eq_of_norm_eq,
+      ``LeanNumDetect.RandSamp.cubeFourierRow_one,
+      ``LeanNumDetect.RandSamp.cubeSampledVandermonde_one_singularValue,
       ``LeanNumDetect.RandSamp.card_cubeFrequency,
       ``LeanNumDetect.RandSamp.cubeSampledVandermonde_energy,
       ``LeanNumDetect.RandSamp.cubeFourierRowGram_posSemidef,

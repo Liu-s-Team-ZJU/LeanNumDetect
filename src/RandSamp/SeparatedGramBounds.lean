@@ -36,7 +36,7 @@ theorem separatedLower_le_upper (M : ℕ) {Δ : ℝ} (hΔ : 0 < Δ) :
   have : 0 ≤ 2 * Real.pi / Δ := by positivity
   linarith
 
-/-- Manuscript equation `eq:fixed-separated-full-gram`, in quadratic-form order.
+/-- The one-dimensional normalized full-Gram bound, in quadratic-form order.
 The full population has `M+1` rows; the numerator has bandwidth `M`. -/
 theorem separated_full_gram_bounds {M s : ℕ} (hM : 0 < M)
     (hs : 1 ≤ s) {Δ : ℝ} (hΔlow : 2 * Real.pi / M < Δ)

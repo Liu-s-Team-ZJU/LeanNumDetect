@@ -10,30 +10,41 @@ complete interface. Declarations are in `LeanNumDetect.RandSamp`.
 | Manuscript result | Exact Lean location |
 | --- | --- |
 | Full consecutive-frequency bounds $M\pm2\pi/\Delta$ | [SeparatedFullGram.lean](SeparatedFullGram.lean): `separated_full_energy_bounds` |
-| Normalized full Gram bound (`eq:fixed-separated-full-gram`) | [SeparatedGramBounds.lean](SeparatedGramBounds.lean): `separated_full_gram_bounds` |
+| One-dimensional normalized full Gram bound | [SeparatedGramBounds.lean](SeparatedGramBounds.lean): `separated_full_gram_bounds` |
 | Fixed node-set lemma (`lem:fixed-support-singular-values`) | [FixedSupport.lean](FixedSupport.lean): `fixedSupport_singularValues` |
-| Fixed well-separated node set (`thm:fixed-separated-singular-values`) | [FixedSeparated.lean](FixedSeparated.lean): `fixedSeparated_singularValues` |
-| Strict positivity of the lower endpoint | [FixedSeparated.lean](FixedSeparated.lean): `fixedSeparated_lower_bound_pos` |
+| One-dimensional corollary of `thm:fixed-separated-singular-values-higher-dimensional` | [FixedSeparated.lean](FixedSeparated.lean): `fixedSeparated_singularValues` |
+| One-dimensional corollary for strict positivity of the lower endpoint | [FixedSeparated.lean](FixedSeparated.lean): `fixedSeparated_lower_bound_pos` |
 
-The main theorem retains $M\geq3$, $2\leq s<M$, $1\leq m\leq M+1$,
-$0<\delta,\eta<1$, and $2\pi/M<\Delta\leq2\pi/s$. Its sample-size condition is
+The one-dimensional corollary retains $M\geq3$, $2\leq s<M$, $1\leq m\leq M+1$,
+$0<\rho,\eta<1$, and $2\pi/M<\Delta\leq2\pi/s$. Its sample-size condition is
 
 $$
-m\geq \frac{3s(M+1)}{\delta^2(M-2\pi/\Delta)}
+m\geq \frac{3s(M+1)}{\rho^2(M-2\pi/\Delta)}
 \log\!\left(\frac{2s}{\eta}\right).
 $$
 
 It proves that the probability of
 
 $$
-\sqrt{\frac{(1-\delta)(M-2\pi/\Delta)}{M+1}}
+\sqrt{\frac{(1-\rho)(M-2\pi/\Delta)}{M+1}}
 \leq\sigma_{\min}(A_\Omega(Y))
 \leq\sigma_{\max}(A_\Omega(Y))
-\leq\sqrt{\frac{(1+\delta)(M+2\pi/\Delta)}{M+1}}
+\leq\sqrt{\frac{(1+\rho)(M+2\pi/\Delta)}{M+1}}
 $$
 
 is at least $1-\eta$. The separate positivity theorem proves that the displayed
-lower endpoint is strictly positive.
+lower endpoint is strictly positive, also by specialization from the cube bound.
+
+The proof of `fixedSeparated_singularValues` calls
+`fixedSeparatedCube_singularValues` with $d=1$. The equivalence
+`Equiv.funUnique` identifies `Fin 1 → Fin (M+1)` with `Fin (M+1)`;
+`finiteSampleEquiv` and `probability_comp_equiv` transport the uniformly
+sampled subsets and their event probabilities. The lemma
+`cubeSampledVandermonde_one_singularValue` proves that this relabelling
+preserves every singular value. The constants simplify using
+`cubeSeparatedLower_one` and `cubeSeparatedUpper_one`, while $s\geq2$
+turns the original bound $\Delta\leq2\pi/s$ into $\Delta\leq\pi$.
+There is no separate concentration or full-Gram argument in the corollary.
 
 ### Definitions and scope
 
@@ -79,7 +90,7 @@ throughout the imported project dependencies and checks the final theorems'
 transitive axioms. Run `lake build` and `python3 .github/ci/check.py` for the
 complete build and admission audit.
 
-## Higher-dimensional fixed separated nodes
+## Fixed separated nodes in arbitrary dimension
 
 | Manuscript result | Exact Lean location |
 | --- | --- |
@@ -87,6 +98,7 @@ complete build and admission audit.
 | Normalized Gram bound (`eq:fixed-separated-higher-dimensional-full-gram`) | [CubeGramBounds.lean](CubeGramBounds.lean): `cube_separated_full_gram_bounds` |
 | Fixed-support Chernoff argument for the cube | [CubeFixedSupport.lean](CubeFixedSupport.lean): `cubeFixedSupport_singularValues` |
 | Main theorem (`thm:fixed-separated-singular-values-higher-dimensional`) | [FixedSeparatedCube.lean](FixedSeparatedCube.lean): `fixedSeparatedCube_singularValues` |
+| Matrix identification at $d=1$ | [CubeRandomModel.lean](CubeRandomModel.lean): `cubeFourierRow_one`, `cubeSampledVandermonde_one_singularValue` |
 | Positivity and reduction of constants at $d=1$ | [CubeConstants.lean](CubeConstants.lean): `cubeSeparated_lower_bound_pos`, `cubeSeparatedLower_one`, `cubeSeparatedUpper_one` |
 
 The theorem retains $d,M\geq1$, $s\geq2$, $1\leq m\leq(M+1)^d$,
@@ -125,8 +137,9 @@ $(M+c)^{d-1}(M-(2d-1)c)$; `cubeLower_le_bartonMass` proves this comparison by
 Bernoulli's inequality. This proves the stated constants directly, including
 non-strict separation, without additional analytic assumptions or limit
 hypotheses. The probability proof uses the proved finite-population reindexing
-interface and the fully proved Chernoff bounds used by the one-dimensional
-theorem. The entire dependency chain is free of admissions and project axioms.
+interface and the fully proved Chernoff bounds. The one-dimensional probability
+result is obtained only afterward as its $d=1$ corollary. The entire dependency
+chain is free of admissions and project axioms.
 
 ## Nonuniform VDM scaling
 

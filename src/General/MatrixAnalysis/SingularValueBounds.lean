@@ -100,6 +100,25 @@ theorem le_singularValues_of_subspace
     singularValues_upper_vector_exists T hi S hS
   simpa only [hnorm, mul_one] using (hbound x hx).trans hupper
 
+/-- Equal action norms determine singular values even when the codomains differ. -/
+theorem singularValues_eq_of_norm_eq
+    {G : Type*} [NormedAddCommGroup G] [InnerProductSpace ℂ G]
+    [FiniteDimensional ℂ G] (A : E →ₗ[ℂ] F) (B : E →ₗ[ℂ] G)
+    (hnorm : ∀ x, ‖A x‖ = ‖B x‖) : A.singularValues = B.singularValues := by
+  ext i
+  by_cases hi : i < Module.finrank ℂ E
+  · apply le_antisymm
+    · obtain ⟨S, hS, hA⟩ := singularValues_lower_subspace_exists A hi
+      exact le_singularValues_of_subspace B hi S hS (fun x hx => by
+        rw [← hnorm x]
+        exact hA x hx)
+    · obtain ⟨S, hS, hB⟩ := singularValues_lower_subspace_exists B hi
+      exact le_singularValues_of_subspace A hi S hS (fun x hx => by
+        rw [hnorm x]
+        exact hB x hx)
+  · rw [A.singularValues_of_finrank_le (Nat.le_of_not_gt hi),
+      B.singularValues_of_finrank_le (Nat.le_of_not_gt hi)]
+
 /-- One-sided operator-norm perturbation bound for singular values. -/
 theorem singularValues_sub_operatorNorm_le
     (A B : E →ₗ[ℂ] F) {i : ℕ} (hi : i < Module.finrank ℂ E) :

@@ -2,8 +2,9 @@ import General.MatrixAnalysis.SingularValueBounds
 
 /-!
 Conversion of quadratic energy estimates into extremal singular-value bounds.
-These are the deterministic spectral steps used by the fixed separated-support
-theorem (`thm:fixed-separated-singular-values`) in the RandSamp manuscript.
+These are the deterministic spectral steps used by the fixed-support lemma
+and the arbitrary-dimensional fixed separated-node theorem
+(`thm:fixed-separated-singular-values-higher-dimensional`) in the manuscript.
 -/
 
 set_option autoImplicit false

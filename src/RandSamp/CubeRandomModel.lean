@@ -162,6 +162,27 @@ theorem quadratic_cubeFourier_sampleMean {d M s m : ℕ} (Y : Fin s → Fin d �
     smul_eq_mul, ← Complex.ofReal_natCast, ← Complex.ofReal_inv,
     Complex.re_ofReal_mul, Complex.re_sum, cubeFourierPopulation, cubeFourierRowGram_quadratic]
 
+/-- A one-coordinate cube row is the corresponding one-dimensional Fourier row. -/
+@[simp] theorem cubeFourierRow_one {M s : ℕ} (Y : Fin s → ℝ)
+    (k : CubeFrequency 1 M) (j : Fin s) :
+    cubeFourierRow (fun j (_ : Fin 1) => Y j) k j = fourierRow Y (k 0).val j := by
+  simp [cubeFourierRow, fourierRow]
+
+/-- Identifying a one-coordinate frequency with its only coordinate preserves
+every singular value of the normalized sampled matrix. -/
+theorem cubeSampledVandermonde_one_singularValue {M s m : ℕ} (Y : Fin s → ℝ)
+    (Ω : Sample (M + 1) m) (i : ℕ) :
+    matrixSingularValue
+      (cubeSampledVandermonde m (fun j (_ : Fin 1) => Y j)
+        (finiteSampleEquiv (Equiv.funUnique (Fin 1) (Fin (M + 1))).symm m Ω).val) i =
+      matrixSingularValue (sampledVandermonde m Y Ω.val) i := by
+  apply congrArg (fun values : ℕ →₀ ℝ => values i)
+  apply singularValues_eq_of_norm_eq
+  intro z
+  apply (sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)).1
+  rw [cubeSampledVandermonde_energy, sampledVandermonde_energy]
+  simp [cubeFourierRowEnergy, fourierRowEnergy, Equiv.funUnique]
+
 end
 
 end LeanNumDetect.RandSamp
