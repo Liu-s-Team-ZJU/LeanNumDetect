@@ -1,9 +1,117 @@
 # RandSamp
 
-This directory formalizes uniform separated-node, fixed-support, and Cartesian DFT-grid random Fourier sampling from the
+This directory formalizes uniform separated-node, fixed-support, Cartesian
+DFT-grid, and uniform off-grid relative Gram random Fourier sampling from the
 RandSamp manuscript, together with the existing nonuniform Fourier--Vandermonde
 estimate from the NumDetect manuscript. Import [Main.lean](Main.lean) for the
 complete interface. Declarations are in `LeanNumDetect.RandSamp`.
+
+## Uniform off-grid relative Gram estimates
+
+| Manuscript result | Exact Lean location |
+| --- | --- |
+| Exact finite representation (`lem:fourier-atomic-grid`) | [General/Fourier/FourierAtomicGrid.lean](../General/Fourier/FourierAtomicGrid.lean): `LeanNumDetect.exists_fourierAtom_grid_expansion`, `LeanNumDetect.fourierAtomicGridSize_le` |
+| Unit-normalized atoms and the signal coefficient bound (`eq:offgrid-atomic-sparsity`) | [OffGridAtomicRepresentation.lean](OffGridAtomicRepresentation.lean): `exists_fullFourierSignal_atomic_expansion_of_fullGram_lower` |
+| Full and sampled signal/Gram normalization | [OffGridSignal.lean](OffGridSignal.lean): `norm_fullFourierSignal_sq`, `sampled_fullFourierSignal_energy` |
+| One dictionary event implies every admissible off-grid relative Gram event | [OffGridAtomicEvent.lean](OffGridAtomicEvent.lean): `relativeGramEvent_of_atomicGridDeviation` |
+| Exact logarithmic rate (`eq:offgrid-relative-sample-size`) | [OffGridSamplingRate.lean](OffGridSamplingRate.lean): `offGridSamplingLogFactor` |
+| Uniform relative Gram theorem (`thm:uniform-offgrid-relative-gram`) | [UniformOffGridRelativeGram.lean](UniformOffGridRelativeGram.lean): `uniformOffGrid_relativeGram` |
+| One constant for the theorem and its separated corollary | [SeparatedOffGridRelativeGram.lean](SeparatedOffGridRelativeGram.lean): `uniformOffGrid_and_uniformSeparated_sameConstant` |
+| Separated specialization (`cor:separated-offgrid-relative-gram`) | [SeparatedOffGridRelativeGram.lean](SeparatedOffGridRelativeGram.lean): `uniformSeparated_relativeGram_singularValues` |
+| Ordinary operator RIP bias estimate following the separated corollary | [OffGridBiasOperator.lean](OffGridBiasOperator.lean): `relativeGramEvent_operator_bias_bound` |
+| Positive lower endpoint under fixed Rayleigh-scale separation | [OffGridBiasOperator.lean](OffGridBiasOperator.lean): `uniformSeparatedLower_rayleigh_scale_bound` |
+
+The theorem quantifies one universal constant $C>0$ before every bandwidth,
+sparsity, sampling cardinality, full-Gram lower endpoint, distortion, and
+failure probability. It assumes $M,s\geq2$, $a>0$, $0<\rho,\eta<1$, and
+$1\leq m\leq M+1$. Its sample-size condition is exactly the manuscript's
+full-sampling alternative or
+
+$$
+m\geq\frac{Cs}{a\rho^2}
+\left[(1+\log(M+1))\left(1+\log\frac{s}{a\rho}\right)^2
++\log\frac2\eta\right].
+$$
+
+Inside one event of probability at least $1-\eta$, it quantifies over every
+real representative tuple $Y:\mathrm{Fin}\ s\to\mathbb R$ whose normalized
+full Gram satisfies $G_M(Y)\succeq aI$, and every coefficient vector. The
+conclusion is exactly
+
+$$
+(1-\rho)c^*G_M(Y)c\leq c^*G_\Omega(Y)c
+\leq(1+\rho)c^*G_M(Y)c.
+$$
+
+The event samples actual uniformly distributed $m$-element frequency subsets;
+it includes the complete sample $m=M+1$. No deterministic upper endpoint,
+separation condition, or coefficient-space RIP assumption is added to this
+general theorem. An empty class of tuples satisfying the stated lower bound
+is handled inside the proof.
+
+The separated specialization uses the already proved endpoints
+
+$$
+a=\frac{M+3/2-2\pi/\Delta}{M+1},\qquad
+b=\frac{M+2\pi/\Delta}{M+1}
+$$
+
+under $2\pi/(M+3/2)<\Delta\leq2\pi/s$ and the same dimension,
+sampling, distortion, and failure-probability assumptions. The joint theorem
+`uniformOffGrid_and_uniformSeparated_sameConstant` proves that one universal
+$C$ satisfies the general theorem and this specialization. The same uniform
+event gives singular-value endpoints $\sqrt{(1-\rho)a}$ and
+$\sqrt{(1+\rho)b}$. The operator-norm bias conversion is also exact:
+$\|G_M-I\|\leq\gamma$ implies
+$\|G_\Omega-I\|\leq\rho+(1+\rho)\gamma$ on a relative Gram event.
+For fixed $C_0>2\pi$ and $\Delta\geq C_0/M$, the proved scalar bound is
+$a\geq1-2\pi/C_0>0$, and the sufficient sample order is
+
+$$
+O_{C_0}\!\left(\rho^{-2}s
+\left[\log(e(M+1))\log^2(es/\rho)+\log(2/\eta)\right]\right).
+$$
+
+The earlier uniform kernel theorem below remains available with its explicit
+constant, arbitrary-dimensional scope, and upper endpoint $\sqrt{b+\rho a}$.
+
+### Proof and trust boundary
+
+The exact dictionary has
+$Q=(\lceil4\pi M\rceil+1)(M+1)\leq(4\pi M+2)(M+1)$ atoms.
+Fourier inversion and a nearby atom give each continuous atom an exact
+expansion with coefficient mass at most two. The full-Gram lower endpoint
+then bounds the normalized signal's coefficient radius squared by $4s/a$.
+These deterministic steps and every full/sampled normalization are proved
+in Lean.
+
+The new probability chain uses **one admitted original external theorem**:
+Brugiapaglia, Dirksen, Jung, and Rauhut, *Sparse recovery in bounded Riesz
+systems with applications to numerical methods for PDEs* (2021),
+[Theorem 1.1, manuscript p. 2](https://arxiv.org/pdf/2005.06994), registered in
+[External/README.md](../External/README.md). Its declaration is
+`LeanNumDetect.BoundedRieszConcentration.boundedRows_concentration` in
+[External/BoundedRieszConcentration.lean](../External/BoundedRieszConcentration.lean).
+The statement retains arbitrary bounded complex row distributions, arbitrary
+probability spaces, independent identically distributed rows, arbitrary target
+subsets of the $\ell^1$ ball, and the source's constants, normalization,
+sample rate, and strict success-probability inequality.
+
+[BoundedAtomicConcentration.lean](../General/Probability/BoundedAtomicConcentration.lean)
+proves the finite-law and dictionary conversion. Finite convex comparison,
+the positive-part deviation estimate, transfer to sampling without
+replacement, and all rate simplifications are proved in
+[BoundedAtomicSampling.lean](../General/Probability/BoundedAtomicSampling.lean)
+and its supporting modules. No specialized concentration result or
+manuscript theorem is admitted.
+
+[OffGridAudit.lean](OffGridAudit.lean) permits exactly that registered original
+declaration's direct admission, rejects every other imported project admission
+or project axiom, and separately checks admission-free deterministic
+prerequisites. The new final probability theorems therefore have a transitive
+`sorryAx` dependency through this one source theorem. The existing
+[Audit.lean](Audit.lean) remains unchanged and continues to enforce the
+admission-free boundary of the earlier results.
 
 ## Fixed-support random sampling
 
@@ -82,8 +190,9 @@ the Lie--Trotter product formula, spectral exponential bounds, and scalar
 Laplace optimization. Their statements preserve the exact factors and full
 parameter ranges of [Tropp (2011), Theorem 2.2](https://arxiv.org/pdf/1011.1595).
 
-There are no admitted external results. The final probability theorems and
-their prerequisites depend only on `propext`, `Classical.choice`, and
+The results in this fixed-support development and the earlier uniform-kernel
+and DFT-grid developments use no admitted external result. Their probability
+theorems and prerequisites depend only on `propext`, `Classical.choice`, and
 `Quot.sound`. [Audit.lean](Audit.lean) rejects admissions and project axioms
 throughout the imported project dependencies and checks the final theorems'
 transitive axioms. Run `lake build` and `python3 .github/ci/check.py` for the

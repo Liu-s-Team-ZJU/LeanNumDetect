@@ -8,8 +8,8 @@ and computational resolution limits. Algorithms, complexity estimates, and
 numerical experiments are outside the current scope.
 
 Import `NumDetect.Main` for the NumDetect results and `RandSamp.Main` for the
-nonuniform Fourier--Vandermonde estimate and the fixed-support random-sampling
-results of the RandSamp manuscript.
+nonuniform Fourier--Vandermonde estimate, fixed-support and uniform random
+sampling, and off-grid relative Gram results of the RandSamp manuscript.
 
 ## Main theoretical results
 
@@ -36,10 +36,10 @@ See more in [NumDetect guide](src/NumDetect/README.md).
 | Path | Purpose |
 | --- | --- |
 | [src/NumDetect](src/NumDetect/README.md) | Manuscript definitions and main results, grouped by flat module prefixes with aggregate import `NumDetect.Main` |
-| [src/RandSamp](src/RandSamp/README.md) | Nonuniform Fourier--Vandermonde scaling and fixed-support random Fourier sampling |
+| [src/RandSamp](src/RandSamp/README.md) | Nonuniform Fourier--Vandermonde scaling, fixed-support and uniform random Fourier sampling, and off-grid relative Gram estimates |
 | [src/SegmentedVDM](src/SegmentedVDM/README.md) | Independent one-dimensional segmented Vandermonde construction and singular-value theorem |
 | [src/General](src/General/README.md) | Reusable finite, Fourier, matrix-analysis, and spectral-perturbation results |
-| [src/External](src/External/README.md) | Source registry; no admitted results remain |
+| [src/External](src/External/README.md) | Source registry and one admitted original bounded-row concentration theorem |
 
 ## Build and verify
 
@@ -55,9 +55,14 @@ python3 .github/ci/check.py
 The first command verifies the pinned dependency checkout, `lake build` builds
 the source libraries, and the final check builds every source module and
 rejects admissions outside `src/External/` and project-defined axioms. The
-random-sampling probability theorems, including both matrix Chernoff tails and
-their analytic prerequisites, are fully proved with no `sorry`. The RandSamp
-audit checks that final results use only standard Lean axioms. If the shared
+earlier random-sampling probability theorems, including both matrix Chernoff
+tails and their analytic prerequisites, are fully proved with no `sorry`.
+The original RandSamp audit checks that these results use only standard Lean
+axioms. The new off-grid probability results depend on the one registered
+original BDJR theorem in `src/External/`; their separate off-grid audit permits
+exactly that direct admission and checks that every project conversion and
+deterministic prerequisite is proved. NumDetect results remain admission-free.
+If the shared
 mathlib checkout is absent, run `python3 .github/ci/setup_mathlib.py` once before these
 commands. See the [CI guide](.github/ci/README.md) for environment setup and
 cache details.
