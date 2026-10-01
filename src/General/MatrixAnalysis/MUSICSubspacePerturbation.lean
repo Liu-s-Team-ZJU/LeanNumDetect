@@ -382,7 +382,7 @@ theorem trailingLeftSingularSubspace_eq_range_orthogonal
 
 The proof uses singular-value variational bounds and the two complementary
 cross-projection estimates. -/
-theorem fixedRankTrailingLeftSingularSubspacePerturbation
+theorem fixedRankTrailingLeftSingularSubspaceProjectionPerturbation
     {ι κ : Type*} [Fintype ι] [Fintype κ]
     [DecidableEq ι] [DecidableEq κ]
     (A E : Matrix ι κ ℂ) (n : ℕ)
@@ -392,8 +392,8 @@ theorem fixedRankTrailingLeftSingularSubspacePerturbation
     (hsmall :
       2 * matrixSpectralNorm E < matrixSingularValue A (n - 1))
     (x : EuclideanSpace ℂ ι) :
-    |‖(trailingLeftSingularSubspace (A + E) n).starProjection x‖ -
-        ‖(trailingLeftSingularSubspace A n).starProjection x‖| ≤
+    ‖(trailingLeftSingularSubspace (A + E) n).starProjection x -
+        (trailingLeftSingularSubspace A n).starProjection x‖ ≤
       (2 * matrixSpectralNorm E /
         matrixSingularValue A (n - 1)) * ‖x‖ := by
   let T := A.toEuclideanLin
@@ -541,16 +541,31 @@ theorem fixedRankTrailingLeftSingularSubspacePerturbation
         (2 * ε / σ) * ‖x‖ :=
     projection_difference_le_of_cross_bounds N M
       (div_nonneg (mul_nonneg (by norm_num) hε) hσpos.le) hMS hNM x
-  have hreverse :
-      |‖M.starProjection x‖ - ‖N.starProjection x‖| ≤
-        ‖M.starProjection x - N.starProjection x‖ :=
-    abs_norm_sub_norm_le _ _
   have htrail (C : Matrix ι κ ℂ) :
       trailingLeftSingularSubspace C n =
         trailingSingularSubspace C.toEuclideanLin.adjoint n := by
     rfl
   rw [htrail (A + E), htrail A]
-  simpa only [M, N, LB, L, B, T, σ, ε] using hreverse.trans hproj
+  simpa only [M, N, LB, L, B, T, σ, ε] using hproj
+
+/-- The trailing-subspace MUSIC correlation changes by at most the projector perturbation. -/
+theorem fixedRankTrailingLeftSingularSubspacePerturbation
+    {ι κ : Type*} [Fintype ι] [Fintype κ]
+    [DecidableEq ι] [DecidableEq κ]
+    (A E : Matrix ι κ ℂ) (n : ℕ)
+    (hn : 0 < n) (hrows : n < Fintype.card ι)
+    (hcols : n ≤ Fintype.card κ)
+    (hrank : A.rank = n)
+    (hsmall :
+      2 * matrixSpectralNorm E < matrixSingularValue A (n - 1))
+    (x : EuclideanSpace ℂ ι) :
+    |‖(trailingLeftSingularSubspace (A + E) n).starProjection x‖ -
+        ‖(trailingLeftSingularSubspace A n).starProjection x‖| ≤
+      (2 * matrixSpectralNorm E /
+        matrixSingularValue A (n - 1)) * ‖x‖ := by
+  exact (abs_norm_sub_norm_le _ _).trans
+    (fixedRankTrailingLeftSingularSubspaceProjectionPerturbation
+      A E n hn hrows hcols hrank hsmall x)
 
 end NumDetect
 
