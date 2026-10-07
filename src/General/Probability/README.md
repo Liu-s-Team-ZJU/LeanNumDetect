@@ -16,8 +16,55 @@
 | [FiniteUnion.lean](FiniteUnion.lean) | Finite union bounds and simultaneous success events for uniform counting probability |
 | [FiniteCenteredConcentration.lean](FiniteCenteredConcentration.lean) | Centered real and complex Hoeffding bounds with exact width-two constants, for populations with arbitrary mean |
 | [FiniteUniformConcentration.lean](FiniteUniformConcentration.lean) | Finite-net extension of centered concentration and exact logarithmic sampling arithmetic |
+| [BoundedRowModel.lean](BoundedRowModel.lean) | Concrete bounded-row energies and covariance definitions, without an admitted concentration result |
+| [BoundedRowEstimates.lean](BoundedRowEstimates.lean) | Arbitrary-law integrability, deterministic envelopes, continuity of row pairings and fourth-moment bounds |
+| [BoundedRowContinuity.lean](BoundedRowContinuity.lean) | Uniform perturbations, arbitrary-target deviation continuity and arbitrary-law almost-everywhere measurability |
+| [BoundedRowTrivialRegime.lean](BoundedRowTrivialRegime.lean) | Probability-one and strict success estimates for arbitrary identically distributed rows when $sK^2\le\delta$ |
+| [FiniteSymmetrization.lean](FiniteSymmetrization.lean) | Ghost-sample Jensen and exact factor-two finite-law symmetrization for bounded infinite test classes |
+| [FiniteBernoulliProcess.lean](FiniteBernoulliProcess.lean) | Signed-process exponential moments, expected finite maxima and maximal Gaussian tails |
+| [ComplexL1WeakNet.lean](ComplexL1WeakNet.lean) | Maurey empirical nets of size $(4N+1)^L$ and a proved exponential exceptional-row count |
+| [ComplexAtomicSimplex.lean](ComplexAtomicSimplex.lean) | Exact $4N+1$-atom simplex representation of every complex coordinate $\ell^1$-ball vector |
+| [FiniteBernoulliChaining.lean](FiniteBernoulliChaining.lean) | An entropy-sum estimate from finite multiscale increments and a uniform residual |
+| [AtomicEmpiricalApproximation.lean](AtomicEmpiricalApproximation.lean) | Weighted finite iid Hoeffding and exceptional-set selection |
+| [FiniteBernoulliContraction.lean](FiniteBernoulliContraction.lean) | Scalar and absolute contraction for arbitrary bounded infinite classes |
+| [FiniteProductConcentration.lean](FiniteProductConcentration.lean) | Boolean product bounded differences, centered exponential moments and optimized tails |
+| [ClippedQuadraticProcesses.lean](ClippedQuadraticProcesses.lean) | Separable clipped-square contraction and localized coefficient-class expectation |
+| [WeakShellDecomposition.lean](WeakShellDecomposition.lean) | Causal first-crossing shell decomposition with explicit exceptional-row energy errors |
+| [EmpiricalProcessReplacementVariance.lean](EmpiricalProcessReplacementVariance.lean) | Linear-envelope delete-one and conditional replacement variance bounds |
+| [FiniteEntropy.lean](FiniteEntropy.lean) | Gibbs variational inequality, entropy convexity and finite weighted product tensorization |
+| [FiniteProductReplacement.lean](FiniteProductReplacement.lean) | Coordinate refresh identities and exchangeability under finite product laws |
+| [FiniteExponentialEntropy.lean](FiniteExponentialEntropy.lean) | Full product replacement entropy inequality and affine variance-proxy conversion |
+| [FiniteProcessSecondMoments.lean](FiniteProcessSecondMoments.lean) | Second moments of maxima from scalar subgaussian moment bounds |
+| [FiniteCubeProcessMaxima.lean](FiniteCubeProcessMaxima.lean) | Maximal second moments for finite families of Boolean cube processes |
+| [NormalizedClippedMasks.lean](NormalizedClippedMasks.lean) | Cardinality-normalized clipped processes and their finite-family second moments |
+| [AtomicPrefixEntropy.lean](AtomicPrefixEntropy.lean) | Cardinality and logarithmic entropy of causal atomic-word prefixes |
+| [CausalMaskChaining.lean](CausalMaskChaining.lean) | Path Cauchy--Schwarz and weighted square-root expectation estimates |
+| [CausalShellProcesses.lean](CausalShellProcesses.lean) | Exact first-crossing mask expansion and stochastic shell bounds |
+| [CausalWeakNetExpectation.lean](CausalWeakNetExpectation.lean) | Constructed atomic words, common exceptional sets and explicit bounded-row Bernoulli expectation |
+| [CausalShellParameters.lean](CausalShellParameters.lean) | Logarithmic level counts, word lengths, residuals and squared-logarithm entropy budget |
+| [BoundedRowSelfConsistency.lean](BoundedRowSelfConsistency.lean) | Scalar expectation bootstrap and exact sampling-budget arithmetic |
+| [WeightedSymmetrization.lean](WeightedSymmetrization.lean) | Exact ghost-sample symmetrization for arbitrary finite probability weights |
+| [HerbstBounds.lean](HerbstBounds.lean) | Differential entropy-to-moment conversion with a linear variance envelope |
+| [FiniteProcessConcentration.lean](FiniteProcessConcentration.lean) | Subgamma moments and optimized tails from replacement entropy |
+| [FiniteEmpiricalSupremumConcentration.lean](FiniteEmpiricalSupremumConcentration.lean) | Cardinality-free deviation tails for finite energy classes |
+| [RelativeDeviationTailBounds.lean](RelativeDeviationTailBounds.lean) | Exact relative-error exponent and threshold arithmetic |
+| [FiniteEmpiricalRelativeConcentration.lean](FiniteEmpiricalRelativeConcentration.lean) | Relative population-energy tails from an expected-deviation bound |
+| [FiniteBoundedRowConcentration.lean](FiniteBoundedRowConcentration.lean) | Exact bounded-row normalization and finite-law tail reduction |
+| [FiniteBoundedRowSymmetrization.lean](FiniteBoundedRowSymmetrization.lean) | Energy-specific symmetrization and empirical-energy expectation bootstrap |
+| [FiniteBoundedRowZeroTarget.lean](FiniteBoundedRowZeroTarget.lean) | Adding the zero test preserves all nonnegative finite maxima exactly |
+| [BoundedRowTargetApproximation.lean](BoundedRowTargetApproximation.lean) | Finite subsets of arbitrary coefficient classes with uniform energy errors |
+| [BoundedRowDistributionApproximation.lean](BoundedRowDistributionApproximation.lean) | Uniform reference-law and sampled-row perturbation bounds |
+| [BoundedRowQuantization.lean](BoundedRowQuantization.lean) | Finite measurable row quantization preserving the exact coordinate envelope |
+| [FiniteWeightedLaw.lean](FiniteWeightedLaw.lean) | Exact finite-law integral and product-event identities, including zero weights |
+| [IIDJointLaw.lean](IIDJointLaw.lean) | Exact product-law transport from arbitrary independent identically distributed rows |
+| [BoundedRowsFiniteReduction.lean](BoundedRowsFiniteReduction.lean) | Concentration transfer to arbitrary laws, probability spaces and target sets |
+| [FiniteBoundedRowExpectation.lean](FiniteBoundedRowExpectation.lean) | Sharp squared-logarithm expected deviation for every finite weighted law and target class |
+| [BoundedRieszConcentration.lean](BoundedRieszConcentration.lean) | Complete original arbitrary-law bounded-row concentration theorem |
 
-Declarations are in `LeanNumDetect.FiniteMatrixSampling`. For a finite population
+The finite matrix sampling declarations are in
+`LeanNumDetect.FiniteMatrixSampling`; the bounded-row model and reductions are
+in `LeanNumDetect.BoundedRieszConcentration`, and weighted entropy estimates
+are in `LeanNumDetect.FiniteEntropy`. For a finite population
 of $N$ matrices, `Sample N m` contains exactly the subsets of size $m$.
 `sampleMean_bounds_probability` gives quadratic-form bounds with failure at most
 
@@ -29,8 +76,18 @@ $$
 where $d$ is matrix dimension, each population matrix lies between $0$ and $RI$,
 and the population mean lies between $aI$ and $bI$, with $a>0$.
 
-Every proof in this directory is complete and independent of admitted external
-results. [MatrixChernoff.lean](MatrixChernoff.lean) proves the exact lower and
+Every local proof and every supporting project dependency is complete.
+The bounded-row theorem preserves arbitrary complex laws, arbitrary
+probability spaces, positive real sparsity radii, arbitrary target subsets,
+the literal squared-logarithm sampling rate and the strict success-probability
+bound. It constructs causal weak atomic shells, bounds their entropy and
+exceptional energy, closes the weighted symmetrization bootstrap, proves a
+replacement-entropy tail, and transfers the finite result to arbitrary laws
+by measurable quantization. The universal constants can be chosen as
+$\kappa=1$, $c_0=10^{12}$ and $c_1=178$.
+The `BoundedAtomic` application chain imports this complete proof from
+`General`; no external admitted theorem remains.
+[MatrixChernoff.lean](MatrixChernoff.lean) proves the exact lower and
 upper tails from the matrix tools in
 [MatrixAnalysis](../MatrixAnalysis/README.md), finite convex comparison,
 and scalar Laplace optimization. Both exact tails and their final applications

@@ -1,4 +1,4 @@
-import External.BoundedRieszConcentration
+import General.Probability.BoundedRieszConcentration
 import General.Probability.FiniteUniformLaw
 import General.Probability.BoundedAtomicRows
 

@@ -24,6 +24,7 @@ sampling, and off-grid relative Gram results of the RandSamp manuscript.
 | Fixed-node random sampling (`lem:fixed-support-singular-values`) | [FixedSupport.lean](src/RandSamp/FixedSupport.lean): theorem `fixedSupport_singularValues` |
 | Fixed separated nodes (`thm:fixed-separated-singular-values`) | [FixedSeparated.lean](src/RandSamp/FixedSeparated.lean): theorem `fixedSeparated_singularValues` |
 | Fixed separated nodes in higher dimensions (`thm:fixed-separated-singular-values-higher-dimensional`) | [FixedSeparatedCube.lean](src/RandSamp/FixedSeparatedCube.lean): theorem `fixedSeparatedCube_singularValues` |
+| Fixed multiclump random row sampling and minimum singular value | [MultiClumpTheorem.lean](src/RandSamp/MultiClumpTheorem.lean): theorem `multiClump_sampling_statement` |
 | Segmented-grid number-detection singular-value threshold (`thm:segmented_threshold`) | [Segmented.lean](src/NumDetect/Segmented.lean): theorem `segmentedGHM_singularValueThreshold` |
 | Random-GHM number-detection threshold (`thm:resolutionrandghmnumber1`) | [Random.lean](src/NumDetect/Random.lean): theorem `randomGHM_singularValueThreshold_of_separation` |
 | General GHM-MUSIC stability (`lem:stability_ghm_music`) | [MUSIC.lean](src/NumDetect/MUSIC.lean): theorem `ghmMUSIC_correlation_stability` |
@@ -39,7 +40,7 @@ See more in [NumDetect guide](src/NumDetect/README.md).
 | [src/RandSamp](src/RandSamp/README.md) | Nonuniform Fourier--Vandermonde scaling, fixed-support and uniform random Fourier sampling, and off-grid relative Gram estimates |
 | [src/SegmentedVDM](src/SegmentedVDM/README.md) | Independent one-dimensional segmented Vandermonde construction and singular-value theorem |
 | [src/General](src/General/README.md) | Reusable finite, Fourier, matrix-analysis, and spectral-perturbation results |
-| [src/External](src/External/README.md) | Source registry and one admitted original bounded-row concentration theorem |
+| [src/External](src/External/README.md) | Source-attribution registry only; no Lean source files |
 
 ## Build and verify
 
@@ -54,14 +55,12 @@ python3 .github/ci/check.py
 
 The first command verifies the pinned dependency checkout, `lake build` builds
 the source libraries, and the final check builds every source module and
-rejects admissions outside `src/External/` and project-defined axioms. The
-earlier random-sampling probability theorems, including both matrix Chernoff
-tails and their analytic prerequisites, are fully proved with no `sorry`.
-The original RandSamp audit checks that these results use only standard Lean
-axioms. The new off-grid probability results depend on the one registered
-original BDJR theorem in `src/External/`; their separate off-grid audit permits
-exactly that direct admission and checks that every project conversion and
-deterministic prerequisite is proved. NumDetect results remain admission-free.
+rejects every project admission and project-defined axiom, including in
+private proofs and cached diagnostics. It also requires `src/External/` to
+contain no Lean source files. Both matrix Chernoff tails, arbitrary-law
+bounded-row concentration, and all RandSamp and NumDetect applications are
+fully proved. The RandSamp, off-grid and multiclump audits require the final
+results and their dependencies to use only standard Lean axioms.
 If the shared
 mathlib checkout is absent, run `python3 .github/ci/setup_mathlib.py` once before these
 commands. See the [CI guide](.github/ci/README.md) for environment setup and

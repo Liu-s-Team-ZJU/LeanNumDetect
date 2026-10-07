@@ -1,6 +1,6 @@
 # Repository-wide Lean CI
 
-The [workflow](../workflows/lean.yml) runs on pushes, pull requests, and manual dispatch. It builds every Lean source module and checks the repository's proof-admission boundary. It does not run `lake test` or rely on a whitelist of theorem names, test instances, or external-declaration counts.
+The [workflow](../workflows/lean.yml) runs on pushes, pull requests, and manual dispatch. It builds every Lean source module and enforces zero proof admissions and zero project axioms. It does not run `lake test` or rely on a whitelist of theorem names, test instances, or external-declaration counts.
 
 ## Local commands
 
@@ -35,16 +35,18 @@ Verification checks actual Git revisions, rejects tracked local modifications in
 
 [check.py](check.py) reads `srcDir` from the Lake configuration and discovers every `.lean` file below it. It passes every source file to Lake explicitly, including modules that no other file imports. New source directories must belong to a configured Lake library.
 
+[check.py](check.py) also requires `src/External/` to contain no Lean source files. Results used from the literature must have complete project proofs; there is no External exception.
+
 [CheckAdmissions.lean](CheckAdmissions.lean) loads full declaration information, including private declarations and proof bodies, and enforces these rules:
 
-- Only declarations originating in `src/External/` may directly contain `sorryAx`, whether introduced by `sorry`, `admit`, or a direct call.
-- Other directories may depend on registered External results, but must provide their own proofs.
-- New project `axiom` declarations cannot bypass the boundary.
-- Ownership is determined by the source module, not the declaration namespace. A hypothetical `src/External.lean` at the source root is not inside `src/External/`.
+- Every project declaration must be free of `sorryAx`, whether introduced by `sorry`, `admit`, or a direct call.
+- Project `axiom` declarations are forbidden everywhere. Standard axioms supplied by Lean and imported dependencies are distinguished by their module ownership.
+- Every supplied project source is checked, regardless of its directory or declaration namespace. External source modules are rejected outright.
+- There are no named-theorem exceptions or permitted admission counts.
 
 The check also inspects persisted compiler diagnostics and scans source code with Lean's lexer. Consequently, anonymous `example` declarations cannot hide missing proofs by disabling `warn.sorry`, and cached diagnostics are checked too. Comments, documentation, name literals, and ordinary string text are not treated as admissions; expressions inside interpolated strings are checked.
 
-The source-registration requirements for original external results are documented in [AGENTS.md](../../AGENTS.md) and the [External registry](../../src/External/README.md).
+The project also maintains theorem-specific axiom audits, including [OffGridAudit.lean](../../src/RandSamp/OffGridAudit.lean), which require the final off-grid conclusions and their supporting results to use only `propext`, `Classical.choice`, and `Quot.sound`.
 
 ## CI setup and caching
 

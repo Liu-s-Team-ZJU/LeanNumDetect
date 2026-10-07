@@ -3,31 +3,11 @@ import Mathlib.MeasureTheory.Integral.Bochner.Basic
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
 import Mathlib.Analysis.SpecialFunctions.Exp
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
+import Mathlib.Tactic
 
-/-!
-# Concentration for arbitrary bounded independent complex rows
-
-Original source: S. Brugiapaglia, S. Dirksen, H. C. Jung, and H. Rauhut,
-*Sparse recovery in bounded Riesz systems with applications to numerical
-methods for PDEs*, Applied and Computational Harmonic Analysis 53 (2021),
-231--269. Theorem 1.1, pages 2--3 of the author's manuscript and
-arXiv:2005.06994v1, page 2.
-
-The result below retains arbitrary bounded row distributions, independent
-identically distributed samples, an arbitrary target subset of the complex
-ℓ¹ ball, all three universal constants, the original sample rate, and the
-original additive-plus-covariance deviation. No Riesz, orthogonality,
-isotropy, atomic dictionary, or finite-population hypothesis is inserted.
-
-The two probability spaces allow the reference row and the sampled rows
-to be represented on their own spaces. `IdentDistrib` includes their
-almost-everywhere measurability. The source's complex inner product is
-written explicitly as a finite sum with conjugation in the first variable.
-
-The only admission in this file is the original concentration theorem.
-Conversions to particular dictionaries or sampling laws belong in fully
-proved modules outside `External`.
--/
+/-! Model and elementary analytic estimates for bounded complex random rows.
+These statements retain arbitrary probability distributions and arbitrary
+subsets of the coordinate ℓ¹ ball. They contain no concentration assumption. -/
 
 set_option autoImplicit false
 
@@ -115,37 +95,5 @@ theorem rowEnergy_nonneg {N : ℕ} (f x : ComplexVector N) : 0 ≤ rowEnergy f x
     (rows : Fin m → Ω' → ComplexVector N) (ω : Ω') :
     restrictedDeviation μ X rows ∅ ω = 0 := by
   simp [restrictedDeviation]
-
-/-- Original bounded-row concentration theorem of Brugiapaglia--Dirksen--
-Jung--Rauhut, Theorem 1.1 (arXiv:2005.06994v1, page 2).
-
-The source states that the success probability *exceeds*
-`1 - 2 exp(-δ² m / (s K²))`; the strict probability inequality is retained.
-The sample condition uses `log(e N)` and `log(s K² / δ)` literally, without
-replacing them by project-specific logarithmic envelopes. The sparsity-radius
-parameter `s` is positive real: this theorem concerns the radius of a whole
-ℓ¹ ball, not only an integer support size.
-
-The constants are quantified before all dimensions, probability spaces,
-random variables, sets, and remaining parameters. Their numerical values in
-Remark 1.2 are not used. -/
-theorem boundedRows_concentration :
-    ∃ κ c₀ c₁ : ℝ, 0 < κ ∧ 0 < c₀ ∧ 0 < c₁ ∧
-      ∀ (N m : ℕ), 0 < N → 0 < m →
-      ∀ (s K δ : ℝ), 0 < s → 0 < K → 0 < δ → δ < κ →
-      ∀ (Ω : Type u) (Ω' : Type v) [MeasurableSpace Ω] [MeasurableSpace Ω']
-        (μ : Measure Ω) (ν : Measure Ω'),
-      IsProbabilityMeasure μ → IsProbabilityMeasure ν →
-      ∀ (X : Ω → ComplexVector N) (rows : Fin m → Ω' → ComplexVector N),
-      iIndepFun rows ν → (∀ i, IdentDistrib (rows i) X ν μ) →
-      (∀ j, ∀ᵐ ω ∂μ, ‖X ω j‖ ≤ K) →
-      ∀ (T : Set (ComplexVector N)),
-      (∀ f ∈ T, coefficientL1Norm f ≤ Real.sqrt s) →
-      c₀ * K ^ 2 * δ⁻¹ ^ 2 * s * Real.log (Real.exp 1 * (N : ℝ)) *
-        Real.log (s * K ^ 2 / δ) ^ 2 ≤ (m : ℝ) →
-      1 - 2 * Real.exp (-(δ ^ 2 * (m : ℝ) / (s * K ^ 2))) <
-        (ν {ω | restrictedDeviation μ X rows T ω ≤
-          c₁ * (δ + δ * populationEnergySup μ X T)}).toReal := by
-  sorry
 
 end LeanNumDetect.BoundedRieszConcentration

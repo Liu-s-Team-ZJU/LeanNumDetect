@@ -1,10 +1,84 @@
 # RandSamp
 
 This directory formalizes uniform separated-node, fixed-support, Cartesian
-DFT-grid, and uniform off-grid relative Gram random Fourier sampling from the
+DFT-grid, fixed multiclump, and uniform off-grid relative Gram random Fourier sampling from the
 RandSamp manuscript, together with the existing nonuniform Fourier--Vandermonde
 estimate from the NumDetect manuscript. Import [Main.lean](Main.lean) for the
 complete interface. Declarations are in `LeanNumDetect.RandSamp`.
+
+## Fixed one-dimensional multiclump row retention
+
+The standalone manuscript is
+[MultiClumpRandomSampling.tex](../../drafts/MultiClumpRandomSampling.tex).
+The exact final theorem is `multiClump_random_row_sampling` in
+[MultiClumpTheorem.lean](MultiClumpTheorem.lean), and
+`multiClump_sampling_statement` proves its existential-constant formulation.
+Both have complete project proofs; no leverage, clump-energy, spectral, or
+concentration estimate is left as an assumption in their statements.
+
+| Manuscript label | Lean declaration and file |
+| --- | --- |
+| `thm:multi-clump-random-sampling` | `multiClump_random_row_sampling`, `multiClump_sampling_statement` in [MultiClumpTheorem.lean](MultiClumpTheorem.lean) |
+| Exact main statement and same event | `MultiClumpSamplingConclusion`, `MultiClumpSuccess`, `multiClumpSuccess_iff_relativeGram` in [MultiClumpSampling.lean](MultiClumpSampling.lean) |
+| Angular geometry, nonempty partition and exact maximum | `MultiClumpGeometry`, `ClumpPartition`, `HasMaxClumpSize` in [MultiClumpModel.lean](MultiClumpModel.lean) |
+| `lem:short-clump-lift` | `angular_short_clump_lift` in [MultiClumpModel.lean](MultiClumpModel.lean) |
+| `lem:polynomial-evaluation` | `jetPolynomial_unit_row_bound`, `jetPolynomial_energy_lower` in [PolynomialEvaluationBounds.lean](../General/Fourier/PolynomialEvaluationBounds.lean) |
+| `lem:small-frequency-evaluation` | `smallFrequency_exponentialSum_bounds`, `smallFrequency_grid_jet_bounds` in [SmallFrequencyEvaluationBounds.lean](../General/Fourier/SmallFrequencyEvaluationBounds.lean) |
+| `lem:clump-polynomial-approximation` | `exists_shortClump_polynomial_bounds` in [ClumpSubspaceGeometry.lean](ClumpSubspaceGeometry.lean), using [ClumpJetApproximation.lean](../General/Fourier/ClumpJetApproximation.lean) |
+| `lem:single-clump-row` | `singleClump_circular_row_bound`, `exponentialSum_grid_row_bound` in [SingleClumpLeverage.lean](SingleClumpLeverage.lean) |
+| `lem:clump-energy` | `multiClump_subspace_thresholds` in [ClumpSubspaceGeometry.lean](ClumpSubspaceGeometry.lean); `clump_sum_half_energy` in [MultiClumpAssembly.lean](MultiClumpAssembly.lean) |
+| `lem:multi-clump-leverage` | `multiClump_integer_row_leverage`, `multiClump_leverage_of_geometry` in [MultiClumpLeverage.lean](MultiClumpLeverage.lean) |
+| `lem:leverage-sampling` | `fixedSupport_relativeGram_allSingularValues_of_leverage` in [LeverageSampling.lean](LeverageSampling.lean) |
+| Every ordered singular value | `singularValues_relative_bounds` in [RelativeSingularValues.lean](../General/MatrixAnalysis/RelativeSingularValues.lean) |
+| Full Gram positivity | `angularDistinct_fullGram_posDef` in [FullVandermondeRank.lean](FullVandermondeRank.lean) |
+| `lem:full-clump-smallest`, lower | `singleClump_lower_thresholds`, `multiClump_minimumSingularValue_lower_of_clump_singular_lower` in [ClumpSingularLower.lean](ClumpSingularLower.lean) |
+| `lem:full-clump-smallest`, upper | `multiclump_fullVandermonde_minSingularValue_upper` in [ClumpSingularUpper.lean](ClumpSingularUpper.lean) |
+| `cor:clump-sampling-order` | `hasMaxClumpSize_squareSum_le`, `hasMaxClumpSize_squareSum_le_real` in [MultiClumpModel.lean](MultiClumpModel.lean) |
+
+The sampling constant is exactly $3072$. It is fixed before the integers
+$2\le n^\star\le n$, which precede the geometry constants
+$0<c_0<1$ and $C_0\ge n$. The nodes and nonempty clump partition are fixed
+outside the uniform counting probability on actual $m$-element subsets of
+$\{0,\ldots,M\}$. For $0<\rho,\delta<1$ and $1\le m\le M+1$, the
+sufficient rate is exactly
+
+$$
+m\ge\frac{3072}{\rho^2}\left(\sum_a n_a^2\right)
+\log\frac{2n}{\delta}.
+$$
+
+The event contains the relative Gram order, all $n$ singular-value
+comparisons, and the smallest-singular-value bounds for **every** admissible
+$K\ge1$ and $\Delta>0$. The constants in those bounds are functions of $K$
+chosen before bandwidth, nodes, partition, distortion and probability. The
+proved event equivalence shows that this complete event is exactly the
+relative Gram event once the deterministic bounds hold. The geometry
+thresholds do not depend on $K$ or $\Delta$, and the sample rate contains no
+inverse internal spacing. Singleton clumps impose no comparable-spacing
+condition, and the maximum $n^\star$ must be attained.
+
+### Multiclump proof boundary
+
+The deterministic row radius is $1024\sum_a n_a^2$; the grid row
+constant for a clump of size $s$ is $512s^2$. The full lower estimate uses
+the complete constructive interpolation-packet bound in
+[SingleClumpVandermonde.lean](../General/Fourier/SingleClumpVandermonde.lean),
+with a positive coefficient chosen over the finitely many clump sizes;
+the upper estimate uses a nonzero moment-kernel vector and the complex
+exponential Taylor remainder. Whitening, sampling without replacement,
+logarithmic-rate arithmetic, and all-index spectral order are fully proved.
+
+The whole multiclump theorem is proved without external admissions.
+The analytic proof uses polynomial Markov bounds, a companion matrix
+representation continuous at colliding frequencies, uniform finite-grid
+norm comparisons, weighted geometric sums for cross-clump interactions,
+and the repository's constructive interpolation packets for the spectral
+lower bound. Reusable lemmas live in `General/Fourier`; project conversions
+and assembly live in `RandSamp`. [MultiClumpAudit.lean](MultiClumpAudit.lean)
+rejects admissions and project axioms in all imported project declarations
+and checks that both final forms depend only on `propext`, `Classical.choice`,
+and `Quot.sound`. This assertion concerns the multiclump theorem; the older
+uniform off-grid result has the separate remaining boundary described below.
 
 ## Uniform off-grid relative Gram estimates
 
@@ -85,33 +159,35 @@ then bounds the normalized signal's coefficient radius squared by $4s/a$.
 These deterministic steps and every full/sampled normalization are proved
 in Lean.
 
-The new probability chain uses **one admitted original external theorem**:
+The probability chain uses the fully proved bounded-row theorem of
 Brugiapaglia, Dirksen, Jung, and Rauhut, *Sparse recovery in bounded Riesz
 systems with applications to numerical methods for PDEs* (2021),
-[Theorem 1.1, manuscript p. 2](https://arxiv.org/pdf/2005.06994), registered in
-[External/README.md](../External/README.md). Its declaration is
+[Theorem 1.1, manuscript p. 2](https://arxiv.org/pdf/2005.06994).
+Its declaration is
 `LeanNumDetect.BoundedRieszConcentration.boundedRows_concentration` in
-[External/BoundedRieszConcentration.lean](../External/BoundedRieszConcentration.lean).
+[General/Probability/BoundedRieszConcentration.lean](../General/Probability/BoundedRieszConcentration.lean).
 The statement retains arbitrary bounded complex row distributions, arbitrary
 probability spaces, independent identically distributed rows, arbitrary target
-subsets of the $\ell^1$ ball, and the source's constants, normalization,
-sample rate, and strict success-probability inequality.
+subsets of the $\ell^1$ ball, all three universal constants, normalization,
+sample rate, and the strict success-probability inequality.
 
+The complete proof uses causal weak atomic shells and their finite-prefix
+entropy, weighted symmetrization, replacement-entropy concentration, and
+finite measurable quantization. The explicit universal constants
+$\kappa=1$, $c_0=10^{12}$ and $c_1=178$ suffice.
 [BoundedAtomicConcentration.lean](../General/Probability/BoundedAtomicConcentration.lean)
-proves the finite-law and dictionary conversion. Finite convex comparison,
-the positive-part deviation estimate, transfer to sampling without
-replacement, and all rate simplifications are proved in
+proves the dictionary conversion. Finite convex comparison, the positive-part
+deviation estimate, transfer to sampling without replacement, and all rate
+simplifications are proved in
 [BoundedAtomicSampling.lean](../General/Probability/BoundedAtomicSampling.lean)
-and its supporting modules. No specialized concentration result or
-manuscript theorem is admitted.
+and its supporting modules.
 
-[OffGridAudit.lean](OffGridAudit.lean) permits exactly that registered original
-declaration's direct admission, rejects every other imported project admission
-or project axiom, and separately checks admission-free deterministic
-prerequisites. The new final probability theorems therefore have a transitive
-`sorryAx` dependency through this one source theorem. The existing
-[Audit.lean](Audit.lean) remains unchanged and continues to enforce the
-admission-free boundary of the earlier results.
+[OffGridAudit.lean](OffGridAudit.lean) rejects every imported project admission
+and project axiom, including private proofs. It checks that the complete
+probability chain and its deterministic prerequisites depend only on
+`propext`, `Classical.choice`, and `Quot.sound`. The repository-wide CI enforces
+zero admissions and requires `src/External/` to contain no Lean source files.
+The earlier [Audit.lean](Audit.lean) remains unchanged.
 
 ## Fixed-support random sampling
 

@@ -1,7 +1,9 @@
 # General
 
-Reusable analysis and algebra for the NumDetect formalization. These modules do
-not import the theorem-specific `SegmentedVDM` directory.
+Reusable analysis and algebra for the NumDetect and random-sampling
+formalizations. Most modules are independent of theorem directories.
+`Fourier/SingleClumpVandermonde` specializes the existing complete
+`SegmentedVDM` interpolation construction; its dependency graph is acyclic.
 
 ## Library map
 

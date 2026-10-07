@@ -1,0 +1,504 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{remark}\newtheorem{remark}[theorem]{Remark}
+\newcommand{\T}{\mathbb T}
+\newcommand{\C}{\mathbb C}
+\newcommand{\R}{\mathbb R}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\abs}[1]{\left|#1\right|}
+\DeclareMathOperator{\diag}{diag}
+\title{Uniform Random Row Subsampling of One-Dimensional\par Multi-Clump Vandermonde Matrices}
+\author{Working mathematical draft}
+\date{October 7, 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+For a fixed collection of tightly clustered angular nodes, uniform sampling
+without replacement preserves its full Vandermonde Gram matrix to relative
+error $\rho$. The sufficient row count is
+$O(\rho^{-2}\sum_a n_a^2\log(n/\delta))$.
+The sampling constant is absolute; the small-clump and large-separation
+thresholds may depend on the total number of nodes and the largest clump.
+No lower bound on within-clump spacing is needed for the relative Gram result.
+Under comparable within-clump spacing, the smallest singular value retains
+the scale $(M\Delta)^{n^\star-1}$. We separate the continuous-to-discrete
+estimate, clump assembly, and sampling argument into individual lemmas.
+\end{abstract}
+
+\section{Setting and main result}
+The angular torus is $\T=\R/(2\pi\mathbb Z)$, equipped with
+\[
+ d_{\T}(x,y)=\min_{p\in\mathbb Z}\abs{x-y+2\pi p}.
+\]
+All matrices are complex. Singular values are listed in decreasing order,
+with $n$ column singular values, including zeros if the rank is smaller than
+$n$. The nodes in $\mathcal X$ are distinct points of $\T$.
+Write $\mathcal X=\bigsqcup_{a=1}^{A}\mathcal C_a$ for a partition into
+nonempty clumps, and put $n_a=\abs{\mathcal C_a}$ and
+$S=\sum_{a=1}^{A}n_a^2$. For $\Omega\subseteq\{0,\ldots,M\}$ of cardinality
+$m$, define
+\[
+ A_M=\frac1{\sqrt{M+1}}[e^{ikx_j}]_{k=0,\ldots,M; j=1,\ldots,n},
+ \qquad
+ A_\Omega=\frac1{\sqrt m}[e^{ikx_j}]_{k\in\Omega; j=1,\ldots,n}.
+\]
+These definitions are independent of the real representatives chosen for
+the angular nodes.
+
+\begin{theorem}[Relative Gram preservation and smallest singular value]
+\label{thm:multi-clump-random-sampling}
+The absolute constant $C=3072$ has the following property.
+For every pair of integers $2\le n^\star\le n$, there exist constants
+\[
+ 0<c_0=c_0(n,n^\star)<1,\qquad C_0=C_0(n,n^\star)\ge n
+\]
+such that the following holds. Suppose $M\ge C_0$, $\mathcal X\subset\T$
+is fixed, $\max_a n_a=n^\star$, and
+\begin{align}
+ \max_{x,y\in\mathcal C_a}d_\T(x,y)&\le c_0/M &&(1\le a\le A),
+ \label{eq:small-clumps}\\
+ \min_{x\in\mathcal C_a,\ y\in\mathcal C_b}d_\T(x,y)&\ge C_0/M
+ &&(a\ne b).\label{eq:clump-separation}
+\end{align}
+Choose $\Omega$ uniformly among all $m$-element subsets of
+$\{0,\ldots,M\}$. For $0<\rho,\delta<1$ and $1\le m\le M+1$, assume
+\begin{equation}
+ \label{eq:multi-clump-sampling-rate}
+ m\ge \frac{3072}{\rho^2}S\log\frac{2n}{\delta}.
+\end{equation}
+With probability at least $1-\delta$, one has
+\begin{equation}
+ \label{eq:relative-gram}
+ (1-\rho)A_M^*A_M\preceq A_\Omega^*A_\Omega
+ \preceq(1+\rho)A_M^*A_M.
+\end{equation}
+On the same event, all singular values satisfy
+\begin{equation}
+ \label{eq:relative-singular-values}
+ \sqrt{1-\rho}\,\sigma_j(A_M)\le\sigma_j(A_\Omega)
+ \le\sqrt{1+\rho}\,\sigma_j(A_M),\qquad 1\le j\le n.
+\end{equation}
+Moreover, for every $K\ge1$ there are positive constants
+$c_1,C_1$, depending only on $n,n^\star,K$, such that if $\Delta>0$ and
+\begin{equation}
+ \label{eq:comparable-spacing}
+ \Delta\le d_\T(x,y)\le K\Delta
+ \quad\text{for distinct }x,y\in\mathcal C_a,
+\end{equation}
+then, on that same event,
+\begin{equation}
+ \label{eq:sampled-smallest-singular-value}
+ c_1\sqrt{1-\rho}(M\Delta)^{n^\star-1}
+ \le\sigma_{\min}(A_\Omega)
+ \le C_1\sqrt{1+\rho}(M\Delta)^{n^\star-1}.
+\end{equation}
+The constants $c_0,C_0$ are chosen before $K,\Delta$ and do not depend on
+them. The random event in \eqref{eq:relative-gram} depends only on
+$\mathcal X,\rho,m,M$; it works simultaneously for every admissible
+$K,\Delta$ and every coefficient vector for this fixed $\mathcal X$.
+\end{theorem}
+
+\begin{remark}\label{rem:scope}
+The theorem is a fixed-node-set assertion. It does not claim one event
+uniformly over all node configurations. If the sufficient rate exceeds
+$M+1$, no sampling cardinality satisfies it. The stated implication still
+holds; the deterministic full sample also satisfies \eqref{eq:relative-gram}.
+We do not insert a full-sampling alternative into the sufficient-rate
+hypothesis of Theorem~\ref{thm:multi-clump-random-sampling}.
+\end{remark}
+
+\section{The deterministic row estimate}
+The proof below uses only finite-dimensional polynomial estimates and
+matrix exponentials. In particular, its constants need not remain uniform
+in the clump cardinality when choosing geometric thresholds. This permits
+us to prove the estimates actually required here without importing an
+unformalized continuous exponential-sum or clustered-subspace theorem.
+
+\begin{lemma}[Polynomial evaluation and coefficient control]
+\label{lem:polynomial-evaluation}
+For $s\ge1$ and $a=(a_0,\ldots,a_{s-1})\in\C^s$, put
+$p_a(t)=\sum_{r=0}^{s-1}a_rt^r/r!$. There is $\gamma_s>0$, depending only
+on $s$, such that
+\[
+ \gamma_s\norm a_\infty^2\le\int_0^1\abs{p_a(t)}^2\,dt,
+ \qquad
+ \sup_{[0,1]}\abs{p_a}^2\le64s^2\int_0^1\abs{p_a(t)}^2\,dt.
+\]
+\end{lemma}
+\begin{proof}
+The Chebyshev endpoint derivative estimate, applied after affine rescaling
+on a one-sided subinterval of length at least $1/2$, gives
+$\abs{P'(t)}\le4(s-1)^2\sup_{[0,1]}\abs P$ for a real polynomial of degree
+at most $s-1$. Applying this to the real and imaginary parts gives the
+conservative estimate $\sup\abs{p_a'}\le8s^2\sup\abs{p_a}$.
+Let $U=\sup\abs{p_a}$. At a maximizer, choose a side interval of length
+$1/(16s^2)$ contained in $[0,1]$. The derivative bound implies
+$\abs{p_a}\ge U/2$ there, proving the second assertion.
+The linear evaluation map $a\mapsto p_a|_{[0,1]}$ is injective: a polynomial
+vanishing on an interval is zero. Equivalence of finite-dimensional norms
+therefore supplies $H_s>0$ with $\norm a_\infty\le H_s\sup\abs{p_a}$.
+Take $\gamma_s=(64s^2H_s^2)^{-1}$.
+\end{proof}
+
+\begin{lemma}[Small frequencies, including collisions]
+\label{lem:small-frequency-evaluation}
+For every $s\ge1$ there exist $\eta_s\in(0,1]$ and $D_s,\alpha_s>0$,
+depending only on $s$, such that every
+$g(t)=\sum_{j=1}^s b_je^{i\lambda_jt}$ with real
+$\abs{\lambda_j}\le\eta_s$ satisfies
+\begin{equation}
+\label{eq:continuous-pointwise}
+ \sup_{[0,1]}\abs g^2\le128s^2\int_0^1\abs g^2,
+ \qquad
+ \sup_{[0,1]}\abs{g'}\le D_s\sup_{[0,1]}\abs g.
+\end{equation}
+If $a_r=\sum_jb_j(i\lambda_j)^r$ for $0\le r<s$, then also
+$\alpha_s\norm a_\infty^2\le\int_0^1\abs g^2$.
+No distinctness or minimum gap is needed.
+\end{lemma}
+\begin{proof}
+Write $\zeta_j=i\lambda_j$ and
+$Q_\zeta(z)=\prod_j(z-\zeta_j)=z^s+\sum_{r<s}q_rz^r$.
+Let $C_\zeta$ be the companion matrix with superdiagonal entries one,
+last row $(-q_0,\ldots,-q_{s-1})$, and all other entries zero.
+With $W_{rj}=\zeta_j^r$, one has
+$C_\zeta W=W\diag(\zeta_j)$, hence
+\[
+ e^{tC_\zeta}W=W\diag(e^{t\zeta_j}),\qquad
+ g(t)=(e^{tC_\zeta}a)_0.
+\]
+These identities do not require inversion of $W$ and hold at collisions.
+At $\zeta=0$, $C_0$ is the nilpotent shift and
+$(e^{tC_0}a)_0=p_a(t)$. Polynomial dependence of the entries of $C_\zeta$
+and continuity of the matrix exponential give uniform convergence of the
+first row of $e^{tC_\zeta}$ to $(t^r/r!)_{r<s}$ on $0\le t\le1$.
+Consequently, for any prescribed $\varepsilon>0$, a sufficiently small
+$\eta_s$ ensures
+$\sup\abs{g-p_a}\le\varepsilon\norm a_\infty$.
+Choose $\varepsilon^2\le\gamma_s/25$, where $\gamma_s$ is from
+Lemma~\ref{lem:polynomial-evaluation}. The inequality
+$\abs{u+v}^2\le\tfrac54\abs u^2+5\abs v^2$ first gives
+\[
+ \int\abs{p_a}^2\le\frac{25}{16}\int\abs g^2,
+ \qquad \frac{\gamma_s}{2}\norm a_\infty^2\le\int\abs g^2.
+\]
+Applying the same inequality pointwise, and the polynomial row estimate,
+yields $\sup\abs g^2\le128s^2\int\abs g^2$.
+Finally, $g'(t)=(e^{tC_\zeta}C_\zeta a)_0$. Compactness of
+$\{\norm\zeta_\infty\le1\}\times[0,1]$ bounds the derivative row by a
+constant depending only on $s$. The coefficient-energy lower bound and
+$\int\abs g^2\le\sup\abs g^2$ prove the derivative assertion.
+\end{proof}
+
+\begin{lemma}[Short circular clumps have short real lifts]
+\label{lem:short-clump-lift}
+If $d_\T(x,y)\le h$ for every pair in a nonempty finite set and
+$3h<2\pi$, there are real representatives with ordinary diameter at most
+$h$. Their ordinary pairwise distances equal their circular distances if
+$h<\pi$.
+\end{lemma}
+\begin{proof}
+Fix an anchor $x_0$ and lift each point into $[x_0-h,x_0+h]$.
+Two lifted points have ordinary distance at most $2h$. Their difference
+is within $h$ of some $2\pi p$. If $p\ne0$, the triangle inequality gives
+$2\pi\le3h$, a contradiction. Thus their ordinary distance is at most
+$h$. Distances smaller than $\pi$ realize the circular minimum.
+\end{proof}
+
+\begin{lemma}[Single-clump discrete row bound]
+\label{lem:single-clump-row}
+For every $s\ge1$ there are $0<\eta_s\le1$ and $N_s\ge s$, depending
+only on $s$, such that for $M\ge N_s$, nodes in a circular clump of diameter
+at most $\eta_s/M$, and $f(k)=\sum_{j=1}^sb_je^{ikx_j}$,
+\begin{equation}
+ \label{eq:single-clump-row}
+ \abs{f(k)}^2\le\frac{512s^2}{M+1}
+                 \sum_{\ell=0}^{M}\abs{f(\ell)}^2,
+ \qquad 0\le k\le M.
+\end{equation}
+No minimum within-clump separation is assumed.
+\end{lemma}
+\begin{proof}
+Fix an anchor $x_0$ and nearest real windings $y_j$ with
+$\abs{y_j-x_0}\le\eta_s/M$. Put $\lambda_j=M(y_j-x_0)$ and
+$g(t)=\sum_jb_je^{i\lambda_jt}$. Integer windings preserve the samples,
+and $f(k)=e^{ikx_0}g(k/M)$. Set $I=\int_0^1\abs g^2$ and
+$U=\sup\abs g^2$. Lemma~\ref{lem:small-frequency-evaluation} gives
+$U\le128s^2I$ and $\sup\abs{g'}\le D_s\sqrt U$.
+Thus $T=\abs g^2$ is Lipschitz with constant $2D_sU$, and the Riemann
+rectangle comparison, with $Q=\sum_{\ell=0}^{M}T(\ell/M)$, gives
+$MI\le Q+2D_sU$. Choose $N_s\ge\max\{s,1,512D_ss^2\}$.
+Absorption gives $Q\ge MI/2$, so
+$T(k/M)\le256s^2Q/M\le512s^2Q/(M+1)$.
+The same calculation, together with the coefficient lower bound, supplies
+$\widetilde\alpha_s>0$ with
+$\widetilde\alpha_s\norm a_\infty^2\le Q/(M+1)$, uniformly in these
+frequencies and bandwidths.
+\end{proof}
+
+\begin{lemma}[Polynomial approximation of a short clump]
+\label{lem:clump-polynomial-approximation}
+For $s\ge1$ and $\epsilon>0$, there exist $r_s,Q_s,L_s>0$, depending
+only on $s,\epsilon$, such that if $M\ge Q_s$, a clump with anchor $x_0$
+has diameter at most $r_s/M$, and $u$ belongs to its unnormalized
+Vandermonde column space, then some polynomial
+$p(t)=\sum_{j=0}^{s-1}c_jt^j$ gives a vector
+$w_k=e^{ikx_0}p(k/M)$ satisfying
+\[
+ \norm{u-w}_2\le\epsilon\norm u_2,
+ \qquad \sum_j\abs{c_j}\le\frac{L_s}{\sqrt{M+1}}\norm u_2.
+\]
+\end{lemma}
+\begin{proof}
+Represent $u$ by its exponential coefficients and use the companion jet
+$a$ from Lemma~\ref{lem:small-frequency-evaluation}.
+The grid coefficient lower bound gives
+$\norm a_\infty\le D_s'\norm u_2/\sqrt{M+1}$ for a constant $D_s'>0$.
+The uniform matrix-exponential convergence permits a radius $r_s$ with
+first-row error at most $\epsilon/(sD_s')$ in every entry.
+Use $c_j=a_j/j!$. Summing the $s$ entrywise errors proves the vector
+error bound. Also $\sum_j\abs{c_j}\le s\norm a_\infty$, so $L_s=sD_s'$
+works. No inverse frequency gap enters this argument.
+\end{proof}
+
+\begin{lemma}[Clump energy comparison]
+\label{lem:clump-energy}
+For every $2\le n^\star\le n$ there are thresholds $0<c_0<1$,
+$C_0\ge n$, depending only on $n,n^\star$, such that, under the geometry
+of Theorem~\ref{thm:multi-clump-random-sampling}, every family
+$v_a\in\operatorname{range}V_M(\mathcal C_a)$ satisfies
+\begin{equation}
+ \label{eq:clump-energy-comparison}
+ \frac12\sum_a\norm{v_a}_2^2\le\norm{\sum_av_a}_2^2
+ \le\frac32\sum_a\norm{v_a}_2^2.
+\end{equation}
+Here $V_M(\mathcal C_a)$ is unnormalized, with rows $0,\ldots,M$.
+We may simultaneously require $M\ge N_s$ for every $1\le s\le n^\star$.
+\end{lemma}
+\begin{proof}
+Put $\epsilon=1/(32n)$ and apply
+Lemma~\ref{lem:clump-polynomial-approximation} for every $1\le s\le n^\star$.
+Let $L\ge1$ bound all the resulting $L_s$ and $Q_s$. Choose $c_0$ smaller
+than every $r_s,\eta_s,1/s,1$, and choose $C_0$ at least
+$n,L,64n\pi L^2$, and every $N_s$. Additional positive size-dependent
+shortness bounds and bandwidth thresholds can be included in these finite
+minima and maxima.
+
+For distinct anchors $x,y$ write $\theta=d_\T(x,y)$ and $z=e^{i(y-x)}$.
+Finite Abel summation and monotonicity of $(k/M)^d$ show
+\[
+ \abs{\sum_{k=0}^{M}z^k(k/M)^d}\le\frac2{\abs{1-z}}
+ \le\frac\pi\theta \qquad(d\ge0),
+\]
+since $\abs{1-z}\ge2\theta/\pi$ for $0\le\theta\le\pi$.
+For the polynomial approximants $w,w'$ to $u,v$, this implies
+\[
+ \abs{\langle w,w'\rangle}
+ \le\frac\pi\theta\left(\sum_j\abs{c_j}\right)
+                         \left(\sum_j\abs{d_j}\right)
+ \le\frac{\pi L^2}{C_0}\norm u_2\norm v_2
+ \le\frac1{64n}\norm u_2\norm v_2.
+\]
+Here $\theta\ge C_0/M$ and $M/(M+1)\le1$ were used. Expanding
+$u=w+(u-w)$ and $v=w'+(v-w')$ gives
+\[
+ \abs{\langle u,v\rangle}
+ \le\left(\frac1{64n}+2\epsilon+\epsilon^2\right)
+                         \norm u_2\norm v_2
+ \le\frac1{2n}\norm u_2\norm v_2.
+\]
+Expanding the norm square of $\sum_av_a$ and using $2uv\le u^2+v^2$
+bounds its difference from $\sum_a\norm{v_a}_2^2$ by
+$(A-1)/(2n)\sum_a\norm{v_a}_2^2\le\tfrac12\sum_a\norm{v_a}_2^2$,
+since the nonempty clumps satisfy $A\le n$.
+\end{proof}
+
+\begin{lemma}[Multi-clump leverage bound]
+\label{lem:multi-clump-leverage}
+With the thresholds of Lemma~\ref{lem:clump-energy}, for every coefficient
+vector $c$ and every $0\le k\le M$,
+\begin{equation}
+ \label{eq:multi-clump-leverage}
+ \abs{(A_Mc)_k}^2\le\frac{1024S}{M+1}\norm{A_Mc}_2^2.
+\end{equation}
+In particular, the corresponding supremum over $c\ne0$ has this bound.
+\end{lemma}
+\begin{proof}
+Let $f_a$ be the unnormalized signal from coefficients in clump $a$ and
+$E_a=\sum_{\ell=0}^{M}\abs{f_a(\ell)}^2$. By
+Lemma~\ref{lem:single-clump-row} and Cauchy--Schwarz,
+\[
+ \abs{\sum_af_a(k)}^2
+ \le\left(\sum_a\sqrt{\frac{512n_a^2}{M+1}}\sqrt{E_a}\right)^2
+ \le\frac{512S}{M+1}\sum_aE_a
+ \le\frac{1024S}{M+1}\sum_{\ell=0}^{M}\abs{\sum_af_a(\ell)}^2.
+\]
+Normalize both sides by $M+1$. Since $M\ge n$ and the nodes are distinct,
+the first $n$ rows form an invertible square Vandermonde matrix; hence
+$\norm{A_Mc}_2>0$ for $c\ne0$.
+\end{proof}
+
+\section{Random sampling}
+\begin{lemma}[Sampling a fixed subspace]
+\label{lem:leverage-sampling}
+Let $A\in\C^{N\times n}$ have full column rank and satisfy
+$\abs{(Ac)_k}^2\le(R/N)\norm{Ac}_2^2$ for all $c,k$, with $R>0$.
+For a uniform $m$-element subset $\Omega$ of its rows, put
+$A_\Omega=\sqrt{N/m}\,A|_\Omega$. If $0<\rho,\delta<1$,
+$1\le m\le N$, and $m\ge3R\rho^{-2}\log(2n/\delta)$, then
+\[
+ \mathbb P\bigl((1-\rho)A^*A\preceq A_\Omega^*A_\Omega
+                       \preceq(1+\rho)A^*A\bigr)\ge1-\delta.
+\]
+\end{lemma}
+\begin{proof}
+Whiten by $H=(A^*A)^{-1/2}$ and put $U=AH$, so $U^*U=I$.
+Writing $u_k$ for row $k$, the leverage hypothesis gives
+$\norm{u_k}_2^2\le R/N$. The population
+$X_k=N u_k^*u_k$ satisfies $0\preceq X_k\preceq RI$ and
+$N^{-1}\sum_kX_k=I$. The two tails in
+\cite[Theorem 2.2]{Tropp} for sampling without replacement imply
+\[
+ \mathbb P\left(\frac1m\sum_{k\in\Omega}X_k
+                         \notin[(1-\rho)I,(1+\rho)I]\right)
+ \le2n\exp\left(-\frac{m\rho^2}{3R}\right)\le\delta.
+\]
+We used the usual Chernoff factor estimates valid for $0<\rho<1$.
+Congruence by $H^{-1}$ yields the assertion. Hermitian eigenvalue
+monotonicity, followed by taking square roots, also yields the
+multiplicative comparison of every singular value.
+\end{proof}
+
+\section{Smallest singular value under comparable spacing}
+\begin{lemma}[Full-matrix smallest singular value]
+\label{lem:full-clump-smallest}
+The thresholds in Lemma~\ref{lem:clump-energy} can be chosen independently
+of $K$ so that, for each $K\ge1$, positive constants $c_1,C_1$ depending
+only on $n,n^\star,K$ satisfy
+\[
+ c_1(M\Delta)^{n^\star-1}\le\sigma_{\min}(A_M)
+ \le C_1(M\Delta)^{n^\star-1}
+\]
+whenever \eqref{eq:comparable-spacing} holds.
+\end{lemma}
+\begin{proof}
+We first give a constructive single-clump interpolation bound. For a
+clump of size $s\ge2$ take short real lifts of diameter at most $c_0/M$,
+and assume $M\ge2s$. Set $q=\lfloor M/s\rfloor$ and
+$r=M-q(s-1)$. Then $q\ge M/(2s)$ and $r+1\ge M/s$.
+For node $x_j$, the trigonometric polynomial
+\[
+ P_j(x)=\prod_{\ell\ne j}
+       \frac{e^{iqx}-e^{iqx_\ell}}{e^{iqx_j}-e^{iqx_\ell}}
+\]
+is cardinal on the clump and has degree $q(s-1)$. Our shortness choice
+ensures $q\abs{x_j-x_\ell}\le\pi$; consequently each denominator has
+modulus at least $2q\Delta/\pi$. The coefficient $\ell^1$ norm of $P_j$
+is at most $(\pi/(q\Delta))^{s-1}$.
+Multiply $P_j$ by
+$D_j(x)=(r+1)^{-1}\sum_{h=0}^{r}e^{ih(x-x_j)}$.
+The product remains cardinal and has degree at most $M$. Its coefficient
+$\ell^2$ norm is at most
+$B_s=(\pi/(q\Delta))^{s-1}/\sqrt{r+1}$, by the triangle inequality for
+convolution with the coefficient vector of $D_j$.
+The matrix of these cardinal coefficient rows is a left inverse of $V_M$,
+with operator norm at most $\sqrt sB_s$. Therefore
+\[
+ \sigma_{\min}(V_M)\ge\frac{\sqrt M}{s}
+                \left(\frac{M\Delta}{2\pi s}\right)^{s-1}
+ \ge\beta_s\sqrt M(M\Delta)^{s-1},\qquad
+ \beta_s=\frac{2^{-s/2}}{s(\sqrt2\pi s)^{s-1}}>0.
+\]
+This conservative $\beta_s$ is the coefficient used in the formal proof,
+which specializes the repository's interpolation-packet construction.
+For $s=1$ the column norm is $\sqrt{M+1}$.
+Enlarge $C_0$ to cover $2s$ for all $s\le n^\star$, and retain the
+size-dependent shortness conditions in Lemma~\ref{lem:clump-energy}.
+Write $b=32\pi e$ and take
+$d=\min_{1\le s\le n^\star}\min\{1,\beta_sb^{s-1}\}>0$.
+Every single clump then satisfies
+$\sigma_{\min}(V_M)\ge d\sqrt M(M\Delta/b)^{s-1}$.
+All these choices depend only on the permitted cardinalities, not on $K$.
+There is a clump of size $n^\star\ge2$, so $0<M\Delta\le c_0<1$.
+For $s\le n^\star$, therefore,
+$(M\Delta/b)^{s-1}\ge b^{-(n^\star-1)}(M\Delta)^{n^\star-1}$.
+Together with $\sqrt{M/(M+1)}\ge1/\sqrt2$ and the lower energy bound
+in \eqref{eq:clump-energy-comparison}, this proves the lower estimate;
+for example one may take the conservative constant
+$c_1=d/(4b^{n^\star-1})$.
+
+For the upper estimate, choose a largest clump and short lifts
+$y_j=x_j-\zeta$ with $\abs{y_j}\le K\Delta$. Put $r=n^\star-1$.
+The $r$ homogeneous equations
+$\sum_jc_jy_j^\ell=0$ for $0\le\ell<r$ have a nonzero solution in
+$\C^{n^\star}$; normalize it to $\norm c_2=1$ and extend by zero to
+the other clumps. The integral Taylor remainder for the real phase gives
+\[
+ \abs{e^{it}-\sum_{\ell=0}^{r-1}(it)^\ell/\ell!}
+ \le\frac{\abs t^r}{r!}.
+\]
+Consequently, at every $0\le k\le M$,
+$\abs{\sum_jc_je^{iky_j}}\le\sqrt{n^\star}(MK\Delta)^r/r!$.
+Averaging its square over the $M+1$ rows proves the upper estimate.
+We may use the slightly larger constant $C_1=2\sqrt{n^\star}K^r/r!$;
+this also follows from the usual complex exponential Taylor remainder
+bound on $\abs t\le1$, the version used in the Lean development.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:multi-clump-random-sampling}]
+Choose the thresholds simultaneously as above. Apply
+Lemma~\ref{lem:leverage-sampling} with $N=M+1$, $A=A_M$, and
+$R=1024S$ from Lemma~\ref{lem:multi-clump-leverage}. Its rate is
+exactly \eqref{eq:multi-clump-sampling-rate}. This proves
+\eqref{eq:relative-gram} and \eqref{eq:relative-singular-values}.
+Combine the latter with Lemma~\ref{lem:full-clump-smallest} to obtain
+\eqref{eq:sampled-smallest-singular-value}. The same event works for
+every subsequent choice of spacing parameters.
+\end{proof}
+
+\begin{corollary}[Sampling order]\label{cor:clump-sampling-order}
+Under the same geometry, $S\le nn^\star$. Hence a sufficient sampling
+threshold is $O(\rho^{-2}nn^\star\log(n/\delta))$, with an absolute implied
+constant; for fixed $\rho$ this is $O_\rho(nn^\star\log(n/\delta))$. The threshold contains no $\Delta^{-1}$.
+\end{corollary}
+\begin{proof}
+Each $n_a^2\le n^\star n_a$ and $\sum_an_a=n$.
+\end{proof}
+
+\begin{remark}[Relation to the literature]
+The continuous leverage and clustered-subspace estimates of
+\cite{EMM,BG,BDGY} motivate the result. The proof above instead uses
+polynomial estimates, companion matrices continuous at frequency
+collisions, and constructive interpolation packets to establish every
+analytic consequence needed here. The matrix Chernoff argument is the
+without-replacement inequality of \cite{Tropp}, whose proof is included in
+the repository's general library. The complete Lean multi-clump theorem
+therefore has no external admitted dependencies. We make no claim that the
+full unrestricted original theorems, with their sharper constants, have
+been formalized. In particular, we use the absolute sufficient constant
+$3072$; its numerical optimization is not part of this result.
+\end{remark}
+
+\begin{thebibliography}{9}
+\bibitem{BDGY} D.~Batenkov, B.~Diederichs, G.~Goldman, and Y.~Yomdin,
+\emph{The spectral properties of Vandermonde matrices with clustered nodes},
+Linear Algebra and its Applications 609 (2021), 37--72.
+\href{https://arxiv.org/abs/1909.01927}{arXiv:1909.01927}.
+\bibitem{EMM} T.~Erd\'elyi, C.~Musco, and C.~Musco,
+\emph{Fourier sparse leverage scores and approximate kernel learning},
+2020. \href{https://arxiv.org/abs/2006.07340}{arXiv:2006.07340}.
+\bibitem{BG} D.~Batenkov and G.~Goldman,
+\emph{Single-exponential bounds for the smallest singular value of
+Vandermonde matrices in the sub-Rayleigh regime}, 2021.
+\href{https://arxiv.org/abs/2107.09326}{arXiv:2107.09326}.
+\bibitem{Tropp} J.~A.~Tropp,
+\emph{Improved analysis of the subsampled randomized Hadamard transform},
+Advances in Adaptive Data Analysis 3 (2011), 115--126.
+\href{https://arxiv.org/abs/1011.1595}{arXiv:1011.1595}.
+\end{thebibliography}
+\end{document}

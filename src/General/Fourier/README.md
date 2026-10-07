@@ -40,6 +40,17 @@ argument at the critical separation.
 | Open-endpoint Selberg lattice minorants and tensor correction | [LatticeSelbergMinorant.lean](LatticeSelbergMinorant.lean) |
 | Integer phase periodicity and exact Lipschitz bounds | [PhaseEstimates.lean](PhaseEstimates.lean) |
 | Finite torus grids, covering radius, and cardinality bounds | [FiniteTorusGrid.lean](FiniteTorusGrid.lean) |
+| Concrete angular Vandermonde and subspace definitions | [ClusteredVandermonde.lean](ClusteredVandermonde.lean) |
+| Constructive single-clump singular-value lower bound | [SingleClumpVandermonde.lean](SingleClumpVandermonde.lean) |
+| Continuous companion generators and the uniform collision limit | [ExponentialCompanion.lean](ExponentialCompanion.lean) |
+| Polynomial Markov, point-evaluation and coefficient-energy bounds | [PolynomialEvaluationBounds.lean](PolynomialEvaluationBounds.lean) |
+| Stability of the polynomial evaluation bound under uniform perturbations | [JetPolynomialPerturbation.lean](JetPolynomialPerturbation.lean) |
+| Integer monomial moments, polynomial cross inner products and perturbations | [PolynomialCrossCorrelation.lean](PolynomialCrossCorrelation.lean) |
+
+| Complex exponential sums, unit norms and elementary calculus | [ExponentialSums.lean](ExponentialSums.lean) |
+| Riemann rectangles, derivative bounds and discrete coefficient control | [UniformGridEvaluationBounds.lean](UniformGridEvaluationBounds.lean) |
+| Gap-free small-frequency pointwise and grid bounds with constant $512s^2$ | [SmallFrequencyEvaluationBounds.lean](SmallFrequencyEvaluationBounds.lean) |
+| Exact column-span representation and modulated jet polynomial approximation | [ClumpJetApproximation.lean](ClumpJetApproximation.lean) |
 
 All frequencies in this chain are angular frequencies with period $2\pi$ and
 phase $e^{ikx_j}$.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build every source module and enforce the repository's admission boundary."""
+"""Build every source module and enforce zero project admissions and axioms."""
 
 import json
 from pathlib import Path
@@ -16,6 +16,10 @@ def main():
     files = sorted(source.rglob("*.lean"))
     if not files:
         raise RuntimeError(f"No Lean sources found in {source}")
+    external_sources = sorted((source / "External").rglob("*.lean"))
+    if external_sources:
+        paths = ", ".join(str(file.relative_to(ROOT)) for file in external_sources)
+        raise RuntimeError(f"src/External must contain no Lean source files: {paths}")
     modules = []
     for file in files:
         parts = file.relative_to(source).with_suffix("").parts
@@ -35,11 +39,9 @@ def main():
     for file, module in zip(files, modules):
         trace = artifact_root.joinpath(*module.split(".")).with_suffix(".trace")
         data = json.loads(trace.read_text())
-        if file.relative_to(source).parts[0] == "External" and file.parent != source:
-            continue
         for entry in data["log"]:
             if entry["level"] == "warning" and "declaration uses `sorry" in entry["message"]:
-                raise RuntimeError(f"Admission outside src/External: {entry['message']}")
+                raise RuntimeError(f"Project admission is not permitted: {entry['message']}")
     subprocess.run(
         [lake, "env", "lean", "--run", str(ROOT / ".github/ci/CheckAdmissions.lean"), str(source), *modules],
         cwd=ROOT, check=True,

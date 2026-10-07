@@ -6,18 +6,13 @@ import Lean.Util.CollectAxioms
 import Lean.Util.Sorry
 
 /-!
-# Separate trust-boundary audit for the near-linear off-grid theorem
+# Admission-free audit for the near-linear off-grid theorem
 
-The earlier admission-free `RandSamp.Audit` is unchanged. This audit permits
-one direct admission only: the source-faithful, registered original BDJR
-Theorem 1.1 in `External.BoundedRieszConcentration`. Every imported project
-type and every other imported project proof must be admission-free, including
-private declarations. Project axioms are never permitted.
-
-The deterministic Fourier representation and normalization are separately
-checked to use only standard Lean axioms. The concentration adapters and
-final theorem may depend on `sorryAx` only through the one allowed original
-external theorem; the imported-declaration inspection enforces that boundary.
+Every imported project declaration, including private declarations, must have
+an admission-free type and proof and must not be a project axiom. All listed
+supporting results and final concentration theorems use only the standard
+Lean axioms `propext`, `Classical.choice`, and `Quot.sound`. There are no
+External or named-theorem exceptions.
 -/
 
 open Lean Elab Command
@@ -36,9 +31,7 @@ run_cmd do
   let roots : Array Name := #[`External, `General, `RandSamp, `SegmentedVDM, `NumDetect]
   let ordinary : Array Name := #[``propext, ``Classical.choice, ``Quot.sound]
   let original := ``LeanNumDetect.BoundedRieszConcentration.boundedRows_concentration
-  let originalModule := `External.BoundedRieszConcentration
   let env ← getEnv
-  let mut directAdmissions : Nat := 0
   for (name, info) in env.constants.toList do
     let origin := match env.getModuleIdxFor? name with
       | some idx => env.header.moduleNames[idx]!
@@ -49,11 +42,7 @@ run_cmd do
       if info.type.hasSorry then
         throwError "Unexpected admission in declaration type in {origin}: {name}"
       if (info.value? true).any Expr.hasSorry then
-        unless name == original && origin == originalModule do
-          throwError "Unregistered admission in {origin}: {name}"
-        directAdmissions := directAdmissions + 1
-  unless directAdmissions == 1 do
-    throwError "Expected exactly the registered original BDJR admission; found {directAdmissions}"
+        throwError "Unexpected admission in declaration proof in {origin}: {name}"
   for name in #[
       ``LeanNumDetect.exists_fourierAtom_grid_expansion,
       ``LeanNumDetect.fourierAtomicGridSize_le,
@@ -88,6 +77,6 @@ run_cmd do
       ``LeanNumDetect.RandSamp.uniformSeparated_relativeGram_singularValues,
       ``LeanNumDetect.RandSamp.uniformOffGrid_and_uniformSeparated_sameConstant] do
     for ax in ← collectAxioms name do
-      unless ordinary.contains ax || ax == ``sorryAx do
+      unless ordinary.contains ax do
         throwError "Unexpected axiom {ax} in off-grid result {name}"
-  logInfo "Off-grid audit passed: exactly one registered original BDJR admission; all project adapters and deterministic results have no direct admissions or project axioms."
+  logInfo "Off-grid audit passed: zero project admissions and axioms; all checked supporting results and final theorems use only standard Lean axioms."
