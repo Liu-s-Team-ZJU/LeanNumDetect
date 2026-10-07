@@ -4,7 +4,7 @@ import Lean.Util.CollectAxioms
 import Lean.Util.Sorry
 
 /-!
-# Trust-boundary audit for the fixed multiclump theorem
+# Trust-boundary audit for multiclump sampling in every dimension
 
 Every imported project declaration, including private declarations and
 types, must be free of admissions and project axioms. The final theorem
@@ -16,9 +16,12 @@ open Lean Elab Command
 
 #print axioms LeanNumDetect.RandSamp.multiClump_random_row_sampling
 #print axioms LeanNumDetect.RandSamp.multiClump_sampling_statement
-#print axioms LeanNumDetect.RandSamp.multiClump_integer_row_leverage
-#print axioms LeanNumDetect.RandSamp.multiclump_fullVandermonde_minSingularValue_upper
-#print axioms LeanNumDetect.RandSamp.fixedSupport_relativeGram_allSingularValues_of_leverage
+#print axioms LeanNumDetect.RandSamp.multidimensionalMultiClump_random_row_sampling
+#print axioms LeanNumDetect.RandSamp.multidimensionalMultiClump_sampling_with_sharp_lower
+#print axioms LeanNumDetect.RandSamp.cubeClump_leverage_thresholds
+#print axioms LeanNumDetect.RandSamp.cube_multiclump_singular_lower
+#print axioms LeanNumDetect.RandSamp.cube_multiclump_singular_upper
+#print axioms LeanNumDetect.RandSamp.arithmeticClump_lower_real_exponent_sharp
 
 run_cmd do
   let roots : Array Name := #[`External, `General, `RandSamp, `SegmentedVDM, `NumDetect]
@@ -41,16 +44,21 @@ run_cmd do
       ``LeanNumDetect.RandSamp.hasMaxClumpSize_squareSum_le,
       ``LeanNumDetect.RandSamp.fullVandermonde_energy,
       ``LeanNumDetect.RandSamp.angularDistinct_fullGram_posDef,
-      ``LeanNumDetect.RandSamp.clump_sum_half_energy,
-      ``LeanNumDetect.RandSamp.singleClump_lower_thresholds,
-      ``LeanNumDetect.SingleClumpVandermonde.periodic_minimumSingularValue_lower_factored,
+      ``LeanNumDetect.AlmostOrthogonalEnergy.clump_sum_half_energy,
+      ``LeanNumDetect.RandSamp.cube_multiclump_singular_lower,
+      ``LeanNumDetect.RandSamp.cube_fullGram_posDef_of_distinct,
       ``LeanNumDetect.ExponentialCompanion.exists_uniform_jet_radius,
-      ``LeanNumDetect.RandSamp.row_bound_of_clump_bounds,
-      ``LeanNumDetect.RandSamp.multiclump_fullVandermonde_minSingularValue_upper,
+      ``LeanNumDetect.AlmostOrthogonalEnergy.row_bound_of_clump_bounds,
+      ``LeanNumDetect.RandSamp.cube_multiclump_singular_upper,
+      ``LeanNumDetect.RandSamp.arithmeticClump_sampled_minimumSingularValue_upper,
+      ``LeanNumDetect.RandSamp.arithmeticClump_structure,
+      ``LeanNumDetect.RandSamp.arithmeticClump_lower_real_exponent_sharp,
       ``LeanNumDetect.RandSamp.allSingularValueEvent_of_relativeGramEvent,
       ``LeanNumDetect.RandSamp.multiClumpSuccess_iff_relativeGram,
       ``LeanNumDetect.RandSamp.multiClump_sampling_of_deterministicControl,
-      ``LeanNumDetect.RandSamp.fixedSupport_relativeGram_allSingularValues_of_leverage,
+      ``LeanNumDetect.RandSamp.cubeFixedSupport_relativeGram_allSingularValues_of_leverage,
+      ``LeanNumDetect.RandSamp.multiClumpSamplingConclusion_of_multidimensional_one,
+      ``LeanNumDetect.RandSamp.multidimensionalMultiClumpSuccess_one,
       ``LeanNumDetect.FiniteMatrixSampling.sampleMean_relative_bounds_probability,
       ``LeanNumDetect.singularValues_relative_bounds] do
     for ax in ← collectAxioms name do
@@ -58,10 +66,13 @@ run_cmd do
         throwError "Unexpected axiom {ax} in admission-free conversion {name}"
   for name in #[
       ``LeanNumDetect.RandSamp.multiClump_deterministic_control,
-      ``LeanNumDetect.RandSamp.multiClump_integer_row_leverage,
+      ``LeanNumDetect.RandSamp.cubeClump_leverage_thresholds,
+      ``LeanNumDetect.RandSamp.multidimensionalMultiClump_deterministic_control,
+      ``LeanNumDetect.RandSamp.multidimensionalMultiClump_random_row_sampling,
+      ``LeanNumDetect.RandSamp.multidimensionalMultiClump_sampling_with_sharp_lower,
       ``LeanNumDetect.RandSamp.multiClump_random_row_sampling,
       ``LeanNumDetect.RandSamp.multiClump_sampling_statement] do
     for ax in ← collectAxioms name do
       unless ordinary.contains ax do
         throwError "Unexpected axiom {ax} in multiclump theorem {name}"
-  logInfo "Multiclump audit passed: no admissions or project axioms in the complete imported development; the final theorem and every analytic and sampling dependency use only the standard logical axioms."
+  logInfo "Multidimensional multiclump audit passed: no admissions or project axioms; the cube theorem, exact dimension-one corollary, sharp lower bound, and real-exponent sharpness use only the standard logical axioms."

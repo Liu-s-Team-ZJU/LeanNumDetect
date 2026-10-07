@@ -6,79 +6,81 @@ RandSamp manuscript, together with the existing nonuniform Fourier--Vandermonde
 estimate from the NumDetect manuscript. Import [Main.lean](Main.lean) for the
 complete interface. Declarations are in `LeanNumDetect.RandSamp`.
 
-## Fixed one-dimensional multiclump row retention
+## Multidimensional multiclump row retention
 
 The standalone manuscript is
-[MultiClumpRandomSampling.tex](../../drafts/MultiClumpRandomSampling.tex).
-The exact final theorem is `multiClump_random_row_sampling` in
-[MultiClumpTheorem.lean](MultiClumpTheorem.lean), and
-`multiClump_sampling_statement` proves its existential-constant formulation.
-Both have complete project proofs; no leverage, clump-energy, spectral, or
-concentration estimate is left as an assumption in their statements.
+[MultidimensionalMultiClumpRandomSampling.tex](../../drafts/MultidimensionalMultiClumpRandomSampling.tex).
+The complete theorem is `multidimensionalMultiClump_random_row_sampling` in
+[MultidimensionalMultiClumpTheorem.lean](MultidimensionalMultiClumpTheorem.lean).
+`multidimensionalMultiClump_sampling_with_sharp_lower` jointly proves the
+same sampling conclusion and the sharp lower estimate without comparable
+spacings, with the same geometry constants and relative Gram event.
 
-| Manuscript label | Lean declaration and file |
+The model is the periodic infinity-metric clump model of NumDetect's
+`defi:metric_separation` and `defi:high_dim_clumps`. Nonempty clumps have
+an attained maximum size, diameter at most $c_0/M$, and cross distance at
+least $C_0/M$. The source definition's strict cross separation is retained
+in `MultidimensionalClumpStructure`; its proved conversion gives the closed
+boundary extension used by the sampling theorem. No constraint is imposed
+on the internal arrangement or on coordinate projections.
+
+| Manuscript label or component | Lean declaration and file |
 | --- | --- |
-| `thm:multi-clump-random-sampling` | `multiClump_random_row_sampling`, `multiClump_sampling_statement` in [MultiClumpTheorem.lean](MultiClumpTheorem.lean) |
-| Exact main statement and same event | `MultiClumpSamplingConclusion`, `MultiClumpSuccess`, `multiClumpSuccess_iff_relativeGram` in [MultiClumpSampling.lean](MultiClumpSampling.lean) |
-| Angular geometry, nonempty partition and exact maximum | `MultiClumpGeometry`, `ClumpPartition`, `HasMaxClumpSize` in [MultiClumpModel.lean](MultiClumpModel.lean) |
-| `lem:short-clump-lift` | `angular_short_clump_lift` in [MultiClumpModel.lean](MultiClumpModel.lean) |
-| `lem:polynomial-evaluation` | `jetPolynomial_unit_row_bound`, `jetPolynomial_energy_lower` in [PolynomialEvaluationBounds.lean](../General/Fourier/PolynomialEvaluationBounds.lean) |
-| `lem:small-frequency-evaluation` | `smallFrequency_exponentialSum_bounds`, `smallFrequency_grid_jet_bounds` in [SmallFrequencyEvaluationBounds.lean](../General/Fourier/SmallFrequencyEvaluationBounds.lean) |
-| `lem:clump-polynomial-approximation` | `exists_shortClump_polynomial_bounds` in [ClumpSubspaceGeometry.lean](ClumpSubspaceGeometry.lean), using [ClumpJetApproximation.lean](../General/Fourier/ClumpJetApproximation.lean) |
-| `lem:single-clump-row` | `singleClump_circular_row_bound`, `exponentialSum_grid_row_bound` in [SingleClumpLeverage.lean](SingleClumpLeverage.lean) |
-| `lem:clump-energy` | `multiClump_subspace_thresholds` in [ClumpSubspaceGeometry.lean](ClumpSubspaceGeometry.lean); `clump_sum_half_energy` in [MultiClumpAssembly.lean](MultiClumpAssembly.lean) |
-| `lem:multi-clump-leverage` | `multiClump_integer_row_leverage`, `multiClump_leverage_of_geometry` in [MultiClumpLeverage.lean](MultiClumpLeverage.lean) |
-| `lem:leverage-sampling` | `fixedSupport_relativeGram_allSingularValues_of_leverage` in [LeverageSampling.lean](LeverageSampling.lean) |
-| Every ordered singular value | `singularValues_relative_bounds` in [RelativeSingularValues.lean](../General/MatrixAnalysis/RelativeSingularValues.lean) |
-| Full Gram positivity | `angularDistinct_fullGram_posDef` in [FullVandermondeRank.lean](FullVandermondeRank.lean) |
-| `lem:full-clump-smallest`, lower | `singleClump_lower_thresholds`, `multiClump_minimumSingularValue_lower_of_clump_singular_lower` in [ClumpSingularLower.lean](ClumpSingularLower.lean) |
-| `lem:full-clump-smallest`, upper | `multiclump_fullVandermonde_minSingularValue_upper` in [ClumpSingularUpper.lean](ClumpSingularUpper.lean) |
-| `cor:clump-sampling-order` | `hasMaxClumpSize_squareSum_le`, `hasMaxClumpSize_squareSum_le_real` in [MultiClumpModel.lean](MultiClumpModel.lean) |
+| `thm:multidimensional-multi-clump-random-sampling` | `multidimensionalMultiClump_random_row_sampling` in [MultidimensionalMultiClumpTheorem.lean](MultidimensionalMultiClumpTheorem.lean) |
+| Exact model, strict NumDetect structure and size sum | `MultidimensionalMultiClumpGeometry`, `MultidimensionalClumpStructure`, `ClumpPartition.sizePowerSum` in [MultidimensionalMultiClumpModel.lean](MultidimensionalMultiClumpModel.lean) |
+| Exact event, rate and outer quantifiers | `MultidimensionalMultiClumpSuccess`, `MultidimensionalMultiClumpSamplingConclusion`, `MultidimensionalMultiClumpSamplingStatement` in [MultidimensionalMultiClumpSampling.lean](MultidimensionalMultiClumpSampling.lean) |
+| `lem:angular-sections` | `angularClump_section_thresholds` in [AngularClumpSectionBounds.lean](../General/Fourier/AngularClumpSectionBounds.lean) |
+| `lem:cube-clump-leverage` | `cubeClump_leverage_thresholds` in [CubeClumpLeverage.lean](CubeClumpLeverage.lean), using [ProductEnergyBounds.lean](../General/Finite/ProductEnergyBounds.lean) and [AlmostOrthogonalEnergy.lean](../General/Finite/AlmostOrthogonalEnergy.lean) |
+| `lem:integer-phase-separation` | `exists_separated_integer_frequency` in [SeparatedAngularFrequency.lean](../General/Fourier/SeparatedAngularFrequency.lean) |
+| `lem:cube-cardinal-lower` | `cube_multiclump_singular_lower_normalized`, `cube_multiclump_singular_lower` in [MultidimensionalClumpSingularBounds.lean](MultidimensionalClumpSingularBounds.lean), using [MultidimensionalTrigonometricInterpolation.lean](../General/Fourier/MultidimensionalTrigonometricInterpolation.lean) |
+| `lem:box-moment-upper` | `cube_multiclump_singular_upper` in [MultidimensionalClumpUpper.lean](MultidimensionalClumpUpper.lean), using [MultidimensionalTaylorBounds.lean](../General/Fourier/MultidimensionalTaylorBounds.lean) |
+| `prop:multidimensional-sharp-lower` | `cube_multiclump_sampled_singular_lower`, `multidimensionalMultiClump_sampling_with_sharp_lower`; `arithmeticClump_lower_real_exponent_sharp` in [MultidimensionalClumpSharpnessBounds.lean](MultidimensionalClumpSharpnessBounds.lean) |
+| Literal admissible sharpness family, exact internal minimum | `arithmeticClump_structure`, `arithmeticClump_step_attained` in [MultidimensionalClumpSharpness.lean](MultidimensionalClumpSharpness.lean) |
+| Nonempty arbitrary sampled rows in the sharpness family | `arithmeticClump_sampled_minimumSingularValue_upper` in [MultidimensionalClumpSharpnessBounds.lean](MultidimensionalClumpSharpnessBounds.lean) |
+| `cor:one-dimensional-multi-clump-random-sampling` | `multiClump_random_row_sampling`, `multiClump_sampling_statement` in [MultiClumpTheorem.lean](MultiClumpTheorem.lean) |
+| Complete dimension-one conclusion transport | `multiClumpSamplingConclusion_of_multidimensional_one` in [MultiClumpSampling.lean](MultiClumpSampling.lean) |
 
-The sampling constant is exactly $3072$. It is fixed before the integers
-$2\le n^\star\le n$, which precede the geometry constants
-$0<c_0<1$ and $C_0\ge n$. The nodes and nonempty clump partition are fixed
-outside the uniform counting probability on actual $m$-element subsets of
-$\{0,\ldots,M\}$. For $0<\rho,\delta<1$ and $1\le m\le M+1$, the
-sufficient rate is exactly
+For $d\ge1$ the row radius is $1024\,512^{d-1}\sum_a n_a^{2d}$, and the
+sufficient sampling condition is
 
 $$
-m\ge\frac{3072}{\rho^2}\left(\sum_a n_a^2\right)
-\log\frac{2n}{\delta}.
+m\ge\frac{3072\,512^{d-1}}{\rho^2}
+\left(\sum_a n_a^{2d}\right)\log\frac{2n}{\delta},
+\qquad 1\le m\le(M+1)^d.
 $$
 
-The event contains the relative Gram order, all $n$ singular-value
-comparisons, and the smallest-singular-value bounds for **every** admissible
-$K\ge1$ and $\Delta>0$. The constants in those bounds are functions of $K$
-chosen before bandwidth, nodes, partition, distortion and probability. The
-proved event equivalence shows that this complete event is exactly the
-relative Gram event once the deterministic bounds hold. The geometry
-thresholds do not depend on $K$ or $\Delta$, and the sample rate contains no
-inverse internal spacing. Singleton clumps impose no comparable-spacing
-condition, and the maximum $n^\star$ must be attained.
+The nodes are fixed outside the uniform counting probability on actual
+$m$-element cube subsets. The event contains the relative Gram order,
+all $n$ singular-value comparisons, and the spectrum estimates for every
+admissible $K\ge1$ and $\Delta>0$. Geometry constants depend only on
+$d,n,n^\star$, precede the nodes and sampling parameters, and do not depend
+on $K$ or $\Delta$. The sample count has no inverse-spacing factor.
 
-### Multiclump proof boundary
+The lower exponent is $n^\star-1$ and needs only a lower spacing bound,
+also in NumDetect's periodic one-norm. The optional upper exponent is
+$q(d,n^\star)=\max\{q\in\mathbb N:q^d<n^\star\}$. Collinear arithmetic
+clumps obey the original strict source model and rule out every real
+lower exponent smaller than $n^\star-1$. This is sharpness over the
+admissible model; the least singular value of a particular arrangement
+can decay more slowly.
 
-The deterministic row radius is $1024\sum_a n_a^2$; the grid row
-constant for a clump of size $s$ is $512s^2$. The full lower estimate uses
-the complete constructive interpolation-packet bound in
-[SingleClumpVandermonde.lean](../General/Fourier/SingleClumpVandermonde.lean),
-with a positive coefficient chosen over the finitely many clump sizes;
-the upper estimate uses a nonzero moment-kernel vector and the complex
-exponential Taylor remainder. Whitening, sampling without replacement,
-logarithmic-rate arithmetic, and all-index spectral order are fully proved.
+At dimension one, the population is exactly $M+1$, the size sum is
+$\sum_a n_a^2$, the sampling constant is exactly $3072$, and
+$q(1,n^\star)=n^\star-1$. All original one-dimensional statement
+definitions are retained. Its complete event and subset probability are
+transported through `Equiv.funUnique`; [MultiClumpTheorem.lean](MultiClumpTheorem.lean)
+contains only dimension-one corollaries. The former independent clump
+proof modules have been removed. Reusable analytic proofs live in
+`General`; the final geometry and sampling assembly live in `RandSamp`.
 
-The whole multiclump theorem is proved without external admissions.
-The analytic proof uses polynomial Markov bounds, a companion matrix
-representation continuous at colliding frequencies, uniform finite-grid
-norm comparisons, weighted geometric sums for cross-clump interactions,
-and the repository's constructive interpolation packets for the spectral
-lower bound. Reusable lemmas live in `General/Fourier`; project conversions
-and assembly live in `RandSamp`. [MultiClumpAudit.lean](MultiClumpAudit.lean)
-rejects admissions and project axioms in all imported project declarations
-and checks that both final forms depend only on `propext`, `Classical.choice`,
-and `Quot.sound`. This assertion concerns the multiclump theorem; the older
-uniform off-grid result has the separate remaining boundary described below.
+[MultiClumpAudit.lean](MultiClumpAudit.lean) checks the full imported
+project, including private proofs, for admissions and project axioms.
+It separately checks the cube theorem, exact one-dimensional corollary,
+sharp lower estimate, and real-exponent sharpness for only
+`propext`, `Classical.choice`, and `Quot.sound`.
+The independent correspondence reports are
+[MultidimensionalMultiClumpConsistency.md](../../drafts/MultidimensionalMultiClumpConsistency.md)
+and [MultiClumpConsistency.md](../../drafts/MultiClumpConsistency.md).
 
 ## Uniform off-grid relative Gram estimates
 

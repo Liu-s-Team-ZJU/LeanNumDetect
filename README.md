@@ -24,7 +24,8 @@ sampling, and off-grid relative Gram results of the RandSamp manuscript.
 | Fixed-node random sampling (`lem:fixed-support-singular-values`) | [FixedSupport.lean](src/RandSamp/FixedSupport.lean): theorem `fixedSupport_singularValues` |
 | Fixed separated nodes (`thm:fixed-separated-singular-values`) | [FixedSeparated.lean](src/RandSamp/FixedSeparated.lean): theorem `fixedSeparated_singularValues` |
 | Fixed separated nodes in higher dimensions (`thm:fixed-separated-singular-values-higher-dimensional`) | [FixedSeparatedCube.lean](src/RandSamp/FixedSeparatedCube.lean): theorem `fixedSeparatedCube_singularValues` |
-| Fixed multiclump random row sampling and minimum singular value | [MultiClumpTheorem.lean](src/RandSamp/MultiClumpTheorem.lean): theorem `multiClump_sampling_statement` |
+| Multidimensional multiclump random row sampling and sharp lower exponent | [MultidimensionalMultiClumpTheorem.lean](src/RandSamp/MultidimensionalMultiClumpTheorem.lean): `multidimensionalMultiClump_random_row_sampling`, `multidimensionalMultiClump_sampling_with_sharp_lower` |
+| Exact one-dimensional multiclump corollary | [MultiClumpTheorem.lean](src/RandSamp/MultiClumpTheorem.lean): `multiClump_sampling_statement` |
 | Segmented-grid number-detection singular-value threshold (`thm:segmented_threshold`) | [Segmented.lean](src/NumDetect/Segmented.lean): theorem `segmentedGHM_singularValueThreshold` |
 | Random-GHM number-detection threshold (`thm:resolutionrandghmnumber1`) | [Random.lean](src/NumDetect/Random.lean): theorem `randomGHM_singularValueThreshold_of_separation` |
 | General GHM-MUSIC stability (`lem:stability_ghm_music`) | [MUSIC.lean](src/NumDetect/MUSIC.lean): theorem `ghmMUSIC_correlation_stability` |

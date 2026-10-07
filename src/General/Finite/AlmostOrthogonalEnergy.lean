@@ -1,24 +1,15 @@
-import RandSamp.MultiClumpModel
-import RandSamp.LeverageSampling
+import Mathlib.Analysis.InnerProductSpace.PiL2
+import Mathlib.Tactic
 
-/-!
-# Assembly of clump row bounds
-
-The finite-dimensional part of manuscript `lem:clump-energy` and
-`lem:multi-clump-leverage`.  This module contains no literature admissions:
-the individual row and cross-clump bounds are explicit hypotheses of the
-reusable assembly lemmas, not assumptions in the intended final theorem.
--/
+/-! Finite energy assembly for almost orthogonal subspaces, on any finite row type. -/
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 1000000
-
-open Matrix WithLp
+open WithLp
 open scoped BigOperators InnerProductSpace
 
-namespace LeanNumDetect.RandSamp
-
+namespace LeanNumDetect.AlmostOrthogonalEnergy
 noncomputable section
 
 /-- Squared norm expansion with ordered cross terms. -/
@@ -117,12 +108,12 @@ theorem clump_sum_half_energy {A n : ℕ} (hn : 0 < n) (hAn : A ≤ n)
   constructor <;> nlinarith [mul_le_mul_of_nonneg_right hcoef hq]
 
 /-- Combining local evaluation bounds and half-energy loses only a factor two. -/
-theorem row_bound_of_clump_bounds {A N : ℕ}
-    (v : Fin A → EuclideanSpace ℂ (Fin N)) (L : Fin A → ℝ)
+theorem row_bound_of_clump_bounds {A : ℕ} {κ : Type*} [Fintype κ]
+    (v : Fin A → EuclideanSpace ℂ κ) (L : Fin A → ℝ)
     (hL : ∀ a, 0 ≤ L a)
-    (hlocal : ∀ a (k : Fin N), ‖v a k‖ ^ 2 ≤ L a * ‖v a‖ ^ 2)
+    (hlocal : ∀ a (k : κ), ‖v a k‖ ^ 2 ≤ L a * ‖v a‖ ^ 2)
     (henergy : (1 / 2 : ℝ) * (∑ a, ‖v a‖ ^ 2) ≤ ‖∑ a, v a‖ ^ 2)
-    (k : Fin N) :
+    (k : κ) :
     ‖(∑ a, v a) k‖ ^ 2 ≤ 2 * (∑ a, L a) * ‖∑ a, v a‖ ^ 2 := by
   have hn (a : Fin A) : ‖v a k‖ ≤ Real.sqrt (L a) * ‖v a‖ := by
     apply (sq_le_sq₀ (norm_nonneg _)
@@ -143,4 +134,4 @@ theorem row_bound_of_clump_bounds {A N : ℕ}
     nlinarith [mul_le_mul_of_nonneg_left henergy hsumL])
 
 end
-end LeanNumDetect.RandSamp
+end LeanNumDetect.AlmostOrthogonalEnergy

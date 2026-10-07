@@ -32,7 +32,9 @@ Lie--Trotter, spectral exponential bounds and scalar Laplace optimization.
 The fixed multiclump theorem's needed pointwise, integer-grid, clump-subspace
 and smallest-singular-value estimates are proved directly in
 [General/Fourier](../General/Fourier/README.md), with exact conversions in
-[RandSamp](../RandSamp/README.md). Its absolute sampling constant is 3072.
+[RandSamp](../RandSamp/README.md). The cube sampling constant in dimension
+$d\ge1$ is $3072\,512^{d-1}$; its exact dimension-one specialization has
+the absolute constant 3072.
 These are sufficient consequences proved for the manuscript's geometry;
 the unrestricted original literature theorems and their sharper constants
 are not claimed as formalized. The former `ExponentialSumEstimates` and

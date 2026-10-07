@@ -1,4 +1,4 @@
-import RandSamp.MultiClumpAssembly
+import RandSamp.MultidimensionalMultiClumpSampling
 import RandSamp.FullVandermondeRank
 
 /-!
@@ -6,9 +6,8 @@ import RandSamp.FullVandermondeRank
 
 The proposition `MultiClumpSamplingStatement` is manuscript
 `thm:multi-clump-random-sampling`, with exactly its outer quantifier order.
-The transfer theorem below is fully proved. Its deterministic input is
-discharged in `RandSamp.MultiClumpTheorem`, which proves the complete
-geometric statement with no extra hypotheses.
+The statements are unchanged; the sampling transfer and the complete theorem
+are exact dimension-one corollaries of the frequency-cube theorem.
 -/
 
 set_option autoImplicit false
@@ -117,35 +116,98 @@ theorem multiClumpSuccess_iff_relativeGram {M n A m nstar : ℕ}
           mul_le_mul_of_nonneg_left hf.2 (Real.sqrt_nonneg _)
         _ = _ := by ring
 
-/-- Fully proved transfer from the deterministic clump estimates to the
-exact sampling conclusion, with the absolute constant `3072`. -/
-theorem multiClump_sampling_of_deterministicControl {n nstar : ℕ}
-    (hn : 0 < n) {c0 C0 : ℝ} (hC0 : (n : ℝ) ≤ C0)
-    (hcontrol : MultiClumpDeterministicControl n nstar c0 C0) :
-    MultiClumpSamplingConclusion multiClumpSamplingConstant n nstar c0 C0 := by
-  obtain ⟨lower, upper, hpos, hdet⟩ := hcontrol
+/-- The dimension-one cube event is exactly the original event, including
+all spacing parameters and both spectral exponents. -/
+@[simp] theorem multidimensionalMultiClumpSuccess_one {M n A m nstar : ℕ}
+    (Y : Fin n → ℝ) (P : ClumpPartition n A) (lower upper : ℝ → ℝ) (ρ : ℝ)
+    (Ω : Sample (M + 1) m) :
+    MultidimensionalMultiClumpSuccess (fun j (_ : Fin 1) => Y j) P nstar lower upper ρ
+      (finiteSampleEquiv (Equiv.funUnique (Fin 1) (Fin (M + 1))).symm m Ω) ↔
+        MultiClumpSuccess Y P nstar lower upper ρ Ω := by
+  simp only [MultidimensionalMultiClumpSuccess, MultiClumpSuccess,
+    cubeRelativeGramEvent_one, cubeAllSingularValueEvent_one,
+    comparableMultidimensionalClumpSpacing_one, multidimensionalClumpUpperExponent_one,
+    cubeSampledVandermonde_one_singularValue]
+
+/-- Dimension-one deterministic control specializes to the original row and
+spectral estimates, with exactly the original constants. -/
+theorem multiClumpDeterministicControl_of_multidimensional_one {n nstar : ℕ}
+    {c0 C0 : ℝ}
+    (h : MultidimensionalMultiClumpDeterministicControl 1 n nstar c0 C0) :
+    MultiClumpDeterministicControl n nstar c0 C0 := by
+  obtain ⟨lower, upper, hpos, hdet⟩ := h
   refine ⟨lower, upper, hpos, ?_⟩
-  intro M hM A P Y hmax hgeom m ρ δ hm hmM hρ0 hρ1 hδ0 hδ1 hsample
-  obtain ⟨hleverage, hfull⟩ := hdet M hM A P Y hmax hgeom
+  intro M hM A P Y hmax hgeom
+  obtain ⟨_, hrow, hfull⟩ := hdet M hM A P (fun j (_ : Fin 1) => Y j) hmax
+    ((multidimensionalMultiClumpGeometry_one c0 C0 Y P).2 hgeom)
+  constructor
+  · intro k z
+    simpa [cubeFourierRowEnergy, fourierRowEnergy,
+      multidimensionalMultiClumpLeverageConstant, ClumpPartition.sizePowerSum_one] using
+      hrow (fun _ : Fin 1 => k) z
+  · simpa only [comparableMultidimensionalClumpSpacing_one,
+      cubeFullVandermonde_one_singularValue, multidimensionalClumpUpperExponent_one] using hfull
+
+/-- The original sampling conclusion is the dimension-one cube conclusion
+under the exact bijection between actual frequency subsets. -/
+theorem multiClumpSamplingConclusion_of_multidimensional_one {C : ℝ} {n nstar : ℕ}
+    {c0 C0 : ℝ}
+    (h : MultidimensionalMultiClumpSamplingConclusion C 1 n nstar c0 C0) :
+    MultiClumpSamplingConclusion C n nstar c0 C0 := by
+  obtain ⟨lower, upper, hpos, hsample⟩ := h
+  refine ⟨lower, upper, hpos, ?_⟩
+  intro M hM A P Y hmax hgeom m ρ δ hm hmM hρ0 hρ1 hδ0 hδ1 hrate
+  have hcube := hsample M hM A P (fun j (_ : Fin 1) => Y j) hmax
+    ((multidimensionalMultiClumpGeometry_one c0 C0 Y P).2 hgeom) m ρ δ hm
+    (by simpa using hmM) hρ0 hρ1 hδ0 hδ1
+    (by simpa only [ClumpPartition.sizePowerSum_one] using hrate)
+  rw [← probability_comp_equiv
+    (finiteSampleEquiv (Equiv.funUnique (Fin 1) (Fin (M + 1))).symm m)
+    (MultidimensionalMultiClumpSuccess (fun j (_ : Fin 1) => Y j) P nstar lower upper ρ)]
+    at hcube
+  simpa only [multidimensionalMultiClumpSuccess_one] using hcube
+
+/-- Original deterministic data can be viewed as dimension-one cube data.
+The positive-definiteness field follows from the unchanged angular distinctness
+and bandwidth assumptions. -/
+theorem multidimensionalMultiClumpDeterministicControl_one_of_original {n nstar : ℕ}
+    {c0 C0 : ℝ} (hC0 : (n : ℝ) ≤ C0)
+    (h : MultiClumpDeterministicControl n nstar c0 C0) :
+    MultidimensionalMultiClumpDeterministicControl 1 n nstar c0 C0 := by
+  obtain ⟨lower, upper, hpos, hdet⟩ := h
+  refine ⟨lower, upper, hpos, ?_⟩
+  intro M hM A P Y hmax hgeom
+  let y : Fin n → ℝ := fun j => Y j 0
+  have hY : Y = (fun j (_ : Fin 1) => y j) := by
+    funext j r
+    exact congrArg (Y j) (Subsingleton.elim r 0)
+  rw [hY] at hgeom ⊢
+  have hg := (multidimensionalMultiClumpGeometry_one c0 C0 y P).1 hgeom
+  obtain ⟨hrow, hfull⟩ := hdet M hM A P y hmax hg
   have hnM : n ≤ M + 1 := by
     have : (n : ℝ) ≤ M := hC0.trans hM
     have : n ≤ M := by exact_mod_cast this
     omega
-  have hS : (0 : ℝ) < P.sizeSquareSum := by
-    exact_mod_cast (lt_of_lt_of_le hn P.n_le_sizeSquareSum)
-  have hR : 0 < 1024 * (P.sizeSquareSum : ℝ) := by positivity
-  have hrate : 3 * (1024 * (P.sizeSquareSum : ℝ)) / ρ ^ 2 *
-      Real.log (2 * (n : ℝ) / δ) ≤ (m : ℝ) := by
-    convert hsample using 1
-    unfold multiClumpSamplingConstant
-    ring
-  have hp := fixedSupport_relativeGram_allSingularValues_of_leverage hn hm hmM Y
-    hR hρ0 hρ1 hδ0 hδ1 (angularDistinct_fullGram_posDef hnM Y hgeom.distinct)
-    hleverage hrate
-  apply hp.trans
-  apply probability_mono
-  intro Ω hΩ
-  exact (multiClumpSuccess_iff_relativeGram hn P Y lower upper hρ0.le hρ1.le hfull Ω).2 hΩ.1
+  refine ⟨?_, ?_, ?_⟩
+  · simpa only [cubeFullGram_one] using angularDistinct_fullGram_posDef hnM y hg.distinct
+  · intro k z
+    simpa [cubeFourierRowEnergy, fourierRowEnergy,
+      multidimensionalMultiClumpLeverageConstant, ClumpPartition.sizePowerSum_one] using
+      hrow (k 0) z
+  · simpa only [comparableMultidimensionalClumpSpacing_one,
+      cubeFullVandermonde_one_singularValue, multidimensionalClumpUpperExponent_one] using hfull
+
+/-- The original transfer is a corollary of cube sampling at dimension one;
+no separate one-dimensional concentration proof is used. -/
+theorem multiClump_sampling_of_deterministicControl {n nstar : ℕ}
+    (hn : 0 < n) {c0 C0 : ℝ} (hC0 : (n : ℝ) ≤ C0)
+    (hcontrol : MultiClumpDeterministicControl n nstar c0 C0) :
+    MultiClumpSamplingConclusion multiClumpSamplingConstant n nstar c0 C0 := by
+  have hcube := multidimensionalMultiClump_sampling_of_deterministicControl
+    (by norm_num : 1 ≤ 1) hn
+    (multidimensionalMultiClumpDeterministicControl_one_of_original hC0 hcontrol)
+  simpa only [multidimensionalMultiClumpSamplingConstant_one, multiClumpSamplingConstant] using
+    multiClumpSamplingConclusion_of_multidimensional_one hcube
 
 /-- Closing the deterministic geometry theorem suffices to prove the whole
 outer-quantifier statement. There is no unproved probability premise. -/

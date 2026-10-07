@@ -51,6 +51,10 @@ argument at the critical separation.
 | Riemann rectangles, derivative bounds and discrete coefficient control | [UniformGridEvaluationBounds.lean](UniformGridEvaluationBounds.lean) |
 | Gap-free small-frequency pointwise and grid bounds with constant $512s^2$ | [SmallFrequencyEvaluationBounds.lean](SmallFrequencyEvaluationBounds.lean) |
 | Exact column-span representation and modulated jet polynomial approximation | [ClumpJetApproximation.lean](ClumpJetApproximation.lean) |
+| Gap-free angular section thresholds, including repeated coordinate projections | [AngularClumpSectionBounds.lean](AngularClumpSectionBounds.lean) |
+| Integer phase separation and short-representative chord estimates | [SeparatedAngularFrequency.lean](SeparatedAngularFrequency.lean) |
+| Multidimensional cardinal packets, cube averaging and diagonal interpolation energy | [MultidimensionalTrigonometricInterpolation.lean](MultidimensionalTrigonometricInterpolation.lean) |
+| Box moment kernels, tensor Taylor remainders and collinear row estimates | [MultidimensionalTaylorBounds.lean](MultidimensionalTaylorBounds.lean) |
 
 All frequencies in this chain are angular frequencies with period $2\pi$ and
 phase $e^{ikx_j}$.

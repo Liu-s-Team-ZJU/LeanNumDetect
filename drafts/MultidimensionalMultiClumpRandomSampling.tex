@@ -1,0 +1,407 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}\newtheorem{remark}[theorem]{Remark}
+\newcommand{\T}{\mathbb T_{2\pi}}
+\newcommand{\C}{\mathbb C}
+\newcommand{\R}{\mathbb R}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\abs}[1]{\left|#1\right|}
+\title{Uniform Random Row Subsampling of Multidimensional\par Multi-Clump Vandermonde Matrices}
+\author{Working mathematical draft}
+\date{October 8, 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+For fixed angular nodes in dimension $d\ge1$, uniform sampling without
+replacement from a cube of integer frequencies preserves the full
+Vandermonde Gram matrix. The sufficient sample count is
+$3072\,512^{d-1}\rho^{-2}\sum_a n_a^{2d}\log(2n/\delta)$.
+The clump model is the periodic $\ell^\infty$ model used in the NumDetect
+manuscript. No restriction on the internal arrangement of a clump is imposed.
+The smallest singular value has a lower bound of order
+$(M\Delta)^{n^\star-1}$, and this exponent is sharp over the allowed model.
+An additional, generally weaker upper bound recovers the existing
+one-dimensional two-sided estimate exactly when $d=1$.
+\end{abstract}
+
+\section{The model and the main theorem}
+For real representatives of $x,y\in\T^d:=\R^d/(2\pi\mathbb Z)^d$, put
+\[
+ d_\infty(x,y)=\max_{1\le r\le d}\min_{p\in\mathbb Z}
+       \abs{x_r-y_r+2\pi p},\qquad
+ d_1(x,y)=\sum_{r=1}^d\min_{p\in\mathbb Z}\abs{x_r-y_r+2\pi p}.
+\]
+Thus $d_\infty\le d_1\le d\,d_\infty$. On representatives in
+$(-\pi,\pi]^d$, each coordinate distance is
+$\min\{\abs{x_r-y_r},2\pi-\abs{x_r-y_r}\}$, exactly as in
+Definition \texttt{defi:metric\_separation} of NumDetect.
+
+\begin{definition}[NumDetect clumps]\label{def:multidimensional-clumps}
+Let $0<\tau\le\eta$ and $n^\star\ge2$. A set of distinct angular nodes
+$\mathcal X=\{x_1,\ldots,x_n\}$ forms
+$(A,\infty,\tau,\eta,n^\star)$-clumps if it admits a partition into
+nonempty, pairwise disjoint sets $\mathcal C_1,\ldots,\mathcal C_A$ with
+\[
+ n_a:=\abs{\mathcal C_a}\le n^\star,\quad
+ \max_a n_a=n^\star,\quad
+ \max_{x,y\in\mathcal C_a}d_\infty(x,y)\le\tau,\quad
+ \min_{x\in\mathcal C_a,\,y\in\mathcal C_b}d_\infty(x,y)>\eta\quad(a\ne b).
+\]
+This is Definition \texttt{defi:high\_dim\_clumps} of NumDetect. In particular,
+the number of nodes at distance at most $\tau$ from a node is the size of
+its clump, so its maximum is $n^\star$.
+\end{definition}
+
+Let $\mathcal K_{d,M}=\{0,\ldots,M\}^d$ and $N=(M+1)^d$.
+For $\Omega\subseteq\mathcal K_{d,M}$ of cardinality $m$, define
+\[
+ A_M=N^{-1/2}[e^{i\langle k,x_j\rangle}]_{k\in\mathcal K_{d,M},\,1\le j\le n},
+ \qquad
+ A_\Omega=m^{-1/2}[e^{i\langle k,x_j\rangle}]_{k\in\Omega,\,1\le j\le n}.
+\]
+The order of the selected rows is immaterial. Both matrices are independent
+of the representatives of their nodes. Singular values are listed in
+decreasing order, with $n$ column singular values, including zeros when
+necessary. Set
+\[
+ S_d=\sum_{a=1}^A n_a^{2d},\qquad
+ C_d=3072\,512^{d-1},\qquad
+ q(d,s)=\max\{q\in\mathbb N:q^d<s\}\quad(s\ge2).
+\]
+Here $q(d,s)\ge1$ and $q(1,s)=s-1$.
+
+\begin{theorem}[Cube sampling and clump spectrum]
+\label{thm:multidimensional-multi-clump-random-sampling}
+For every $d\ge1$ and $2\le n^\star\le n$, there exist
+\[
+ 0<c_0=c_0(d,n,n^\star)<1,\qquad C_0=C_0(d,n,n^\star)\ge n
+\]
+with the following property. Let $M\ge C_0$ and let the fixed distinct
+angular node set $\mathcal X$ be partitioned into nonempty clumps with
+$\max_a n_a=n^\star$. Suppose
+\begin{equation}\label{eq:multidimensional-clump-geometry}
+ \max_{x,y\in\mathcal C_a}d_\infty(x,y)\le c_0/M,\qquad
+ \min_{x\in\mathcal C_a,\,y\in\mathcal C_b}d_\infty(x,y)\ge C_0/M\quad(a\ne b).
+\end{equation}
+Choose $\Omega$ uniformly among all $m$-element subsets of
+$\mathcal K_{d,M}$. Given $0<\rho,\delta<1$ and $1\le m\le N$, assume
+\begin{equation}\label{eq:multidimensional-sampling-rate}
+ \boxed{m\ge\frac{C_d}{\rho^2}S_d\log\frac{2n}{\delta}.}
+\end{equation}
+With probability at least $1-\delta$,
+\begin{equation}\label{eq:multidimensional-relative-gram}
+ (1-\rho)A_M^*A_M\preceq A_\Omega^*A_\Omega
+       \preceq(1+\rho)A_M^*A_M.
+\end{equation}
+On this same event, for every $1\le j\le n$,
+\begin{equation}\label{eq:multidimensional-relative-spectrum}
+ \sqrt{1-\rho}\,\sigma_j(A_M)\le\sigma_j(A_\Omega)
+       \le\sqrt{1+\rho}\,\sigma_j(A_M).
+\end{equation}
+Moreover, for each $K\ge1$ there are positive constants $c_1,C_1$ depending
+only on $d,n,n^\star,K$ such that, whenever $\Delta>0$ and
+\begin{equation}\label{eq:multidimensional-comparable-spacing}
+ \Delta\le d_\infty(x,y)\le K\Delta
+       \quad\text{for all distinct }x,y\in\mathcal C_a,
+\end{equation}
+the same event satisfies
+\begin{equation}\label{eq:multidimensional-sampled-smallest-singular-value}
+ \boxed{c_1\sqrt{1-\rho}(M\Delta)^{n^\star-1}
+       \le\sigma_{\min}(A_\Omega)
+       \le C_1\sqrt{1+\rho}(M\Delta)^{q(d,n^\star)}.}
+\end{equation}
+The geometry thresholds are chosen before $K,\Delta,M,\mathcal X,m,\rho,\delta$.
+The Gram event depends only on the fixed nodes and sampling parameters and
+works simultaneously for all admissible spacing parameters and coefficient
+vectors. The sample count contains no inverse separation factor.
+\end{theorem}
+
+The strict inter-clump inequality of Definition
+\ref{def:multidimensional-clumps} implies the closed inequality in
+\eqref{eq:multidimensional-clump-geometry} whenever
+$\tau\le c_0/M$ and $\eta\ge C_0/M$. The closed boundary in the theorem
+also includes the boundary of the current one-dimensional result.
+There is no assumption of distinct coordinate projections, a Cartesian
+product of nodes, or any particular internal arrangement.
+
+\begin{proposition}[Sharp lower exponent]\label{prop:multidimensional-sharp-lower}
+The lower estimate does not require the upper spacing inequality in
+\eqref{eq:multidimensional-comparable-spacing}. Under the geometric
+hypotheses of Theorem
+\ref{thm:multidimensional-multi-clump-random-sampling}, a positive constant
+$c=c(d,n,n^\star)$ gives
+\[
+ \sigma_{\min}(A_M)\ge c(M\Delta)^{n^\star-1}
+\]
+for every $\Delta>0$ which bounds all distinct within-clump
+$d_\infty$-distances from below. Consequently, if these distances in $d_1$
+are bounded below by $\Delta_1$, then
+\[
+ \sigma_{\min}(A_M)\ge c\,d^{-(n^\star-1)}(M\Delta_1)^{n^\star-1}.
+\]
+On the relative Gram event, both lower bounds acquire the factor
+$\sqrt{1-\rho}$. The exponent $n^\star-1$ cannot be decreased uniformly
+over the clump model, even for a single clump.
+\end{proposition}
+
+\begin{remark}[Sample count and scope]
+Since $S_d\le n(n^\star)^{2d-1}$, a sufficient count for fixed $d$ and
+fixed relative error is $O_{d,\rho}(n(n^\star)^{2d-1}\log(n/\delta))$.
+This is a fixed-node assertion. When the sufficient count exceeds $N$,
+there is no eligible cardinality; the full sample itself preserves the
+Gram matrix deterministically.
+\end{remark}
+
+\section{Gap-free leverage estimates}
+The following section estimates remain valid when projected nodes coincide.
+This is essential in a model which imposes no internal arrangement.
+
+\begin{lemma}[One-coordinate sections]\label{lem:angular-sections}
+For fixed $n,n^\star\ge1$, there are common thresholds
+$0<c_0<1$ and $C_0\ge n$ with the following properties for all
+$1\le s,t\le n^\star$ and $M\ge C_0$.
+If $s$ angular frequencies have lifts within $c_0/M$ of a center and
+$u(k)=\sum_{j=1}^s c_j e^{ikx_j}$, then, for every
+$k\in\{0,\ldots,M\}$,
+\begin{equation}\label{eq:section-row-bound}
+ (M+1)\abs{u(k)}^2\le512s^2\sum_{\ell=0}^M\abs{u(\ell)}^2.
+\end{equation}
+If two such sections have $s$ and $t$ frequencies respectively, and
+their centers $x,y$ satisfy
+$\abs{y-x-2\pi p}\ge C_0/M$ for every $p\in\mathbb Z$, then
+\begin{equation}\label{eq:section-cross-bound}
+ \abs{\langle u,v\rangle}\le\frac1{2n}\norm{u}_2\norm{v}_2.
+\end{equation}
+Neither assertion requires different projected frequencies.
+\end{lemma}
+\begin{proof}
+Scale the offsets by $M$ and use the companion matrix of
+$\prod_j(z-iM(x_j-\text{center}))$. Its evolution represents the exponential
+sum also at repeated roots. As its roots approach zero, its first-coordinate
+evolution approaches the polynomial jet basis
+$1,t,\ldots,t^{s-1}/(s-1)!$ uniformly on $[0,1]$.
+Polynomial evaluation and a Markov derivative estimate control the value
+and the integer-grid energy. A sufficiently small perturbation gives
+\eqref{eq:section-row-bound} with the displayed absolute constant.
+For \eqref{eq:section-cross-bound}, approximate each section, relative to
+its actual grid norm, by a modulated polynomial of degree at most $s-1$.
+Finite summation by parts bounds every normalized polynomial cross moment
+by $\pi/\eta$ when all winding differences of the centers are at least
+$\eta$. Choose the relative approximation error first and then the
+separation threshold. Finite maxima and minima supply common thresholds
+for all $1\le s\le n^\star$.
+\end{proof}
+
+\begin{lemma}[Cube sections and assembly]\label{lem:cube-clump-leverage}
+Thresholds depending only on $d,n,n^\star$ can be chosen so that every
+single-clump signal on $\mathcal K_{d,M}$ satisfies
+\[
+ N\abs{u(k)}^2\le512^d n_a^{2d}\norm{u}_2^2.
+\]
+For different clumps their signal spaces satisfy
+$\abs{\langle u,v\rangle}\le(2n)^{-1}\norm{u}_2\norm{v}_2$.
+Consequently, for every full multiclump signal $f=\sum_a u_a$,
+\begin{equation}\label{eq:cube-leverage}
+ \sup_{f\ne0}\frac{\abs{f(k)}^2}{\norm{f}_2^2}
+       \le\frac{2\,512^d S_d}{N}.
+\end{equation}
+\end{lemma}
+\begin{proof}
+Fix all coordinates except one. The resulting section is a univariate
+exponential sum supported on that coordinate projection of the clump;
+collisions simply repeat roots. Apply \eqref{eq:section-row-bound} in
+each coordinate and sum successively. This gives the tensor factor
+$(512n_a^2)^d$.
+For two clumps, choose anchors. Their $d_\infty$-separation is attained in
+some coordinate. Apply \eqref{eq:section-cross-bound} to the corresponding
+sections and sum over all other coordinates; Cauchy--Schwarz gives the
+same bound for the entire cube. The chosen coordinate can depend on the
+pair of clumps.
+Expanding the norm and summing the pairwise estimates gives
+\[
+ \norm{\sum_a u_a}_2^2\ge\tfrac12\sum_a\norm{u_a}_2^2.
+\]
+Weighted Cauchy--Schwarz at a fixed row gives
+$N\abs{\sum_a u_a(k)}^2\le512^d S_d\sum_a\norm{u_a}_2^2$,
+which proves \eqref{eq:cube-leverage}.
+\end{proof}
+
+\section{Deterministic spectrum and sharpness}
+\begin{lemma}[Integer phase separation]\label{lem:integer-phase-separation}
+Suppose $\eta>0$, $Q\in\mathbb N$ with $Q\ge1$, and
+$\abs{\theta-2\pi p}\ge\eta$ for every integer $p$. If
+$(Q+1)\eta\ge2\pi$, there exists an integer $1\le q\le Q$ with
+$\abs{e^{iq\theta}-1}\ge1$.
+For a short representative with $\abs{Q\theta}\le\pi$, one also has
+$\abs{e^{iQ\theta}-1}\ge(2/\pi)Q\abs{\theta}$.
+\end{lemma}
+\begin{proof}
+The geometric-sum estimate gives
+$\abs{\sum_{k=0}^Q e^{ik\theta}}\le\pi/\eta\le(Q+1)/2$.
+If every chord were smaller than one, the real part of each summand would
+be greater than $1/2$, contradicting this bound. The second assertion is
+the sine chord estimate on the principal interval.
+\end{proof}
+
+\begin{lemma}[Cardinal polynomials on a cube]\label{lem:cube-cardinal-lower}
+For sufficiently large thresholds independent of the within-clump minimum
+gap, the normalized full cube matrix is injective and obeys the lower
+estimate in Proposition \ref{prop:multidimensional-sharp-lower}.
+\end{lemma}
+\begin{proof}
+Fix a node $x_j$. For each other node choose a coordinate attaining its
+periodic $\ell^\infty$-distance from $x_j$. Allocate an integer bandwidth
+of order $M/n$ to each pair. For a pair in the same clump, the second part
+of Lemma \ref{lem:integer-phase-separation} provides a chord of size at
+least a constant times $M\Delta/n$. For a pair in another clump, its first
+part provides a chord of size at least one.
+Multiply the associated normalized two-term trigonometric factors. Scale
+each within-clump factor by $\lambda=c_nM\Delta$ so that its coefficient
+mass is bounded by an absolute constant. The resulting polynomial vanishes
+at every other node and takes value $\lambda^{n_a-1}$ at $x_j$. Its
+coefficient mass is bounded in terms of $n$, and its frequencies lie in a
+cube of side at most $M/2$.
+Multiply by a normalized product of Dirichlet averages in the unused
+bandwidth, centered at $x_j$. Convolution bounds its coefficient norm by
+its earlier coefficient mass divided by a constant times $(M+1)^{d/2}$.
+Testing a Fourier signal against these $n$ coefficient vectors and using
+Cauchy--Schwarz gives the claimed normalized lower bound. Since
+$M\Delta\le c_0<1$ and $n_a\le n^\star$, the power $n_a-1$ may be
+replaced by $n^\star-1$. A finite set of distinct within-clump distances
+has a positive minimum, so this argument also proves injectivity without
+any prescribed lower spacing hypothesis. The $d_1$ conclusion follows
+from $d_1\le d\,d_\infty$.
+\end{proof}
+
+\begin{lemma}[Box-moment upper bound]\label{lem:box-moment-upper}
+Under the geometric hypotheses of Theorem
+\ref{thm:multidimensional-multi-clump-random-sampling} and
+\eqref{eq:multidimensional-comparable-spacing},
+$\sigma_{\min}(A_M)\le C(d,n^\star,K)(M\Delta)^{q(d,n^\star)}$.
+\end{lemma}
+\begin{proof}
+Use a clump of size $s=n^\star$, choose short coordinate lifts relative
+to an anchor, and put $q=q(d,s)$. The $q^d\times s$ matrix of box moments
+indexed by $\alpha\in\{0,\ldots,q-1\}^d$ has a unit kernel vector because
+$q^d<s$. This vector annihilates the tensor product of the coordinate
+Taylor polynomials of degree $q-1$.
+Each coordinate phase is at most $M\,\operatorname{diam}_\infty\mathcal C_a
+\le c_0<1$ in absolute value. The exponential remainder and a telescoping
+product estimate bound the remaining row value by
+$2\sqrt{s}\,d\,3^d(MK\Delta)^q/q!$. Sum its square over the cube, divide
+by $N$, and extend the vector by zero outside this clump. The variational
+characterization of the least singular value gives the result.
+\end{proof}
+
+\begin{proof}[Sharpness in Proposition \ref{prop:multidimensional-sharp-lower}]
+For $s=n^\star$, take the admissible single clump
+$\mathcal X_\Delta=\{j\Delta e_1:0\le j\le s-1\}$ with
+$(s-1)M\Delta\le c_0$. Its within-clump distances are between $\Delta$
+and $(s-1)\Delta$, both for $d_1$ and $d_\infty$.
+There is a unit coefficient vector annihilating the $s-1$ scalar moments
+$1,j\Delta,\ldots,(j\Delta)^{s-2}$. Every Fourier phase of this collinear
+family depends only on $k_1$. The univariate Taylor remainder therefore
+gives, for every cube row, the upper bound
+\[
+ \abs{\sum_j a_j e^{i\langle k,j\Delta e_1\rangle}}
+ \le B_s(M\Delta)^{s-1},\qquad
+ B_s=\frac{6\sqrt{s}(s-1)^{s-1}}{(s-1)!}.
+\]
+After squaring and averaging, this bounds both the normalized full matrix
+and every nonempty selected-row matrix by $B_s(M\Delta)^{s-1}$ in least
+singular value. For any real $p<s-1$ and any $c>0$, an arbitrarily small
+positive scale $t=M\Delta$ has $B_st^{s-1}<ct^p$. This contradicts a
+proposed uniform lower bound of exponent $p$, while the family continues
+to satisfy the literal clump model. Thus the lower exponent is sharp.
+\end{proof}
+
+\section{Sampling and exact one-dimensional specialization}
+\begin{proof}[Proof of Theorem
+\ref{thm:multidimensional-multi-clump-random-sampling}]
+Choose common thresholds for Lemmas \ref{lem:cube-clump-leverage} and
+\ref{lem:cube-cardinal-lower}. Let $G=A_M^*A_M$, which is positive definite,
+and whiten the raw row vectors by $G^{-1/2}$. Their population average
+outer product is the identity. Equation \eqref{eq:cube-leverage} bounds
+each whitened outer product by
+$R I$, where $R=2\,512^d S_d$.
+The finite matrix Chernoff bound for uniform sampling without replacement
+has failure probability at most $2n\exp(-m\rho^2/(3R))$.
+Since $3R=3072\,512^{d-1}S_d$, condition
+\eqref{eq:multidimensional-sampling-rate} makes this at most $\delta$.
+Undo whitening to obtain \eqref{eq:multidimensional-relative-gram}.
+Eigenvalue monotonicity for Hermitian matrices and the nonnegative square
+root give \eqref{eq:multidimensional-relative-spectrum}.
+The deterministic lower and upper lemmas supply the last assertion on
+this same event, simultaneously for all admissible $K,\Delta$.
+\end{proof}
+
+\begin{corollary}[The current one-dimensional theorem]
+\label{cor:one-dimensional-multi-clump-random-sampling}
+For $d=1$, Theorem
+\ref{thm:multidimensional-multi-clump-random-sampling} is exactly the current
+one-dimensional random-retained-row multiclump theorem: $N=M+1$,
+$S_1=\sum_a n_a^2$, the sampling constant is $3072$,
+$q(1,n^\star)=n^\star-1$, and
+$d_\infty=d_1=d_{\mathbb T}$. Its geometry thresholds depend only on $n,n^\star$,
+and the comparable-spacing spectral constants depend only on
+$n,n^\star,K$. In particular,
+\[
+ m\ge\frac{3072}{\rho^2}\Bigl(\sum_a n_a^2\Bigr)\log\frac{2n}{\delta},
+ \qquad
+ c_1\sqrt{1-\rho}(M\Delta)^{n^\star-1}
+ \le\sigma_{\min}(A_\Omega)
+ \le C_1\sqrt{1+\rho}(M\Delta)^{n^\star-1}.
+\]
+\end{corollary}
+\begin{proof}
+Identify a one-coordinate frequency function with its coordinate. This is
+a bijection from $\{0,\ldots,M\}^1$ to $\{0,\ldots,M\}$ and induces a
+bijection between their $m$-element subsets, preserving the uniform law.
+Under this identification the full and sampled matrices agree up to a
+row permutation. Their Gram matrices and all singular values therefore
+agree. Substitute the displayed identities into the theorem.
+\end{proof}
+
+\begin{remark}[Meaning of sharpness]
+Sharpness is uniform over the admissible clump model. It does not assert
+that every multidimensional configuration has the same asymptotic order.
+For example, the three nodes $0,\Delta e_1,\Delta e_2$ need not have the
+same least-singular-value exponent as three collinear nodes. The model
+allows both arrangements, and the collinear family establishes the
+worst-case exponent without adding any assumption to the theorem.
+\end{remark}
+
+\begin{thebibliography}{9}
+\bibitem{bdgy}
+D. Batenkov, B. Diederichs, G. Goldman, and Y. Yomdin,
+\emph{The spectral properties of Vandermonde matrices with clustered nodes},
+2021, \href{https://arxiv.org/abs/1909.01927}{arXiv:1909.01927}.
+\bibitem{emm}
+T. Erd\'elyi, C. Musco, and C. Musco,
+\emph{Fourier sparse leverage scores and approximate kernel learning},
+2020, \href{https://arxiv.org/abs/2006.07340}{arXiv:2006.07340}.
+\bibitem{bg}
+D. Batenkov and G. Goldman,
+\emph{Single-exponential bounds for the smallest singular value of
+Vandermonde matrices in the sub-Rayleigh regime},
+2021, \href{https://arxiv.org/abs/2107.09326}{arXiv:2107.09326}.
+\bibitem{tropp}
+J. A. Tropp, \emph{Improved analysis of the subsampled randomized Hadamard
+transform}, 2011, \href{https://arxiv.org/abs/1011.1595}{arXiv:1011.1595}.
+\bibitem{grossnesme}
+D. Gross and V. Nesme, \emph{Note on sampling without replacing from a
+finite collection of matrices}, 2010,
+\href{https://arxiv.org/abs/1001.2738}{arXiv:1001.2738}.
+\bibitem{kunisnagel}
+S. Kunis and D. Nagel, \emph{On the smallest singular value of multivariate
+Vandermonde matrices with clustered nodes}, 2020,
+\href{https://arxiv.org/abs/1907.07119}{arXiv:1907.07119}.
+\end{thebibliography}
+\end{document}

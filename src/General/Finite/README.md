@@ -11,6 +11,9 @@ reductions.
 | [FiniteSorting.lean](FiniteSorting.lean) | `exists_strictMono_reordering`: an injective finite real node family admits a strictly increasing permutation |
 | [FiniteRealGeometry.lean](FiniteRealGeometry.lean) | `finite_nodes_enclosing_diameter` and the singleton case; `exists_periodic_gap_le_pi` and `periodic_separation_lt_half` for period $2\pi$ |
 | [PeriodicClumpLift.lean](PeriodicClumpLift.lean) | `periodic_clump_lift`: choose real representatives of a sufficiently short periodic clump without increasing its diameter bound |
+| [ProductEnergyBounds.lean](ProductEnergyBounds.lean) | Exact iteration of coordinate row estimates and one-coordinate cross-inner-product lifting |
+| [AlmostOrthogonalEnergy.lean](AlmostOrthogonalEnergy.lean) | Finite clump half-energy and row bounds on arbitrary finite row types |
+| [PowerOrderSharpness.lean](PowerOrderSharpness.lean) | Small-scale strict power comparisons for natural and arbitrary real exponents |
 
 ## Geometry and grid assumptions
 

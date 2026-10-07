@@ -12,8 +12,10 @@ import RandSamp.MultiClumpTheorem
 /-! Public entry point for nonuniform Vandermonde scaling, uniform and fixed
 separated-node random sampling, simultaneous DFT-grid RIP in any dimension,
 the near-linear one-dimensional off-grid relative Gram estimate, and
-fixed multiclump relative sampling with the absolute rate
-`3072 ρ⁻² (Σ n_a²) log(2n/δ)`.
+multiclump relative cube sampling with the rate
+`3072*512^(d-1) ρ⁻² (Σ n_a^(2d)) log(2n/δ)`, a sharp worst-case
+lower spectral exponent, and the exact dimension-one corollary with the
+original absolute constant `3072`.
 
 Every result is fully proved. `RandSamp.OffGridAudit` checks the complete
 off-grid probability chain, and `RandSamp.MultiClumpAudit` checks the

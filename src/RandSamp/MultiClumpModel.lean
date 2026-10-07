@@ -1,5 +1,6 @@
 import RandSamp.RandomModel
 import General.Finite.PeriodicClumpLift
+import Mathlib.Data.Fintype.EquivFin
 import MathExtras.NumberTheory.Analysis.LargeSieveInequality
 
 /-!
@@ -16,6 +17,7 @@ maximum, which is needed for the smallest-singular-value upper estimate.
 set_option autoImplicit false
 
 open scoped BigOperators
+open WithLp
 
 namespace LeanNumDetect.RandSamp
 
@@ -178,12 +180,21 @@ def members (a : Fin A) : Finset (Fin n) :=
 /-- Number of sources in a clump. -/
 def size (a : Fin A) : ℕ := (P.members a).card
 
+/-- Enumerate a clump without changing its cardinality. This combinatorial
+bijection is shared by every ambient dimension. -/
+def enumeration (a : Fin A) : Fin (P.size a) ≃ P.members a :=
+  (P.members a).equivFin.symm
+
 /-- The deterministic size parameter in the random sampling rate. -/
 def sizeSquareSum : ℕ := ∑ a : Fin A, P.size a ^ 2
 
 @[simp] theorem mem_members (a : Fin A) (j : Fin n) :
     j ∈ P.members a ↔ P.label j = a := by
   simp [members]
+
+theorem enumeration_label (a : Fin A) (j : Fin (P.size a)) :
+    P.label (P.enumeration a j).val = a :=
+  (P.mem_members _ _).1 (P.enumeration a j).property
 
 theorem members_nonempty (a : Fin A) : (P.members a).Nonempty := by
   obtain ⟨j, hj⟩ := P.surjective a
@@ -235,6 +246,30 @@ theorem sizeSquareSum_le {nstar : ℕ} (hsize : ∀ a, P.size a ≤ nstar) :
 theorem sizeSquareSum_le_real {nstar : ℕ} (hsize : ∀ a, P.size a ≤ nstar) :
     (P.sizeSquareSum : ℝ) ≤ (n : ℝ) * (nstar : ℝ) := by
   exact_mod_cast P.sizeSquareSum_le hsize
+
+theorem sum_enumeration {β : Type*} [AddCommMonoid β] (a : Fin A) (f : Fin n → β) :
+    (∑ j : Fin (P.size a), f (P.enumeration a j).val) = ∑ j ∈ P.members a, f j := by
+  rw [← Finset.sum_coe_sort (P.members a) f]
+  exact (P.enumeration a).sum_comp (fun j => f j.val)
+
+/-- Every coefficient appears exactly once in the partition. -/
+theorem sum_clumps {β : Type*} [AddCommMonoid β] (f : Fin n → β) :
+    (∑ a : Fin A, ∑ j : Fin (P.size a), f (P.enumeration a j).val) = ∑ j, f j := by
+  simp_rw [P.sum_enumeration]
+  have h := Finset.sum_fiberwise_eq_sum_filter
+    (Finset.univ : Finset (Fin n)) (Finset.univ : Finset (Fin A)) P.label f
+  simpa only [members, Finset.mem_univ, Finset.filter_true] using h
+
+/-- Restriction of a Euclidean coefficient vector to a clump. -/
+def coefficients (a : Fin A) (z : EuclideanSpace ℂ (Fin n)) :
+    EuclideanSpace ℂ (Fin (P.size a)) :=
+  toLp 2 (fun j => z (P.enumeration a j).val)
+
+theorem sum_coefficients_norm_sq (z : EuclideanSpace ℂ (Fin n)) :
+    (∑ a, ‖P.coefficients a z‖ ^ 2) = ‖z‖ ^ 2 := by
+  simp_rw [EuclideanSpace.norm_sq_eq]
+  exact P.sum_clumps (fun j => ‖z j‖ ^ 2)
+
 
 end ClumpPartition
 
