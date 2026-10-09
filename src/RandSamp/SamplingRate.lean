@@ -11,6 +11,32 @@ set_option autoImplicit false
 
 namespace LeanNumDetect.RandSamp
 
+/-- A lower-only Chernoff estimate uses one tail and the logarithm `log(d/η)`. -/
+theorem lower_chernoff_failure_bound_of_sample_size
+    {m d R a δ η : ℝ}
+    (hd : 0 < d) (hR : 0 < R) (ha : 0 < a) (hδ : 0 < δ) (hη : 0 < η)
+    (hsample : 2 * R / (a * δ ^ 2) * Real.log (d / η) ≤ m) :
+    d * Real.exp (-(m * a * δ ^ 2) / (2 * R)) ≤ η := by
+  have hq : 0 < a * δ ^ 2 := by positivity
+  have hs' : (2 * R * Real.log (d / η)) / (a * δ ^ 2) ≤ m := by
+    calc
+      _ = 2 * R / (a * δ ^ 2) * Real.log (d / η) := by ring
+      _ ≤ m := hsample
+  have hlog : Real.log (d / η) ≤ (m * a * δ ^ 2) / (2 * R) := by
+    apply (le_div_iff₀ (by positivity : 0 < 2 * R)).2
+    have h := (div_le_iff₀ hq).1 hs'
+    nlinarith
+  have hexp : Real.exp (-Real.log (d / η)) = η / d := by
+    rw [Real.exp_neg, Real.exp_log (by positivity)]
+    exact inv_div _ _
+  have htail : Real.exp (-(m * a * δ ^ 2) / (2 * R)) ≤ η / d := by
+    rw [← hexp]
+    apply Real.exp_le_exp.mpr
+    simpa only [neg_div] using neg_le_neg hlog
+  calc
+    _ ≤ d * (η / d) := mul_le_mul_of_nonneg_left htail hd.le
+    _ = η := by field_simp
+
 /-- A logarithmic sampling threshold makes the sum of the lower and upper
 Chernoff failure bounds at most the requested failure probability. -/
 theorem chernoff_failure_bound_of_sample_size

@@ -78,6 +78,54 @@ theorem exists_angularClump_row_bounds (s : ℕ) (hs : 0 < s) :
   rw [heq, evolutionVector_coordinate_norm, evolutionVector_norm_sq]
   exact (hbounds frequency jet M hfrequency hM hsize).2 k.val (by omega)
 
+theorem exists_angularClump_row_bounds_with_row_bound (s : ℕ) (hs : 0 < s)
+    {K q : ℝ} (hK : 1 ≤ K) (hq : K < q)
+    (hpoly : ∀ (a : Fin s → ℂ) (x : ℝ), x ∈ Set.Icc (0 : ℝ) 1 →
+      ‖PolynomialEvaluationBounds.jetPolynomialSignal a x‖^2 ≤ K * (s : ℝ)^2 *
+        (∫ t in (0 : ℝ)..1, ‖PolynomialEvaluationBounds.jetPolynomialSignal a t‖^2)) :
+    ∃ r B : ℝ, 0 < r ∧ r ≤ 1 ∧ 0 < B ∧
+      ∀ (M : ℕ), B ≤ (M : ℝ) → 0 < M →
+        ∀ (node : Fin s → ℝ) (center : ℝ), WithinAngularClump M node center r →
+          ∀ u ∈ ClusteredVandermonde.clusterSubspace M node,
+            ∀ k : Fin (M + 1), (M + 1 : ℝ) * ‖u k‖ ^ 2 ≤
+              q * (s : ℝ) ^ 2 * ‖u‖ ^ 2 := by
+  obtain ⟨r, B, c, hr, hr1, hB, hc, hbounds⟩ := smallFrequency_grid_jet_bounds_with_row_bound hs hK hq hpoly
+  refine ⟨r, B, hr, hr1, hB, ?_⟩
+  intro M hsize hM node center hwithin u hu k
+  obtain ⟨coefficient, rfl⟩ := clusterSubspace_coefficient_representation node u hu
+  choose p hp using hwithin
+  let frequency : Fin s → ℂ := fun j => Complex.I * (((M : ℝ) *
+    (node j - center + 2 * Real.pi * p j) : ℝ) : ℂ)
+  let jet := ExponentialCompanion.initialJet frequency coefficient
+  have hfrequency : ‖frequency‖ ≤ r := scaled_frequency_norm_le hM node center r hr.le p hp
+  have heq := angularSignal_eq_evolutionVector hs hM node coefficient center p
+  change angularSignal M node coefficient = evolutionVector hs M frequency jet center at heq
+  rw [heq, evolutionVector_coordinate_norm, evolutionVector_norm_sq]
+  exact (hbounds frequency jet M hfrequency hM hsize).2 k.val (by omega)
+
+
+theorem exists_angularClump_row_bounds_tight (s : ℕ) (hs : 0 < s) :
+    ∃ r B : ℝ, 0 < r ∧ r ≤ 1 ∧ 0 < B ∧
+      ∀ (M : ℕ), B ≤ (M : ℝ) → 0 < M →
+        ∀ (node : Fin s → ℝ) (center : ℝ), WithinAngularClump M node center r →
+          ∀ u ∈ ClusteredVandermonde.clusterSubspace M node,
+            ∀ k : Fin (M + 1), (M + 1 : ℝ) * ‖u k‖ ^ 2 ≤
+              24 * (s : ℝ) ^ 2 * ‖u‖ ^ 2 := by
+  obtain ⟨r, B, c, hr, hr1, hB, hc, hbounds⟩ := smallFrequency_grid_jet_bounds_tight hs
+  refine ⟨r, B, hr, hr1, hB, ?_⟩
+  intro M hsize hM node center hwithin u hu k
+  obtain ⟨coefficient, rfl⟩ := clusterSubspace_coefficient_representation node u hu
+  choose p hp using hwithin
+  let frequency : Fin s → ℂ := fun j => Complex.I * (((M : ℝ) *
+    (node j - center + 2 * Real.pi * p j) : ℝ) : ℂ)
+  let jet := ExponentialCompanion.initialJet frequency coefficient
+  have hfrequency : ‖frequency‖ ≤ r := scaled_frequency_norm_le hM node center r hr.le p hp
+  have heq := angularSignal_eq_evolutionVector hs hM node coefficient center p
+  change angularSignal M node coefficient = evolutionVector hs M frequency jet center at heq
+  rw [heq, evolutionVector_coordinate_norm, evolutionVector_norm_sq]
+  exact (hbounds frequency jet M hfrequency hM hsize).2 k.val (by omega)
+
+
 /-- A sufficiently short section has a relative polynomial approximation
 whose coefficients are controlled by the actual section norm. -/
 theorem angularClump_polynomial_approximation {s M : ℕ} (hs : 0 < s) (hM : 0 < M)
@@ -286,6 +334,276 @@ theorem angularClump_section_thresholds (n nstar : ℕ) (hn : 0 < n) (hnstar : 0
       dsimp [ε]
       field_simp
       nlinarith
+    exact hresult.trans (mul_le_mul_of_nonneg_right
+      (mul_le_mul_of_nonneg_right heps (norm_nonneg u)) (norm_nonneg v))
+
+theorem angularClump_section_thresholds_tight (n nstar : ℕ) (hn : 0 < n) (hnstar : 0 < nstar)
+    (B b : ℕ → ℝ) (hb : ∀ s, 1 ≤ s → s ≤ nstar → 0 < b s) :
+    ∃ c0 C0 : ℝ, 0 < c0 ∧ c0 < 1 ∧ (n : ℝ) ≤ C0 ∧
+      (∀ s, 1 ≤ s → s ≤ nstar → B s ≤ C0 ∧ c0 ≤ b s) ∧
+      (∀ (s M : ℕ), 0 < s → s ≤ nstar → C0 ≤ (M : ℝ) →
+        ∀ (node : Fin s → ℝ) (center : ℝ), WithinAngularClump M node center c0 →
+          ∀ u ∈ ClusteredVandermonde.clusterSubspace M node,
+            ∀ k : Fin (M + 1), (M + 1 : ℝ) * ‖u k‖ ^ 2 ≤
+              24 * (s : ℝ) ^ 2 * ‖u‖ ^ 2) ∧
+      (∀ (s t M : ℕ), 0 < s → s ≤ nstar → 0 < t → t ≤ nstar → C0 ≤ (M : ℝ) →
+        ∀ (node : Fin s → ℝ) (node' : Fin t → ℝ) (x y : ℝ),
+          WithinAngularClump M node x c0 → WithinAngularClump M node' y c0 →
+          (∀ p : ℤ, C0 / (M : ℝ) ≤ |y - x - 2 * Real.pi * p|) →
+          ∀ u ∈ ClusteredVandermonde.clusterSubspace M node,
+            ∀ v ∈ ClusteredVandermonde.clusterSubspace M node',
+              ‖⟪u, v⟫_ℂ‖ ≤ (1 / (2 * (n : ℝ))) * ‖u‖ * ‖v‖) := by
+  classical
+  have hnR : 0 < (n : ℝ) := by exact_mod_cast hn
+  let ε : ℝ := 1 / (32 * (n : ℝ))
+  have hε : 0 < ε := by dsimp [ε]; positivity
+  choose rR QR hrR hrR1 hQR hrow using
+    fun i : Fin nstar => exists_angularClump_row_bounds_tight (i.val + 1) (by omega)
+  choose rP QP DP hrP hQP hDP happrox using
+    fun i : Fin nstar => exists_angularClump_polynomial_bounds (i.val + 1) (by omega) ε hε
+  let f : Fin nstar → ℝ := fun i => max 1 (max (DP i) (max |QP i| (max |QR i|
+    (max |B (i.val + 1)| (max (rP i)⁻¹ (max (rR i)⁻¹ (b (i.val + 1))⁻¹))))))
+  obtain ⟨L, hL⟩ := (Set.finite_range f).bddAbove
+  have hbounds (i : Fin nstar) : 1 ≤ L ∧ DP i ≤ L ∧ |QP i| ≤ L ∧ |QR i| ≤ L ∧
+      |B (i.val + 1)| ≤ L ∧ (rP i)⁻¹ ≤ L ∧ (rR i)⁻¹ ≤ L ∧
+        (b (i.val + 1))⁻¹ ≤ L := by
+    have h := hL (Set.mem_range_self i)
+    simpa only [f, max_le_iff] using h
+  have hL1 : 1 ≤ L := (hbounds ⟨0, hnstar⟩).1
+  have hL0 : 0 < L := zero_lt_one.trans_le hL1
+  let T := max (n : ℝ) (max L (64 * (n : ℝ) * Real.pi * L ^ 2))
+  have hnT : (n : ℝ) ≤ T := le_max_left _ _
+  have hLT : L ≤ T := (le_max_left _ _).trans (le_max_right _ _)
+  have hcrossT : 64 * (n : ℝ) * Real.pi * L ^ 2 ≤ T :=
+    (le_max_right _ _).trans (le_max_right _ _)
+  have hT0 : 0 < T := hL0.trans_le hLT
+  have hT1 : 1 ≤ T := hL1.trans hLT
+  have hsmall : 1 / (2 * T) ≤ 1 / L := by
+    apply one_div_le_one_div_of_le hL0
+    linarith
+  have hinv (x : ℝ) (hx : 0 < x) (h : x⁻¹ ≤ L) : 1 / L ≤ x := by
+    apply (div_le_iff₀ hL0).2
+    have hh := mul_le_mul_of_nonneg_left h hx.le
+    simpa only [mul_inv_cancel₀ hx.ne', mul_comm x L] using hh
+  have hsmallP (i : Fin nstar) : 1 / (2 * T) ≤ rP i :=
+    hsmall.trans (hinv (rP i) (hrP i) (hbounds i).2.2.2.2.2.1)
+  have hsmallR (i : Fin nstar) : 1 / (2 * T) ≤ rR i :=
+    hsmall.trans (hinv (rR i) (hrR i) (hbounds i).2.2.2.2.2.2.1)
+  refine ⟨1 / (2 * T), T, by positivity,
+    (div_lt_one (by positivity : 0 < 2 * T)).2 (by linarith), hnT, ?_, ?_, ?_⟩
+  · intro s hs hsmax
+    let i : Fin nstar := ⟨s - 1, by omega⟩
+    have hi : i.val + 1 = s := by dsimp [i]; omega
+    rcases hbounds i with ⟨_, _, _, _, hBi, _, _, hbi⟩
+    constructor
+    · exact (le_abs_self (B s)).trans ((hi ▸ hBi).trans hLT)
+    · exact hsmall.trans (hinv (b s) (hb s hs hsmax) (hi ▸ hbi))
+  · intro s M hs hsmax hM node center hwithin u hu k
+    let i : Fin nstar := ⟨s - 1, by omega⟩
+    have hi : i.val + 1 = s := by dsimp [i]; omega
+    have hMR : 0 < (M : ℝ) := hT0.trans_le hM
+    have hMN : 0 < M := by exact_mod_cast hMR
+    have hQRi : QR i ≤ (M : ℝ) :=
+      (le_abs_self _).trans ((hbounds i).2.2.2.1.trans (hLT.trans hM))
+    have h := hrow i
+    rw [hi] at h
+    exact h M hQRi hMN node center (hwithin.mono hMN (hsmallR i)) u hu k
+  · intro s t M hs hsmax ht htmax hM node node' x y hwithin hwithin' hsep u hu v hv
+    let i : Fin nstar := ⟨s - 1, by omega⟩
+    let j : Fin nstar := ⟨t - 1, by omega⟩
+    have hi : i.val + 1 = s := by dsimp [i]; omega
+    have hj : j.val + 1 = t := by dsimp [j]; omega
+    have hMR : 0 < (M : ℝ) := hT0.trans_le hM
+    have hMN : 0 < M := by exact_mod_cast hMR
+    have hQi : QP i ≤ (M : ℝ) :=
+      (le_abs_self _).trans ((hbounds i).2.2.1.trans (hLT.trans hM))
+    have hQj : QP j ≤ (M : ℝ) :=
+      (le_abs_self _).trans ((hbounds j).2.2.1.trans (hLT.trans hM))
+    have hai := happrox i
+    have haj := happrox j
+    rw [hi] at hai
+    rw [hj] at haj
+    obtain ⟨c, huc, hcnorm⟩ := hai M hQi hMN node x (hwithin.mono hMN (hsmallP i)) u hu
+    obtain ⟨d, hvd, hdnorm⟩ := haj M hQj hMN node' y (hwithin'.mono hMN (hsmallP j)) v hv
+    have hsqrt : 0 < Real.sqrt (M + 1 : ℝ) := by positivity
+    have hcnorm' : (∑ k, ‖c k‖) ≤ L / Real.sqrt (M + 1 : ℝ) * ‖u‖ :=
+      hcnorm.trans (by gcongr; exact (hbounds i).2.1)
+    have hdnorm' : (∑ k, ‖d k‖) ≤ L / Real.sqrt (M + 1 : ℝ) * ‖v‖ :=
+      hdnorm.trans (by gcongr; exact (hbounds j).2.1)
+    have hpoly := PolynomialCrossCorrelation.inner_modulatedPolynomial_norm_le hMN c d x y
+      (T / M) (by positivity) hsep
+    have hpoly' : ‖⟪PolynomialCrossCorrelation.modulatedPolynomial M x c,
+        PolynomialCrossCorrelation.modulatedPolynomial M y d⟫_ℂ‖ ≤
+        (Real.pi * L ^ 2 / T) * ‖u‖ * ‖v‖ := by
+      have hratio : (M : ℝ) / (M + 1 : ℝ) ≤ 1 := by
+        apply (div_le_one (by positivity)).2
+        linarith
+      calc
+        _ ≤ (Real.pi / (T / M)) * (L / Real.sqrt (M + 1 : ℝ) * ‖u‖) *
+            (L / Real.sqrt (M + 1 : ℝ) * ‖v‖) := hpoly.trans (by gcongr)
+        _ = (Real.pi * L ^ 2 / T) * ((M : ℝ) / (M + 1 : ℝ)) * ‖u‖ * ‖v‖ := by
+          field_simp
+          rw [Real.sq_sqrt (by positivity : 0 ≤ (M + 1 : ℝ))]
+        _ ≤ _ := by
+          apply mul_le_mul_of_nonneg_right _ (norm_nonneg v)
+          apply mul_le_mul_of_nonneg_right _ (norm_nonneg u)
+          simpa only [mul_one] using mul_le_mul_of_nonneg_left hratio
+            (show 0 ≤ Real.pi * L ^ 2 / T by positivity)
+    have hκ : Real.pi * L ^ 2 / T ≤ 1 / (64 * (n : ℝ)) := by
+      apply (div_le_div_iff₀ hT0 (by positivity)).2
+      nlinarith [hcrossT]
+    have hpoly'' : ‖⟪PolynomialCrossCorrelation.modulatedPolynomial M x c,
+        PolynomialCrossCorrelation.modulatedPolynomial M y d⟫_ℂ‖ ≤
+        (1 / (64 * (n : ℝ))) * ‖u‖ * ‖v‖ :=
+      hpoly'.trans (mul_le_mul_of_nonneg_right
+        (mul_le_mul_of_nonneg_right hκ (norm_nonneg u)) (norm_nonneg v))
+    have hresult := PolynomialCrossCorrelation.inner_approximation_bound u v
+      (PolynomialCrossCorrelation.modulatedPolynomial M x c)
+      (PolynomialCrossCorrelation.modulatedPolynomial M y d) hε.le huc hvd hpoly''
+    have heps : (1 / (64 * (n : ℝ)) + 2 * ε + ε ^ 2) ≤ 1 / (2 * (n : ℝ)) := by
+      have hn1 : (1 : ℝ) ≤ n := by exact_mod_cast hn
+      dsimp [ε]
+      field_simp
+      nlinarith
+    exact hresult.trans (mul_le_mul_of_nonneg_right
+      (mul_le_mul_of_nonneg_right heps (norm_nonneg u)) (norm_nonneg v))
+
+
+theorem angularClump_section_thresholds_with_row_bound (n nstar : ℕ) (hn : 0 < n) (hnstar : 0 < nstar)
+    {K q κ : ℝ} (hK : 1 ≤ K) (hq : K < q) (hκ : 0 < κ)
+    (hpoly : ∀ (s : ℕ), 0 < s → s ≤ nstar → ∀ (a : Fin s → ℂ) (x : ℝ),
+      x ∈ Set.Icc (0 : ℝ) 1 →
+      ‖PolynomialEvaluationBounds.jetPolynomialSignal a x‖^2 ≤ K * (s : ℝ)^2 *
+        (∫ t in (0 : ℝ)..1, ‖PolynomialEvaluationBounds.jetPolynomialSignal a t‖^2))
+    (B b : ℕ → ℝ) (hb : ∀ s, 1 ≤ s → s ≤ nstar → 0 < b s) :
+    ∃ c0 C0 : ℝ, 0 < c0 ∧ c0 < 1 ∧ (n : ℝ) ≤ C0 ∧
+      (∀ s, 1 ≤ s → s ≤ nstar → B s ≤ C0 ∧ c0 ≤ b s) ∧
+      (∀ (s M : ℕ), 0 < s → s ≤ nstar → C0 ≤ (M : ℝ) →
+        ∀ (node : Fin s → ℝ) (center : ℝ), WithinAngularClump M node center c0 →
+          ∀ u ∈ ClusteredVandermonde.clusterSubspace M node,
+            ∀ k : Fin (M + 1), (M + 1 : ℝ) * ‖u k‖ ^ 2 ≤
+              q * (s : ℝ) ^ 2 * ‖u‖ ^ 2) ∧
+      (∀ (s t M : ℕ), 0 < s → s ≤ nstar → 0 < t → t ≤ nstar → C0 ≤ (M : ℝ) →
+        ∀ (node : Fin s → ℝ) (node' : Fin t → ℝ) (x y : ℝ),
+          WithinAngularClump M node x c0 → WithinAngularClump M node' y c0 →
+          (∀ p : ℤ, C0 / (M : ℝ) ≤ |y - x - 2 * Real.pi * p|) →
+          ∀ u ∈ ClusteredVandermonde.clusterSubspace M node,
+            ∀ v ∈ ClusteredVandermonde.clusterSubspace M node',
+              ‖⟪u, v⟫_ℂ‖ ≤ κ * ‖u‖ * ‖v‖) := by
+  classical
+  have hnR : 0 < (n : ℝ) := by exact_mod_cast hn
+  let ε : ℝ := min 1 (κ / 8)
+  have hε : 0 < ε := by dsimp [ε]; positivity
+  choose rR QR hrR hrR1 hQR hrow using
+    fun i : Fin nstar => exists_angularClump_row_bounds_with_row_bound (i.val + 1) (by omega) hK hq
+      (hpoly (i.val + 1) (by omega) (by omega))
+  choose rP QP DP hrP hQP hDP happrox using
+    fun i : Fin nstar => exists_angularClump_polynomial_bounds (i.val + 1) (by omega) ε hε
+  let f : Fin nstar → ℝ := fun i => max 1 (max (DP i) (max |QP i| (max |QR i|
+    (max |B (i.val + 1)| (max (rP i)⁻¹ (max (rR i)⁻¹ (b (i.val + 1))⁻¹))))))
+  obtain ⟨L, hL⟩ := (Set.finite_range f).bddAbove
+  have hbounds (i : Fin nstar) : 1 ≤ L ∧ DP i ≤ L ∧ |QP i| ≤ L ∧ |QR i| ≤ L ∧
+      |B (i.val + 1)| ≤ L ∧ (rP i)⁻¹ ≤ L ∧ (rR i)⁻¹ ≤ L ∧
+        (b (i.val + 1))⁻¹ ≤ L := by
+    have h := hL (Set.mem_range_self i)
+    simpa only [f, max_le_iff] using h
+  have hL1 : 1 ≤ L := (hbounds ⟨0, hnstar⟩).1
+  have hL0 : 0 < L := zero_lt_one.trans_le hL1
+  let T := max (n : ℝ) (max L (4 * Real.pi * L ^ 2 / κ))
+  have hnT : (n : ℝ) ≤ T := le_max_left _ _
+  have hLT : L ≤ T := (le_max_left _ _).trans (le_max_right _ _)
+  have hcrossT : 4 * Real.pi * L ^ 2 / κ ≤ T :=
+    (le_max_right _ _).trans (le_max_right _ _)
+  have hT0 : 0 < T := hL0.trans_le hLT
+  have hT1 : 1 ≤ T := hL1.trans hLT
+  have hsmall : 1 / (2 * T) ≤ 1 / L := by
+    apply one_div_le_one_div_of_le hL0
+    linarith
+  have hinv (x : ℝ) (hx : 0 < x) (h : x⁻¹ ≤ L) : 1 / L ≤ x := by
+    apply (div_le_iff₀ hL0).2
+    have hh := mul_le_mul_of_nonneg_left h hx.le
+    simpa only [mul_inv_cancel₀ hx.ne', mul_comm x L] using hh
+  have hsmallP (i : Fin nstar) : 1 / (2 * T) ≤ rP i :=
+    hsmall.trans (hinv (rP i) (hrP i) (hbounds i).2.2.2.2.2.1)
+  have hsmallR (i : Fin nstar) : 1 / (2 * T) ≤ rR i :=
+    hsmall.trans (hinv (rR i) (hrR i) (hbounds i).2.2.2.2.2.2.1)
+  refine ⟨1 / (2 * T), T, by positivity,
+    (div_lt_one (by positivity : 0 < 2 * T)).2 (by linarith), hnT, ?_, ?_, ?_⟩
+  · intro s hs hsmax
+    let i : Fin nstar := ⟨s - 1, by omega⟩
+    have hi : i.val + 1 = s := by dsimp [i]; omega
+    rcases hbounds i with ⟨_, _, _, _, hBi, _, _, hbi⟩
+    constructor
+    · exact (le_abs_self (B s)).trans ((hi ▸ hBi).trans hLT)
+    · exact hsmall.trans (hinv (b s) (hb s hs hsmax) (hi ▸ hbi))
+  · intro s M hs hsmax hM node center hwithin u hu k
+    let i : Fin nstar := ⟨s - 1, by omega⟩
+    have hi : i.val + 1 = s := by dsimp [i]; omega
+    have hMR : 0 < (M : ℝ) := hT0.trans_le hM
+    have hMN : 0 < M := by exact_mod_cast hMR
+    have hQRi : QR i ≤ (M : ℝ) :=
+      (le_abs_self _).trans ((hbounds i).2.2.2.1.trans (hLT.trans hM))
+    have h := hrow i
+    rw [hi] at h
+    exact h M hQRi hMN node center (hwithin.mono hMN (hsmallR i)) u hu k
+  · intro s t M hs hsmax ht htmax hM node node' x y hwithin hwithin' hsep u hu v hv
+    let i : Fin nstar := ⟨s - 1, by omega⟩
+    let j : Fin nstar := ⟨t - 1, by omega⟩
+    have hi : i.val + 1 = s := by dsimp [i]; omega
+    have hj : j.val + 1 = t := by dsimp [j]; omega
+    have hMR : 0 < (M : ℝ) := hT0.trans_le hM
+    have hMN : 0 < M := by exact_mod_cast hMR
+    have hQi : QP i ≤ (M : ℝ) :=
+      (le_abs_self _).trans ((hbounds i).2.2.1.trans (hLT.trans hM))
+    have hQj : QP j ≤ (M : ℝ) :=
+      (le_abs_self _).trans ((hbounds j).2.2.1.trans (hLT.trans hM))
+    have hai := happrox i
+    have haj := happrox j
+    rw [hi] at hai
+    rw [hj] at haj
+    obtain ⟨c, huc, hcnorm⟩ := hai M hQi hMN node x (hwithin.mono hMN (hsmallP i)) u hu
+    obtain ⟨d, hvd, hdnorm⟩ := haj M hQj hMN node' y (hwithin'.mono hMN (hsmallP j)) v hv
+    have hsqrt : 0 < Real.sqrt (M + 1 : ℝ) := by positivity
+    have hcnorm' : (∑ k, ‖c k‖) ≤ L / Real.sqrt (M + 1 : ℝ) * ‖u‖ :=
+      hcnorm.trans (by gcongr; exact (hbounds i).2.1)
+    have hdnorm' : (∑ k, ‖d k‖) ≤ L / Real.sqrt (M + 1 : ℝ) * ‖v‖ :=
+      hdnorm.trans (by gcongr; exact (hbounds j).2.1)
+    have hpoly := PolynomialCrossCorrelation.inner_modulatedPolynomial_norm_le hMN c d x y
+      (T / M) (by positivity) hsep
+    have hpoly' : ‖⟪PolynomialCrossCorrelation.modulatedPolynomial M x c,
+        PolynomialCrossCorrelation.modulatedPolynomial M y d⟫_ℂ‖ ≤
+        (Real.pi * L ^ 2 / T) * ‖u‖ * ‖v‖ := by
+      have hratio : (M : ℝ) / (M + 1 : ℝ) ≤ 1 := by
+        apply (div_le_one (by positivity)).2
+        linarith
+      calc
+        _ ≤ (Real.pi / (T / M)) * (L / Real.sqrt (M + 1 : ℝ) * ‖u‖) *
+            (L / Real.sqrt (M + 1 : ℝ) * ‖v‖) := hpoly.trans (by gcongr)
+        _ = (Real.pi * L ^ 2 / T) * ((M : ℝ) / (M + 1 : ℝ)) * ‖u‖ * ‖v‖ := by
+          field_simp
+          rw [Real.sq_sqrt (by positivity : 0 ≤ (M + 1 : ℝ))]
+        _ ≤ _ := by
+          apply mul_le_mul_of_nonneg_right _ (norm_nonneg v)
+          apply mul_le_mul_of_nonneg_right _ (norm_nonneg u)
+          simpa only [mul_one] using mul_le_mul_of_nonneg_left hratio
+            (show 0 ≤ Real.pi * L ^ 2 / T by positivity)
+    have hκ : Real.pi * L ^ 2 / T ≤ κ / 4 := by
+      apply (div_le_div_iff₀ hT0 (by norm_num : (0 : ℝ) < 4)).2
+      have ht := (div_le_iff₀ hκ).1 hcrossT
+      nlinarith only [ht]
+    have hpoly'' : ‖⟪PolynomialCrossCorrelation.modulatedPolynomial M x c,
+        PolynomialCrossCorrelation.modulatedPolynomial M y d⟫_ℂ‖ ≤
+        (κ / 4) * ‖u‖ * ‖v‖ :=
+      hpoly'.trans (mul_le_mul_of_nonneg_right
+        (mul_le_mul_of_nonneg_right hκ (norm_nonneg u)) (norm_nonneg v))
+    have hresult := PolynomialCrossCorrelation.inner_approximation_bound u v
+      (PolynomialCrossCorrelation.modulatedPolynomial M x c)
+      (PolynomialCrossCorrelation.modulatedPolynomial M y d) hε.le huc hvd hpoly''
+    have heps : (κ / 4 + 2 * ε + ε ^ 2) ≤ κ := by
+      have he0 : 0 ≤ ε := hε.le
+      have he1 : ε ≤ 1 := min_le_left _ _
+      have heκ : ε ≤ κ / 8 := min_le_right _ _
+      nlinarith only [he0, he1, heκ, mul_nonneg he0 (sub_nonneg.mpr he1)]
     exact hresult.trans (mul_le_mul_of_nonneg_right
       (mul_le_mul_of_nonneg_right heps (norm_nonneg u)) (norm_nonneg v))
 

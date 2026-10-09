@@ -55,7 +55,7 @@ def positiveCubeFrequency {d L M : ℕ}
     (W : FiniteSample (CubeFrequency d L) M) : W.val → Point d :=
   fun k r => ((k.val r : Fin (L + 1)).val : ℝ)
 
-private theorem normalizedCubeVandermonde_eq
+theorem normalizedCubeVandermonde_eq
     {d L n M : ℕ} (W : FiniteSample (CubeFrequency d L) M)
     (Y : Fin n → Point d) :
     cubeSampledVandermonde M Y W.val =
@@ -65,7 +65,7 @@ private theorem normalizedCubeVandermonde_eq
   rfl
 
 
-private theorem unnormalizedCubeVandermonde_eq
+theorem unnormalizedCubeVandermonde_eq
     {d L n M : ℕ} (hM : 0 < M)
     (W : FiniteSample (CubeFrequency d L) M)
     (Y : Fin n → Point d) :
@@ -78,7 +78,7 @@ private theorem unnormalizedCubeVandermonde_eq
   simp only [Matrix.smul_apply, smul_eq_mul]
   field_simp
 
-private theorem unnormalizedCubeVandermonde_minimumSingularValue
+theorem unnormalizedCubeVandermonde_minimumSingularValue
     {d L n M : ℕ} (hn : 0 < n) (hM : 0 < M)
     (W : FiniteSample (CubeFrequency d L) M)
     (Y : Fin n → Point d) {b : ℝ} (_hb : 0 ≤ b)
@@ -117,6 +117,20 @@ private theorem unnormalizedCubeVandermonde_minimumSingularValue
     omega
   exact le_singularValue_of_subspace_lower A.toEuclideanLin hi ⊤ htop
     (fun z _ => hlower z)
+
+
+/-- Restoring the unnormalized manuscript Vandermonde matrix multiplies a
+    nonnegative lower bound by the square root of the retained row count. -/
+theorem unnormalizedCubeVandermonde_singular_lower
+    {d L n M : ℕ} (hn : 0 < n) (hM : 0 < M)
+    (W : FiniteSample (CubeFrequency d L) M) (Y : Fin n → Point d)
+    {b : ℝ} (hb : 0 ≤ b)
+    (hsv : b ≤ matrixSingularValue (cubeSampledVandermonde M Y W.val) (n - 1)) :
+    Real.sqrt (M : ℝ) * b ≤
+      matrixSingularValue (generalizedVandermonde (positiveCubeFrequency W) Y) (n - 1) := by
+  have h := unnormalizedCubeVandermonde_minimumSingularValue hn hM W Y
+    (sq_nonneg b) (by simpa only [Real.sqrt_sq hb] using hsv)
+  simpa only [Real.sqrt_sq hb] using h
 
 
 /-- Abstract deterministic MUSIC stability for two positive-cube samples, with
@@ -279,7 +293,9 @@ private theorem cubeGHM_sub_fourier_entry_lt
   rw [hvalue, add_sub_cancel_left]
   exact hsmall
 
-private theorem cubeGHM_sub_fourier_spectralNorm_lt
+/-- A bounded band-query measurement gives a deterministic noise-norm bound
+    for every pair of positive-cube subsets, including repeated frequency sums. -/
+theorem positiveCubeGHM_noise_spectralNorm_lt
     {d n L M₁ M₂ : ℕ} {Ω σ : ℝ}
     (W : FiniteSample (CubeFrequency d L) M₁)
     (Z : FiniteSample (CubeFrequency d L) M₂)
@@ -356,6 +372,51 @@ theorem periodicMinimumLInfSeparation_cubeAngularSeparated
     exact hcomponent k
   exact (not_lt_of_ge hqle) hnorm
 
+/-- The angular periodic infinity separation never exceeds π; this fact is
+    derived from the manuscript model rather than added as a theorem premise. -/
+theorem periodicMinimumLInfSeparation_le_pi
+    {d n : ℕ} (Y : Fin n → Point d) (hn : 2 ≤ n)
+    (hY : ∀ j, InAngularCube (Y j)) :
+    periodicMinimumLInfSeparation Y hn ≤ Real.pi := by
+  let i : Fin n := ⟨0, by omega⟩
+  let j : Fin n := ⟨1, by omega⟩
+  have hij : i ≠ j := by simp [i, j]
+  apply (periodicMinimumLInfSeparation_le Y hn hij).trans
+  unfold periodicLInfDistance
+  apply (pi_norm_le_iff_of_nonneg Real.pi_pos.le).2
+  intro r
+  rw [Real.norm_eq_abs, abs_of_nonneg
+    (periodicCoordinateDistance_nonneg_of_angular (hY i r) (hY j r))]
+  unfold periodicCoordinateDistance
+  by_cases h : |Y i r - Y j r| ≤ Real.pi
+  · exact (min_le_left _ _).trans h
+  · exact (min_le_right _ _).trans (by linarith)
+
+/-- The lower-only random cube Vandermonde statement in the manuscript.
+    The periodic upper spacing bound is derived from angular representatives. -/
+theorem positiveCubeVandermonde_lower_highProbability
+    {d L n m : ℕ} (Y : Fin n → Point d)
+    (hd : 1 ≤ d) (hL : 1 ≤ L) (hn : 2 ≤ n)
+    (hsource : ∀ j, InAngularCube (Y j))
+    (hm : 1 ≤ m) (hmN : m ≤ (L + 1) ^ d)
+    {ρ ε : ℝ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (hε0 : 0 < ε) (hε1 : ε < 1)
+    (hqLow : 2 * Real.pi * (2 * (d : ℝ) - 1) / L <
+      periodicMinimumLInfSeparation Y hn)
+    (hsample : 3 * (n : ℝ) /
+      (cubeSeparatedLower d L (periodicMinimumLInfSeparation Y hn) * ρ ^ 2) *
+      Real.log (2 * n / ε) ≤ m) :
+    1 - ε ≤ probability (fun W : FiniteSample (CubeFrequency d L) m =>
+      Real.sqrt ((1 - ρ) * cubeSeparatedLower d L
+        (periodicMinimumLInfSeparation Y hn)) ≤
+      matrixSingularValue (cubeSampledVandermonde m Y W.val) (n - 1)) := by
+  have hqpos := cube_separation_pos hd hL hqLow
+  have hsep := periodicMinimumLInfSeparation_cubeAngularSeparated Y hn hsource hqpos
+  have h := fixedSeparatedCube_singularValues hd hL hn hm hmN
+    hρ0 hρ1 hε0 hε1 hqLow (periodicMinimumLInfSeparation_le_pi Y hn hsource)
+    Y hsep hsample
+  exact h.trans (probability_mono fun W hW => hW.1)
+
 /-- High-probability MUSIC correlation stability for two independent positive
     cube samples. The source set is fixed before drawing either sample. -/
 theorem positiveCubeMUSIC_correlation_stability_highProbability
@@ -373,7 +434,6 @@ theorem positiveCubeMUSIC_correlation_stability_highProbability
     (hqLow :
       2 * Real.pi * (2 * (d : ℝ) - 1) / L <
         periodicMinimumLInfSeparation μ.node hn)
-    (hqHigh : periodicMinimumLInfSeparation μ.node hn ≤ Real.pi)
     (hsample₁ :
       3 * (n : ℝ) /
         (cubeSeparatedLower d L (periodicMinimumLInfSeparation μ.node hn) * ρ ^ 2) *
@@ -400,6 +460,7 @@ theorem positiveCubeMUSIC_correlation_stability_highProbability
             ((1 - ρ) * cubeSeparatedLower d L
               (periodicMinimumLInfSeparation μ.node hn)))) := by
   classical
+  have hqHigh := periodicMinimumLInfSeparation_le_pi μ.node hn hsource
   let q := periodicMinimumLInfSeparation μ.node hn
   let a := cubeSeparatedLower d L q
   have hqpos : 0 < q := cube_separation_pos hd hL hqLow
@@ -453,7 +514,7 @@ theorem positiveCubeMUSIC_correlation_stability_highProbability
           measurement -
         generalizedHankel (positiveCubeFrequency W) (positiveCubeFrequency Z)
           (fourier μ)) ≤ σ * Real.sqrt (M₁ * M₂) :=
-    (cubeGHM_sub_fourier_spectralNorm_lt W Z μ measurement hmeasurement
+    (positiveCubeGHM_noise_spectralNorm_lt W Z μ measurement hmeasurement
       hband (by omega) (by omega)).le
   have hdet := positiveCubeMUSIC_correlation_stability_of_singularValues
     μ W Z

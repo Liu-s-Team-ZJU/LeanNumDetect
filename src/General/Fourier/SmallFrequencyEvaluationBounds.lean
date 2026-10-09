@@ -1,5 +1,6 @@
 import General.Fourier.ExponentialCompanion
 import General.Fourier.JetPolynomialPerturbation
+import General.Fourier.SharperPolynomialEvaluation
 import General.Fourier.ExponentialSums
 import General.Fourier.UniformGridEvaluationBounds
 
@@ -185,6 +186,181 @@ theorem smallFrequency_grid_jet_bounds {s : ℕ} (hs : 0 < s) :
       (show 0 ≤ 128 * (s : ℝ)^2 by positivity) hb.2.1 hb.2.2 hM hsize hk
     convert h using 1
     ring
+
+theorem smallFrequency_evolution_bounds_with_row_bound {s : ℕ} (hs : 0 < s)
+    {K q : ℝ} (hK : 1 ≤ K) (hq : K < q)
+    (hrow : ∀ (a : Fin s → ℂ) (x : ℝ), x ∈ Icc (0 : ℝ) 1 →
+      ‖jetPolynomialSignal a x‖^2 ≤ K * (s : ℝ)^2 *
+        (∫ t in (0 : ℝ)..1, ‖jetPolynomialSignal a t‖^2)) :
+    ∃ η c D : ℝ, 0 < η ∧ η ≤ 1 ∧ 0 < c ∧ 0 < D ∧
+      ∀ (frequency a : Fin s → ℂ), ‖frequency‖ ≤ η →
+        c * ‖a‖^2 ≤ unitEnergy (evolutionSignal hs frequency a) ∧
+        unitSupNorm (evolutionSignal hs frequency a)^2 ≤
+          q * (s : ℝ)^2 * unitEnergy (evolutionSignal hs frequency a) ∧
+        (∀ t ∈ Icc (0 : ℝ) 1,
+          ‖deriv (evolutionSignal hs frequency a) t‖ ≤
+            D * unitSupNorm (evolutionSignal hs frequency a)) := by
+  have hq0 : 0 < q := by linarith
+  obtain ⟨ε, c, hε, hc, hstable⟩ :=
+    jetPolynomial_stability_constants_with_row_loss s hs hK hq hrow
+  obtain ⟨η, hη, hradius⟩ := exists_uniform_jet_radius hs (ε / s)
+    (by exact div_pos hε (by exact_mod_cast hs))
+  obtain ⟨L, hL, hder⟩ := exists_evolution_derivative_coefficient_bound hs
+  refine ⟨min η 1, c, L / Real.sqrt c, lt_min hη zero_lt_one,
+    min_le_right _ _, hc, div_pos hL (Real.sqrt_pos.2 hc), ?_⟩
+  intro frequency a hfrequency
+  let f := evolutionSignal hs frequency a
+  have hf : Continuous f := continuous_evolutionSignal hs frequency a
+  have hclose := evolutionSignal_close_to_jetPolynomial hs hε.le frequency a
+    (hradius frequency (hfrequency.trans (min_le_left _ _)))
+  have h := hstable a f hf hclose
+  have hE : c * ‖a‖^2 ≤ unitEnergy f := h.1
+  have hSqE : 0 ≤ q * (s : ℝ)^2 * unitEnergy f := by
+    have := unitEnergy_nonneg f
+    positivity
+  have hsup : unitSupNorm f ≤ Real.sqrt (q * (s : ℝ)^2 * unitEnergy f) := by
+    apply unitSupNorm_le hf
+    intro t ht
+    have hh := h.2 t ht
+    change ‖f t‖^2 ≤ q * (s : ℝ)^2 * unitEnergy f at hh
+    exact (sq_le_sq₀ (norm_nonneg _) (Real.sqrt_nonneg _)).1
+      (by rwa [Real.sq_sqrt hSqE])
+  refine ⟨hE, ?_, ?_⟩
+  · have hsup2 := (sq_le_sq₀ (unitSupNorm_nonneg hf) (Real.sqrt_nonneg _)).2 hsup
+    rwa [Real.sq_sqrt hSqE] at hsup2
+  · exact derivative_bound_of_coefficient_energy_lower a hf hc hL.le
+      (unitSupNorm_nonneg hf) hE (fun t ht => norm_le_unitSupNorm hf ht)
+      (hder frequency a (hfrequency.trans (min_le_right _ _)))
+
+theorem smallFrequency_grid_jet_bounds_with_row_bound {s : ℕ} (hs : 0 < s)
+    {K q : ℝ} (hK : 1 ≤ K) (hq : K < q)
+    (hrow : ∀ (a : Fin s → ℂ) (x : ℝ), x ∈ Icc (0 : ℝ) 1 →
+      ‖jetPolynomialSignal a x‖^2 ≤ K * (s : ℝ)^2 *
+        (∫ t in (0 : ℝ)..1, ‖jetPolynomialSignal a t‖^2)) :
+    ∃ η B c : ℝ, 0 < η ∧ η ≤ 1 ∧ 0 < B ∧ 0 < c ∧
+      ∀ (frequency a : Fin s → ℂ) (M : ℕ), ‖frequency‖ ≤ η →
+        0 < M → B ≤ (M : ℝ) →
+        c * ‖a‖^2 ≤
+          (∑ l ∈ Finset.range (M + 1),
+            ‖evolutionSignal hs frequency a ((l : ℝ) / M)‖^2) / ((M : ℝ) + 1) ∧
+        ∀ k ≤ M, ((M : ℝ) + 1) *
+          ‖evolutionSignal hs frequency a ((k : ℝ) / M)‖^2 ≤
+          q * (s : ℝ)^2 *
+            ∑ l ∈ Finset.range (M + 1),
+              ‖evolutionSignal hs frequency a ((l : ℝ) / M)‖^2 := by
+  let r : ℝ := (K + q) / 2
+  have hr : K < r := by dsimp [r]; linarith
+  have hrq : r < q := by dsimp [r]; linarith
+  have hr0 : 0 < r := by linarith
+  let loss : ℝ := q / r
+  have hloss : 1 < loss := (one_lt_div hr0).2 hrq
+  have hloss0 : 0 < loss - 1 := by linarith
+  have hlossr : loss * r = q := by dsimp [loss]; field_simp
+  obtain ⟨η, c, D, hη, hηone, hc, hD, hbounds⟩ :=
+    smallFrequency_evolution_bounds_with_row_bound hs hK hr hrow
+  let E : ℝ := r * (s : ℝ)^2
+  let B : ℝ := max 1 (max (4 * D * E) ((1 + 2 * loss * D * E) / (loss - 1)))
+  refine ⟨η, B, c / 4, hη, hηone, by dsimp [B]; positivity, by positivity, ?_⟩
+  intro frequency a M hfrequency hM hsize
+  have hb := hbounds frequency a hfrequency
+  have hf := continuous_evolutionSignal hs frequency a
+  have hfdiff : Differentiable ℝ (evolutionSignal hs frequency a) :=
+    fun t => (hasDerivAt_evolutionSignal hs frequency a t).differentiableAt
+  have hresolution : 4 * D * E ≤ (M : ℝ) :=
+    (le_max_left _ _).trans ((le_max_right _ _).trans hsize)
+  have hgridSize : 1 + 2 * loss * D * E ≤ (loss - 1) * (M : ℝ) := by
+    have h := (le_max_right _ _).trans ((le_max_right _ _).trans hsize)
+    have h' := (div_le_iff₀ hloss0).1 h
+    nlinarith only [h']
+  constructor
+  · exact uniformGrid_coefficient_energy_lower a hf hfdiff hc.le hD.le
+      (by positivity) hb.1 hb.2.1 hb.2.2 hM hresolution
+  · intro k hk
+    have h := uniformGrid_row_bound_with_loss hf hfdiff hD.le
+      (show 0 ≤ E by positivity) hloss hb.2.1 hb.2.2 hM hgridSize hk
+    convert h using 1
+    dsimp [E]
+    rw [← mul_assoc, hlossr]
+
+theorem smallFrequency_evolution_bounds_tight {s : ℕ} (hs : 0 < s) :
+    ∃ η c D : ℝ, 0 < η ∧ η ≤ 1 ∧ 0 < c ∧ 0 < D ∧
+      ∀ (frequency a : Fin s → ℂ), ‖frequency‖ ≤ η →
+        c * ‖a‖^2 ≤ unitEnergy (evolutionSignal hs frequency a) ∧
+        unitSupNorm (evolutionSignal hs frequency a)^2 ≤
+          21 * (s : ℝ)^2 * unitEnergy (evolutionSignal hs frequency a) ∧
+        (∀ t ∈ Icc (0 : ℝ) 1,
+          ‖deriv (evolutionSignal hs frequency a) t‖ ≤
+            D * unitSupNorm (evolutionSignal hs frequency a)) := by
+  obtain ⟨ε, c, hε, hc, hstable⟩ := jetPolynomial_stability_constants_of_row_bound
+    s hs (K := 12) (by norm_num) (fun a x hx => jetPolynomial_unit_row_bound_sharper hs a hx)
+  have hstable' (a : Fin s → ℂ) (f : ℝ → ℂ) (hf : Continuous f)
+      (hclose : ∀ t ∈ Icc (0 : ℝ) 1,
+        ‖f t - jetPolynomialSignal a t‖ ≤ ε * ‖a‖) :
+      c * ‖a‖^2 ≤ ∫ t in (0 : ℝ)..1, ‖f t‖^2 ∧
+        ∀ x ∈ Icc (0 : ℝ) 1, ‖f x‖^2 ≤
+          21 * (s : ℝ)^2 * (∫ t in (0 : ℝ)..1, ‖f t‖^2) := by
+    have heq : (7 / 4 : ℝ) * 12 = 21 := by norm_num
+    simpa only [heq] using hstable a f hf hclose
+  obtain ⟨η, hη, hradius⟩ := exists_uniform_jet_radius hs (ε / s)
+    (by exact div_pos hε (by exact_mod_cast hs))
+  obtain ⟨L, hL, hder⟩ := exists_evolution_derivative_coefficient_bound hs
+  refine ⟨min η 1, c, L / Real.sqrt c, lt_min hη zero_lt_one,
+    min_le_right _ _, hc, div_pos hL (Real.sqrt_pos.2 hc), ?_⟩
+  intro frequency a hfrequency
+  let f := evolutionSignal hs frequency a
+  have hf : Continuous f := continuous_evolutionSignal hs frequency a
+  have hclose := evolutionSignal_close_to_jetPolynomial hs hε.le frequency a
+    (hradius frequency (hfrequency.trans (min_le_left _ _)))
+  have h := hstable' a f hf hclose
+  have hE : c * ‖a‖^2 ≤ unitEnergy f := h.1
+  have hSqE : 0 ≤ 21 * (s : ℝ)^2 * unitEnergy f := by
+    have := unitEnergy_nonneg f
+    positivity
+  have hsup : unitSupNorm f ≤ Real.sqrt (21 * (s : ℝ)^2 * unitEnergy f) := by
+    apply unitSupNorm_le hf
+    intro t ht
+    have hh := h.2 t ht
+    change ‖f t‖^2 ≤ 21 * (s : ℝ)^2 * unitEnergy f at hh
+    exact (sq_le_sq₀ (norm_nonneg _) (Real.sqrt_nonneg _)).1
+      (by rwa [Real.sq_sqrt hSqE])
+  refine ⟨hE, ?_, ?_⟩
+  · have hsup2 := (sq_le_sq₀ (unitSupNorm_nonneg hf) (Real.sqrt_nonneg _)).2 hsup
+    rwa [Real.sq_sqrt hSqE] at hsup2
+  · exact derivative_bound_of_coefficient_energy_lower a hf hc hL.le
+      (unitSupNorm_nonneg hf) hE (fun t ht => norm_le_unitSupNorm hf ht)
+      (hder frequency a (hfrequency.trans (min_le_right _ _)))
+
+theorem smallFrequency_grid_jet_bounds_tight {s : ℕ} (hs : 0 < s) :
+    ∃ η B c : ℝ, 0 < η ∧ η ≤ 1 ∧ 0 < B ∧ 0 < c ∧
+      ∀ (frequency a : Fin s → ℂ) (M : ℕ), ‖frequency‖ ≤ η →
+        0 < M → B ≤ (M : ℝ) →
+        c * ‖a‖^2 ≤
+          (∑ l ∈ Finset.range (M + 1),
+            ‖evolutionSignal hs frequency a ((l : ℝ) / M)‖^2) / ((M : ℝ) + 1) ∧
+        ∀ k ≤ M, ((M : ℝ) + 1) *
+          ‖evolutionSignal hs frequency a ((k : ℝ) / M)‖^2 ≤
+          24 * (s : ℝ)^2 *
+            ∑ l ∈ Finset.range (M + 1),
+              ‖evolutionSignal hs frequency a ((l : ℝ) / M)‖^2 := by
+  obtain ⟨η, c, D, hη, hηone, hc, hD, hbounds⟩ := smallFrequency_evolution_bounds_tight hs
+  refine ⟨η, max 16 (32 * D * (21 * (s : ℝ)^2)), c / 4, hη, hηone,
+    by positivity, by positivity, ?_⟩
+  intro frequency a M hfrequency hM hsize
+  have hb := hbounds frequency a hfrequency
+  have hf := continuous_evolutionSignal hs frequency a
+  have hfdiff : Differentiable ℝ (evolutionSignal hs frequency a) :=
+    fun t => (hasDerivAt_evolutionSignal hs frequency a t).differentiableAt
+  constructor
+  · exact uniformGrid_coefficient_energy_lower a hf hfdiff hc.le hD.le
+      (by positivity) hb.1 hb.2.1 hb.2.2 hM
+      (by have h := (le_max_right 16 (32 * D * (21 * (s : ℝ)^2))).trans hsize; nlinarith [mul_nonneg hD.le (show 0 ≤ 21 * (s : ℝ)^2 by positivity)])
+  · intro k hk
+    have h := uniformGrid_row_bound_tight hf hfdiff hD.le
+      (show 0 ≤ 21 * (s : ℝ)^2 by positivity) hb.2.1 hb.2.2 hM
+      ((le_max_right _ _).trans hsize) ((le_max_left _ _).trans hsize) hk
+    convert h using 1
+    ring
+
 
 theorem exponentialSum_eq_evolution {s : ℕ} (hs : 0 < s)
     (frequency : Fin s → ℝ) (coefficient : Fin s → ℂ) :

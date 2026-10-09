@@ -6,6 +6,82 @@ RandSamp manuscript, together with the existing nonuniform Fourier--Vandermonde
 estimate from the NumDetect manuscript. Import [Main.lean](Main.lean) for the
 complete interface. Declarations are in `LeanNumDetect.RandSamp`.
 
+## NumDetect lower-only cube sampling
+
+The current NumDetect manuscript label `lem:random-cube-multiclump` uses
+`multidimensionalMultiClump_lower_sampling_explicit` from
+[MultidimensionalMultiClumpLowerSampling.lean](MultidimensionalMultiClumpLowerSampling.lean).
+Its conclusion is `QuantitativeMultiClumpLowerSamplingConclusion`, whose
+three geometry parameters are the width, bandwidth, and interclump separation
+thresholds. The manuscript-facing unnormalized statement is
+`positiveCubeClumpVandermonde_lower_highProbability` in
+[NumDetect/RandomClumpVandermonde.lean](../NumDetect/RandomClumpVandermonde.lean).
+
+The explicit definitions in
+[QuantitativeClumpSectionBounds.lean](../General/Fourier/QuantitativeClumpSectionBounds.lean)
+are `quantitativeClumpRadius`, `quantitativeClumpBandwidth`, and
+`quantitativeClumpSeparation`. The width is a finite minimum of the local
+companion radii. The bandwidth is the maximum of $n$, $16n^\star$, and the
+finite set of polynomial grid thresholds. The separation is the smaller of
+the pairwise and weighted global correlation thresholds. These quantities
+are selected independently. For a single clump the separation threshold is
+zero. The attained maximum size gives $A-1\le n-n^\star$.
+
+The sharp polynomial estimate is $t^2$. Explicit companion and grid losses
+produce the section coefficient $(1+1/(16d))t^2$. The correlation budget is
+$1/[4(n-n^\star)]$ when there are multiple clumps, and the energy factor is
+$3/4$. Since $(1+1/(16d))^d\le16/15$, the leverage radius is at most
+$(3/2)\sum_a n_a^{2d}$. The lower Chernoff tail alone yields
+
+$$
+m\ge\frac{3}{\rho^2}
+\left(\sum_a n_a^{2d}\right)\log\frac n\epsilon,
+\qquad 1\le m\le(M+1)^d.
+$$
+
+`cubeClump_quantitative_leverage_energy` in
+[CubeClumpLeverage.lean](CubeClumpLeverage.lean) proves the leverage and energy
+comparison for the same explicit thresholds. It uses the sharp Legendre
+coefficient energy bound, a rational companion remainder, a half-cell grid
+error, continuous polynomial variation, and weighted finite
+Cauchy--Schwarz. These conversions are fully proved in
+[QuantitativePolynomialBounds.lean](../General/Fourier/QuantitativePolynomialBounds.lean),
+[QuantitativeCompanionBounds.lean](../General/Fourier/QuantitativeCompanionBounds.lean),
+[QuantitativePolynomialGridBounds.lean](../General/Fourier/QuantitativePolynomialGridBounds.lean),
+[QuantitativeAngularSectionBounds.lean](../General/Fourier/QuantitativeAngularSectionBounds.lean),
+[QuantitativePolynomialVariationCrossCorrelation.lean](../General/Fourier/QuantitativePolynomialVariationCrossCorrelation.lean),
+[WeightedClumpCrossBounds.lean](../General/Fourier/WeightedClumpCrossBounds.lean),
+and [ClumpMomentBounds.lean](ClumpMomentBounds.lean).
+A smaller universal separation coefficient such as $4n$ requires an
+additional direct global row estimate.
+
+`multidimensionalMultiClump_lowerGram_sampling_explicit` proves the lower
+probability for the fixed source tuple.
+`cubeLowerGramEvent_singularValue` in
+[MultidimensionalMultiClumpSampling.lean](MultidimensionalMultiClumpSampling.lean)
+transfers this event to singular values. Two independently sampled
+Vandermonde factors use $\log(2n/\epsilon)$ by assigning failure probability
+$\epsilon/2$ to each factor.
+
+The full-cube lower estimate is
+`cube_multiclump_singular_lower_quantitative_originalConstant` in
+[MultidimensionalClumpQuantitativeSingularBounds.lean](MultidimensionalClumpQuantitativeSingularBounds.lean).
+The additional bandwidth improves the interpolation floor estimate, so the
+original `multidimensionalClumpOptimizedLowerConstant` remains valid with
+three-quarter clump energy. Its constant depends only on $d,n^\star$ and
+uses the manuscript's periodic one-norm internal spacing.
+
+The earlier existential interface `multidimensionalMultiClump_lower_sampling`
+and its generic $3K^d$ assembly remain available as supporting results, with
+their original $9/10$ energy and $(1+1/(4d))t^2$ section estimates. The
+$24t^2$ section interfaces also remain available separately. The existing
+definitions `multidimensionalMultiClumpLowerLeverageConstant` and
+`multidimensionalMultiClumpLowerSamplingConstant` are $3/2$ and $3$.
+
+The older two-sided result below remains available as an independent
+supporting theorem. Its larger sample count and upper conclusions are not
+part of the current NumDetect lower-only statement.
+
 ## Multidimensional multiclump row retention
 
 The standalone manuscript is

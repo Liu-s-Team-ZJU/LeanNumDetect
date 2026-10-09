@@ -93,6 +93,14 @@ upper tails from the matrix tools in
 and scalar Laplace optimization. Both exact tails and their final applications
 use only standard Lean axioms.
 
+`sampleMean_lower_bound_probability` retains only the lower matrix-Chernoff
+tail, with failure bound $d\exp(-ma\rho^2/(2R))$.
+`sampleMean_relative_lower_bound_probability` whitens the actual population
+mean and transports that same lower tail back to the original coordinates.
+The lower-only event needs no upper-tail estimate or union bound, so its
+scalar sample count contains $\log(d/\epsilon)$ rather than
+$\log(2d/\epsilon)$.
+
 `finiteSampleMean_bounds_probability` has the same bound for an arbitrary
 finite index type. Its event is defined on `FiniteSample κ m`, the actual
 subsets of that type. The proof transports the finite-dimensional theorem

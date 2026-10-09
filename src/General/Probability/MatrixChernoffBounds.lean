@@ -10,6 +10,74 @@ set_option backward.isDefEq.respectTransparency false
 open scoped BigOperators ComplexOrder
 namespace LeanNumDetect.FiniteMatrixSampling
 
+/-- The lower sample-mean tail alone needs neither an upper population bound
+nor the two-tail union bound. -/
+theorem sampleMean_lower_bound_probability
+    {N d m : ℕ} (hN : 0 < N) (hd : 0 < d) (hm : 1 ≤ m) (hmN : m ≤ N)
+    (X : Fin N → Matrix (Fin d) (Fin d) ℂ) {R a δ : ℝ}
+    (hR : 0 < R) (ha : 0 < a) (hδ0 : 0 < δ) (hδ1 : δ < 1)
+    (hX : ∀ k, (X k).PosSemidef)
+    (hbound : ∀ k (x : EuclideanSpace ℂ (Fin d)),
+      quadratic (X k) x ≤ R * ‖x‖ ^ 2)
+    (hmean : ∀ x : EuclideanSpace ℂ (Fin d),
+      a * ‖x‖ ^ 2 ≤ quadratic (mean X) x) :
+    1 - (d : ℝ) * Real.exp (-((m : ℝ) * a * δ ^ 2) / (2 * R)) ≤
+      probability (fun Ω : Sample N m => ∀ x : EuclideanSpace ℂ (Fin d),
+        (1 - δ) * a * ‖x‖ ^ 2 ≤ quadratic (sampleMean X Ω) x) := by
+  classical
+  letI : Nonempty (Sample N m) := sample_nonempty hmN
+  have hmpos : (0 : ℝ) < m := by exact_mod_cast (show 0 < m by omega)
+  obtain ⟨l, _, hl, _⟩ := exists_rayleigh_extrema hd (mean X)
+  have hal : a ≤ l := by
+    obtain ⟨x, hx, hq⟩ := hl.1
+    simpa only [hx, one_pow, mul_one, hq] using hmean x
+  let L : Sample N m → Prop := fun Ω => ∃ x : EuclideanSpace ℂ (Fin d),
+    ‖x‖ = 1 ∧ quadratic (sampleSum X Ω) x ≤ (1 - δ) * (m : ℝ) * l
+  have hL : probability L ≤ (d : ℝ) * Real.exp (-((m : ℝ) * a * δ ^ 2) / (2 * R)) := by
+    apply (matrixChernoff_withoutReplacement_lower hN hd hm hmN X hR hX hbound hl
+      hδ0.le hδ1).trans
+    apply mul_le_mul_of_nonneg_left _ (Nat.cast_nonneg d)
+    apply (lower_chernoff_factor_le hδ0.le hδ1
+      (div_nonneg (mul_nonneg hmpos.le (ha.le.trans hal)) hR.le)).trans
+    apply Real.exp_le_exp.mpr
+    have hh := mul_le_mul_of_nonneg_left hal
+      (show 0 ≤ (m : ℝ) * δ ^ 2 / (2 * R) by positivity)
+    convert! neg_le_neg hh using 1 <;> ring
+  have hgood := probability_mono (P := fun Ω : Sample N m => ¬ L Ω)
+    (Q := fun Ω : Sample N m => ∀ x : EuclideanSpace ℂ (Fin d),
+      (1 - δ) * a * ‖x‖ ^ 2 ≤ quadratic (sampleMean X Ω) x) (by
+    intro Ω hΩ x
+    by_cases hx : x = 0
+    · simp [hx]
+    have hn : 0 < ‖x‖ := norm_pos_iff.mpr hx
+    let y := (‖x‖⁻¹ : ℂ) • x
+    have hy : ‖y‖ = 1 := norm_smul_inv_norm hx
+    have hlow : (1 - δ) * (m : ℝ) * l < quadratic (sampleSum X Ω) y :=
+      lt_of_not_ge (fun hh => hΩ ⟨y, hy, hh⟩)
+    have hscaled : (1 - δ) * (m : ℝ) * a ≤ quadratic (sampleSum X Ω) y := by
+      have h := mul_le_mul_of_nonneg_left hal
+        (show 0 ≤ (1 - δ) * (m : ℝ) by positivity)
+      exact h.trans hlow.le
+    have he : quadratic (sampleMean X Ω) x =
+        (m : ℝ)⁻¹ * quadratic (sampleSum X Ω) x := by
+      simpa only [sampleMean, Complex.ofReal_inv, Complex.ofReal_natCast] using
+        quadratic_smul_matrix (sampleSum X Ω) (m : ℝ)⁻¹ x
+    have hyq : quadratic (sampleSum X Ω) y =
+        ‖x‖⁻¹ ^ 2 * quadratic (sampleSum X Ω) x := by
+      simpa only [y, ← Complex.ofReal_inv] using
+        quadratic_real_smul (sampleSum X Ω) ‖x‖⁻¹ x
+    rw [hyq] at hscaled
+    have hmul := mul_le_mul_of_nonneg_right hscaled (sq_nonneg ‖x‖)
+    have hcancel : (‖x‖⁻¹ ^ 2 * quadratic (sampleSum X Ω) x) * ‖x‖^2 =
+        quadratic (sampleSum X Ω) x := by
+      field_simp
+    rw [hcancel] at hmul
+    rw [he, mul_comm (m : ℝ)⁻¹]
+    apply (le_mul_inv_iff₀ hmpos).mpr
+    nlinarith)
+  rw [probability_not] at hgood
+  linarith
+
 /-- Uniform sampling preserves a fixed positive definite population mean with
 an explicit two-tail probability bound. The same lower mean bound is used in
 both tail exponents; no Fourier or separation hypothesis occurs here. -/

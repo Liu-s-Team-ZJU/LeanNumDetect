@@ -28,6 +28,9 @@ import NumDetect.SegmentedMUSICPeakProjectorCurvature
 import NumDetect.SegmentedMUSICPeakFinal
 import NumDetect.Random
 import NumDetect.RandomCubeMUSIC
+import NumDetect.RandomClumpVandermonde
+import NumDetect.RandomCubeNumberDetection
+import NumDetect.RandomClumpMUSIC
 import NumDetect.Segmented.Main
 import NumDetect.WellSeparatedSegmented
 import NumDetect.Uniform

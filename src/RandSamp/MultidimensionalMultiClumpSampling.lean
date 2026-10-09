@@ -36,6 +36,76 @@ theorem norm_cubeFullVandermonde_sq {d n : ℕ} (M : ℕ) (Y : Fin n → Fin d �
   rw [← Finset.mul_sum]
   simp only [Nat.cast_pow, Nat.cast_add, Nat.cast_one, cubeFourierRowEnergy]
 
+/-- Relative lower Gram order for one fixed source tuple. -/
+def CubeLowerGramEvent {d M n m : ℕ} (Y : Fin n → Fin d → ℝ) (ρ : ℝ)
+    (Ω : FiniteSample (CubeFrequency d M) m) : Prop :=
+  ∀ z : EuclideanSpace ℂ (Fin n),
+    (1 - ρ) * FiniteMatrixSampling.quadratic (cubeFullGram M Y) z ≤
+      FiniteMatrixSampling.quadratic (finiteSampleMean (cubeFourierPopulation Y) Ω) z
+
+/-- Lower Gram order transfers to an arbitrary ordered singular value. -/
+theorem cubeLowerGramEvent_singularValue {d M n m : ℕ}
+    (Y : Fin n → Fin d → ℝ) {ρ : ℝ} (hρ1 : ρ ≤ 1)
+    (Ω : FiniteSample (CubeFrequency d M) m) (hrelative : CubeLowerGramEvent Y ρ Ω)
+    {i : ℕ} (hi : i < n) :
+    Real.sqrt (1 - ρ) * matrixSingularValue (cubeFullVandermonde M Y) i ≤
+      matrixSingularValue (cubeSampledVandermonde m Y Ω.val) i := by
+  let A := (cubeFullVandermonde M Y).toEuclideanLin
+  let B := (cubeSampledVandermonde m Y Ω.val).toEuclideanLin
+  have hlower (z : EuclideanSpace ℂ (Fin n)) : Real.sqrt (1 - ρ) * ‖A z‖ ≤ ‖B z‖ := by
+    apply (sq_le_sq₀ (mul_nonneg (Real.sqrt_nonneg _) (norm_nonneg _)) (norm_nonneg _)).1
+    rw [mul_pow, Real.sq_sqrt (sub_nonneg.mpr hρ1)]
+    change (1 - ρ) * ‖(cubeFullVandermonde M Y).toEuclideanLin z‖^2 ≤
+      ‖(cubeSampledVandermonde m Y Ω.val).toEuclideanLin z‖^2
+    rw [norm_cubeFullVandermonde_sq, ← quadratic_cubeFourier_sampleMean]
+    exact hrelative z
+  have hi' : i < Module.finrank ℂ (EuclideanSpace ℂ (Fin n)) := by simpa using hi
+  obtain ⟨S, hS, hA⟩ := singularValues_lower_subspace_exists A hi'
+  apply le_singularValues_of_subspace B hi' S hS
+  intro x hx
+  calc
+    Real.sqrt (1 - ρ) * A.singularValues i * ‖x‖ =
+        Real.sqrt (1 - ρ) * (A.singularValues i * ‖x‖) := by ring
+    _ ≤ Real.sqrt (1 - ρ) * ‖A x‖ :=
+      mul_le_mul_of_nonneg_left (hA x hx) (Real.sqrt_nonneg _)
+    _ ≤ _ := hlower x
+
+/-- Cube sampling for the lower Gram event needs one Chernoff tail. -/
+theorem cubeFixedSupport_lowerGram_of_leverage {d M n m : ℕ}
+    (hn : 0 < n) (hm : 1 ≤ m) (hmN : m ≤ (M + 1)^d) (Y : Fin n → Fin d → ℝ)
+    {R ρ δ : ℝ} (hR : 0 < R) (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (hδ0 : 0 < δ) (hG : (cubeFullGram M Y).PosDef)
+    (hleverage : ∀ (k : CubeFrequency d M) (z : EuclideanSpace ℂ (Fin n)),
+      cubeFourierRowEnergy Y k (ofLp z) ≤ R * FiniteMatrixSampling.quadratic (cubeFullGram M Y) z)
+    (hsample : 2 * R / ρ^2 * Real.log ((n : ℝ) / δ) ≤ (m : ℝ)) :
+    1 - δ ≤ probability (fun Ω : FiniteSample (CubeFrequency d M) m =>
+      CubeLowerGramEvent Y ρ Ω) := by
+  let e := (Fintype.equivFin (CubeFrequency d M)).symm
+  have hcard : 0 < Fintype.card (CubeFrequency d M) := by
+    rw [card_cubeFrequency]
+    exact pow_pos (Nat.succ_pos M) d
+  have hmcard : m ≤ Fintype.card (CubeFrequency d M) := by simpa using hmN
+  have hMean : mean (fun k => cubeFourierPopulation Y (e k)) = cubeFullGram M Y := by
+    rw [← finiteMean_fin, finiteMean_comp_equiv e, cubeFullGram]
+  have hSample (Ω : Sample (Fintype.card (CubeFrequency d M)) m) :
+      sampleMean (fun k => cubeFourierPopulation Y (e k)) Ω =
+        finiteSampleMean (cubeFourierPopulation Y) (finiteSampleEquiv e m Ω) :=
+    finiteSampleMean_comp_equiv e (cubeFourierPopulation Y) Ω
+  have hprob := sampleMean_relative_lower_bound_probability hcard hn hm hmcard
+    (fun k => cubeFourierPopulation Y (e k)) hR hρ0 hρ1
+    (fun k => cubeFourierRowGram_posSemidef Y (e k))
+    (by simpa only [hMean] using hG)
+    (fun k z => by
+      rw [hMean, cubeFourierPopulation, quadratic_cubeFourierRowGram]
+      exact hleverage (e k) z)
+  have htail := lower_chernoff_failure_bound_of_sample_size
+    (by exact_mod_cast hn : (0 : ℝ) < n) hR (a := 1)
+    (by norm_num) hρ0 hδ0 (by simpa only [one_mul] using hsample)
+  simp only [mul_one] at htail
+  have h := (sub_le_sub_left htail 1).trans hprob
+  rw [← probability_comp_equiv (finiteSampleEquiv e m) (CubeLowerGramEvent Y ρ)]
+  simpa only [CubeLowerGramEvent, hMean, hSample] using h
+
 /-- Relative Gram order for one fixed source tuple and a uniformly sampled cube subset. -/
 def CubeRelativeGramEvent {d M n m : ℕ} (Y : Fin n → Fin d → ℝ) (ρ : ℝ)
     (Ω : FiniteSample (CubeFrequency d M) m) : Prop :=

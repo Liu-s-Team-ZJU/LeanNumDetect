@@ -167,5 +167,99 @@ theorem uniformGrid_coefficient_energy_lower {s : ℕ} (a : Fin s → ℂ)
   apply (le_div_iff₀ (by positivity : 0 < (M : ℝ) + 1)).2
   nlinarith
 
+/-- By choosing a larger resolution threshold, the continuum-to-grid row
+loss is `8/7`, rather than the coarse factor `4`. -/
+theorem uniformGrid_row_bound_tight {f : ℝ → ℂ}
+    (hf : Continuous f) (hfdiff : Differentiable ℝ f)
+    {D q : ℝ} (hD : 0 ≤ D) (hq : 0 ≤ q)
+    (hsup : unitSupNorm f^2 ≤ q * unitEnergy f)
+    (hder : ∀ x ∈ Icc (0 : ℝ) 1, ‖deriv f x‖ ≤ D * unitSupNorm f)
+    {M : ℕ} (hM : 0 < M) (hsize : 32 * D * q ≤ (M : ℝ))
+    (hlarge : 16 ≤ (M : ℝ)) {k : ℕ} (hk : k ≤ M) :
+    ((M : ℝ) + 1) * ‖f ((k : ℝ) / M)‖^2 ≤
+      (8 / 7 : ℝ) * q * ∑ l ∈ Finset.range (M + 1), ‖f ((l : ℝ) / M)‖^2 := by
+  let S := unitSupNorm f
+  let I := unitEnergy f
+  let Q := ∑ l ∈ Finset.range (M + 1), ‖f ((l : ℝ) / M)‖^2
+  have hMR : (0 : ℝ) < M := by exact_mod_cast hM
+  have hI : 0 ≤ I := unitEnergy_nonneg f
+  have hR := integral_le_leftRiemannSum_add_error (hf.norm.pow 2)
+    (by positivity : 0 ≤ 2 * D * S^2)
+    (fun u hu t ht => norm_sq_lipschitz_of_derivative_bound hf hfdiff hder hu ht) hM
+  change I ≤ (∑ l ∈ Finset.range M, ‖f ((l : ℝ) / M)‖^2) / M +
+    2 * D * S^2 / M at hR
+  have hleft : (∑ l ∈ Finset.range M, ‖f ((l : ℝ) / M)‖^2) ≤ Q := by
+    dsimp [Q]
+    rw [Finset.sum_range_succ]
+    exact le_add_of_nonneg_right (sq_nonneg _)
+  have hR' : I * (M : ℝ) ≤ Q + 2 * D * S^2 := by
+    have hmul := (le_div_iff₀ hMR).mp (by simpa only [← add_div] using hR)
+    exact hmul.trans (by linarith)
+  have hupper : 2 * D * S^2 ≤ 2 * D * q * I := by
+    have h := mul_le_mul_of_nonneg_left hsup (by positivity : 0 ≤ 2 * D)
+    nlinarith
+  have hresolution := mul_le_mul_of_nonneg_right hsize hI
+  have hgrid : 15 * I * (M : ℝ) ≤ 16 * Q := by nlinarith
+  have hgridq := mul_le_mul_of_nonneg_left hgrid hq
+  have hpoint : (k : ℝ) / M ∈ Icc (0 : ℝ) 1 := by
+    constructor
+    · positivity
+    · rw [div_le_one hMR]
+      exact_mod_cast hk
+  have hnorm : ‖f ((k : ℝ) / M)‖^2 ≤ unitSupNorm f^2 :=
+    (sq_le_sq₀ (norm_nonneg _) (unitSupNorm_nonneg hf)).2
+      (norm_le_unitSupNorm hf hpoint)
+  have hnorm' := mul_le_mul_of_nonneg_left (hnorm.trans hsup)
+    (show 0 ≤ (M : ℝ) + 1 by positivity)
+  have hratio := mul_nonneg (show 0 ≤ (M : ℝ) - 14 by linarith)
+    (mul_nonneg hq hI)
+  change ((M : ℝ) + 1) * ‖f ((k : ℝ) / M)‖^2 ≤ (8 / 7 : ℝ) * q * Q
+  nlinarith
+
+/-- A prescribed grid loss is obtained by increasing the resolution.
+The hypothesis is the exact algebraic condition arising from the Riemann
+sum error and the normalization by the number of grid points. -/
+theorem uniformGrid_row_bound_with_loss {f : ℝ → ℂ}
+    (hf : Continuous f) (hfdiff : Differentiable ℝ f)
+    {D q loss : ℝ} (hD : 0 ≤ D) (hq : 0 ≤ q) (hloss : 1 < loss)
+    (hsup : unitSupNorm f^2 ≤ q * unitEnergy f)
+    (hder : ∀ x ∈ Icc (0 : ℝ) 1, ‖deriv f x‖ ≤ D * unitSupNorm f)
+    {M : ℕ} (hM : 0 < M)
+    (hsize : 1 + 2 * loss * D * q ≤ (loss - 1) * (M : ℝ))
+    {k : ℕ} (hk : k ≤ M) :
+    ((M : ℝ) + 1) * ‖f ((k : ℝ) / M)‖^2 ≤
+      loss * q * ∑ l ∈ Finset.range (M + 1), ‖f ((l : ℝ) / M)‖^2 := by
+  let S := unitSupNorm f
+  let I := unitEnergy f
+  let Q := ∑ l ∈ Finset.range (M + 1), ‖f ((l : ℝ) / M)‖^2
+  have hMR : (0 : ℝ) < M := by exact_mod_cast hM
+  have hI : 0 ≤ I := unitEnergy_nonneg f
+  have hR := integral_le_leftRiemannSum_add_error (hf.norm.pow 2)
+    (by positivity : 0 ≤ 2 * D * S^2)
+    (fun u hu t ht => norm_sq_lipschitz_of_derivative_bound hf hfdiff hder hu ht) hM
+  change I ≤ (∑ l ∈ Finset.range M, ‖f ((l : ℝ) / M)‖^2) / M +
+    2 * D * S^2 / M at hR
+  have hleft : (∑ l ∈ Finset.range M, ‖f ((l : ℝ) / M)‖^2) ≤ Q := by
+    dsimp [Q]
+    rw [Finset.sum_range_succ]
+    exact le_add_of_nonneg_right (sq_nonneg _)
+  have hR' : I * (M : ℝ) ≤ Q + 2 * D * S^2 := by
+    have hmul := (le_div_iff₀ hMR).mp (by simpa only [← add_div] using hR)
+    exact hmul.trans (by linarith)
+  have hupper := mul_le_mul_of_nonneg_left hsup (show 0 ≤ 2 * D by positivity)
+  change 2 * D * S^2 ≤ 2 * D * (q * I) at hupper
+  have hgrid : I * (M : ℝ) ≤ Q + 2 * D * q * I := by nlinarith
+  have hgrid' := mul_le_mul_of_nonneg_left hgrid (show 0 ≤ loss * q by positivity)
+  have hsize' := mul_le_mul_of_nonneg_right hsize (mul_nonneg hq hI)
+  have hpoint : (k : ℝ) / M ∈ Icc (0 : ℝ) 1 := by
+    exact ⟨by positivity, (div_le_one hMR).2 (by exact_mod_cast hk)⟩
+  have hnorm : ‖f ((k : ℝ) / M)‖^2 ≤ unitSupNorm f^2 :=
+    (sq_le_sq₀ (norm_nonneg _) (unitSupNorm_nonneg hf)).2
+      (norm_le_unitSupNorm hf hpoint)
+  have hnorm' := mul_le_mul_of_nonneg_left (hnorm.trans hsup)
+    (show 0 ≤ (M : ℝ) + 1 by positivity)
+  change ((M : ℝ) + 1) * ‖f ((k : ℝ) / M)‖^2 ≤ loss * q * Q
+  nlinarith
+
 end
 end LeanNumDetect.UniformGridEvaluationBounds

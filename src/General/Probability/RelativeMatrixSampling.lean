@@ -53,6 +53,44 @@ theorem exists_whitening_matrix {d : ℕ} (G : Matrix (Fin d) (Fin d) ℂ)
   simp only [← Matrix.mul_assoc, Matrix.inv_mul_of_invertible, Matrix.one_mul,
     Matrix.mul_inv_of_invertible]
 
+/-- Relative lower Gram order from a single matrix-Chernoff tail. -/
+theorem sampleMean_relative_lower_bound_probability
+    {N d m : ℕ} (hN : 0 < N) (hd : 0 < d) (hm : 1 ≤ m) (hmN : m ≤ N)
+    (X : Fin N → Matrix (Fin d) (Fin d) ℂ) {R ρ : ℝ}
+    (hR : 0 < R) (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (hX : ∀ k, (X k).PosSemidef) (hG : (mean X).PosDef)
+    (hbound : ∀ k (x : EuclideanSpace ℂ (Fin d)),
+      quadratic (X k) x ≤ R * quadratic (mean X) x) :
+    1 - (d : ℝ) * Real.exp (-((m : ℝ) * ρ ^ 2) / (2 * R)) ≤
+      probability (fun Ω : Sample N m => ∀ x : EuclideanSpace ℂ (Fin d),
+        (1 - ρ) * quadratic (mean X) x ≤ quadratic (sampleMean X Ω) x) := by
+  obtain ⟨P, hP, hwhite⟩ := exists_whitening_matrix (mean X) hG
+  letI := hP.invertible
+  let W := fun k => Pᴴ * X k * P
+  have hmean : mean W = 1 := by rw [mean_congruence, hwhite]
+  have hmetric (x : EuclideanSpace ℂ (Fin d)) :
+      quadratic (mean X) (P.toEuclideanLin x) = ‖x‖ ^ 2 := by
+    rw [← quadratic_congruence, hwhite, quadratic_identity]
+  have hprob := sampleMean_lower_bound_probability hN hd hm hmN W hR
+    (by norm_num : (0 : ℝ) < 1) hρ0 hρ1
+    (fun k => (hX k).conjTranspose_mul_mul_same P)
+    (fun k x => by
+      rw [quadratic_congruence]
+      simpa only [hmetric] using hbound k (P.toEuclideanLin x))
+    (a := 1) (fun x => by simp [hmean])
+  simp only [mul_one] at hprob
+  apply hprob.trans
+  apply probability_mono
+  intro Ω hΩ x
+  let y := P⁻¹.toEuclideanLin x
+  have hxy : P.toEuclideanLin y = x := by
+    change (P.toEuclideanLin ∘ₗ P⁻¹.toEuclideanLin) x = x
+    rw [← Matrix.toLpLin_mul_same, Matrix.mul_inv_of_invertible]
+    simp
+  have hy := hΩ y
+  rw [sampleMean_congruence, quadratic_congruence, ← hmetric y, hxy] at hy
+  simpa only [mul_one] using hy
+
 /-- The two-tail without-replacement concentration estimate, relative to the
 actual positive definite population mean. The radius is a leverage bound in
 the metric of the mean, and need not contain its least eigenvalue. -/

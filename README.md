@@ -28,6 +28,9 @@ sampling, and off-grid relative Gram results of the RandSamp manuscript.
 | Exact one-dimensional multiclump corollary | [MultiClumpTheorem.lean](src/RandSamp/MultiClumpTheorem.lean): `multiClump_sampling_statement` |
 | Segmented-grid number-detection singular-value threshold (`thm:segmented_threshold`) | [Segmented.lean](src/NumDetect/Segmented.lean): theorem `segmentedGHM_singularValueThreshold` |
 | Random-GHM number-detection threshold (`thm:resolutionrandghmnumber1`) | [Random.lean](src/NumDetect/Random.lean): theorem `randomGHM_singularValueThreshold_of_separation` |
+| Multi-clump random VDM lower bound (`lem:random-cube-multiclump`) | [RandomClumpVandermonde.lean](src/NumDetect/RandomClumpVandermonde.lean): `positiveCubeClumpVandermonde_lower_highProbability`, with the exact [manuscript model bridge](src/NumDetect/RandomClumpModel.lean), unnormalized $\mathcal V_{\mathcal W}$, explicit independent bandwidth and separation thresholds, $C(d,n^\star)$ and sampling coefficient $3$ |
+| Multi-clump random-GHM number detection | [RandomClumpMUSIC.lean](src/NumDetect/RandomClumpMUSIC.lean): `positiveCubeClumpGHM_numberDetection_highProbability`, with the strict noise threshold and exact singular-value count |
+| Multi-clump random-GHM MUSIC correlation stability (`cor:random-ghm-music-multiclump`) | [RandomClumpMUSIC.lean](src/NumDetect/RandomClumpMUSIC.lean): `positiveCubeClumpMUSIC_correlation_stability_highProbability` |
 | General GHM-MUSIC stability (`lem:stability_ghm_music`) | [MUSIC.lean](src/NumDetect/MUSIC.lean): theorem `ghmMUSIC_correlation_stability` |
 | Segmented-grid MUSIC stability (`cor:stability_multidim_segmented`) | [MUSIC.lean](src/NumDetect/MUSIC.lean): theorem `segmentedMUSIC_correlation_stability` |
 
@@ -60,8 +63,7 @@ rejects every project admission and project-defined axiom, including in
 private proofs and cached diagnostics. It also requires `src/External/` to
 contain no Lean source files. Both matrix Chernoff tails, arbitrary-law
 bounded-row concentration, and all RandSamp and NumDetect applications are
-fully proved. The RandSamp, off-grid and multiclump audits require the final
-results and their dependencies to use only standard Lean axioms.
+fully proved. The RandSamp, off-grid, multiclump sampling and [random-clump MUSIC audit](src/NumDetect/RandomClumpMUSICAudit.lean) require the final results and their dependencies to use only standard Lean axioms.
 If the shared
 mathlib checkout is absent, run `python3 .github/ci/setup_mathlib.py` once before these
 commands. See the [CI guide](.github/ci/README.md) for environment setup and
