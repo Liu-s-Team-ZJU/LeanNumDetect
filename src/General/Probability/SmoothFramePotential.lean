@@ -57,6 +57,18 @@ theorem smoothEntropy_le {R t : ℝ} (hR : 0 < R) (ht : 0 ≤ t) :
   have he : R * (1 + t / R - 1) = t := by field_simp; ring
   simpa only [smoothEntropy, he] using h
 
+/-- The logarithmic tail needed by the finite spectral-thickness estimate. -/
+theorem smoothEntropy_log_lower {R t : ℝ} (hR : 0 < R) (ht : 0 ≤ t) :
+    R * max 0 (Real.log (t / R)) ≤ smoothEntropy R t := by
+  have harg : 0 < 1 + t / R := by positivity
+  have h0 : 0 ≤ Real.log (1 + t / R) := Real.log_nonneg (le_add_of_nonneg_right (div_nonneg ht hR.le))
+  have hl : Real.log (t / R) ≤ Real.log (1 + t / R) := by
+    by_cases ht0 : t = 0
+    · simp [ht0]
+    · exact (Real.log_le_log_iff (div_pos (lt_of_le_of_ne ht (Ne.symm ht0)) hR) harg).mpr
+        (by linarith)
+  exact mul_le_mul_of_nonneg_left (max_le h0 hl) hR.le
+
 theorem smoothEntropy_hasDerivAt {R t : ℝ} (hR : 0 < R) (ht : 0 ≤ t) :
     HasDerivAt (smoothEntropy R) (smoothWeight R t) t := by
   have harg : 0 < 1 + t / R := by positivity

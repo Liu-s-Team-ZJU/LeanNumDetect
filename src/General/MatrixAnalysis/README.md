@@ -25,6 +25,10 @@ thresholding and MUSIC arguments.
 | [FiniteFrameGram.lean](FiniteFrameGram.lean) | Rank-one frame populations, quadratic forms and weighted trace identities |
 | [InverseMetric.lean](InverseMetric.lean) | Inverse order, whitening, and the metric Cauchy--Schwarz row bound |
 | [PositiveDefiniteDeterminant.lean](PositiveDefiniteDeterminant.lean) | Real determinant, logarithmic spectral identities, whitening, and relative log-determinant bounds |
+| [CappedRowLeverage.lean](CappedRowLeverage.lean) | Standalone inverse-metric row bounds in the capped-weight namespace |
+| [CappedWeightIteration.lean](CappedWeightIteration.lean) | Determinant floors and a finite noncontracting update for capped covariance iteration |
+| [CappedWeightMap.lean](CappedWeightMap.lean) | Monotone capped covariance and entropy descent |
+| [CappedWeightSequence.lean](CappedWeightSequence.lean) | Standalone finite capped-weight construction from a determinant floor |
 | [LogDetDirectionalDerivative.lean](LogDetDirectionalDerivative.lean) | Jacobi derivative of the determinant and real log determinant along affine matrix directions |
 | [SmoothFrameStationarity.lean](SmoothFrameStationarity.lean) | First-order condition at a smooth frame-potential minimum and the resulting weighted covariance identity |
 | [FrameLogDetMean.lean](FrameLogDetMean.lean) | Hadamard logarithmic determinant lower bounds from quantitatively independent rows and averaging over translated row sets |
@@ -36,3 +40,8 @@ smallest singular value of a full-column-rank matrix with `n` columns.
 All declarations are fully proved and live under the `LeanNumDetect` namespace.
 Frame Gram, inverse-metric and positive-definite determinant tools are in
 `LeanNumDetect.FrameMatrixBounds`.
+
+The capped-weight modules remain reusable alongside the direct smooth
+variational construction. The current random-clump sampling theorem uses
+`FrameMatrixBounds`, the logarithmic determinant average, and
+`SmoothFrameStationarity`; its strict audit checks the actual dependency chain.

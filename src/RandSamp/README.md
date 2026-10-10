@@ -43,6 +43,17 @@ lower bound, and the normalized rank-one row has norm at most $12n/5$.
 The weights enter the proof of concentration; the theorem samples the
 original unweighted Fourier rows.
 
+[CubeThicknessLowerSampling.lean](CubeThicknessLowerSampling.lean) retains
+`cubeFixedSupport_lowerGram_of_whitened_thickness` and
+`cubeFixedSupport_thickness_lowerGram_probability` as reusable applications
+of the standalone cube-thickness and capped-weight sampling results.
+The primary [CubeWeakLowerSampling.lean](CubeWeakLowerSampling.lean) proves
+`cubeFixedSupport_weak_lowerGram_probability` and the minimum-singular-value
+theorem through the logarithmic-average construction. The random-clump audit
+checks the retained alternative results and the actual public proof route
+separately.
+
+
 [NumDetect/LiCubeClumpBounds.lean](../NumDetect/LiCubeClumpBounds.lean)
 supplies the deterministic full-cube singular-value lower bound under
 Li's clump geometry. The manuscript-facing theorem combines it with this

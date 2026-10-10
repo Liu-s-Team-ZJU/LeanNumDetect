@@ -140,6 +140,15 @@ is bounded below by $\delta I$ through a direct precision-eigenvalue bound.
 Each normalized weighted rank-one row has norm at most $12n/5\le(5/2)n$,
 so the sample count is proportional to the total node count $n$.
 
+Standalone subspace-thickness, capped-iteration, and smooth-thickness results
+remain available in the [Fourier](../General/Fourier/README.md),
+[matrix-analysis](../General/MatrixAnalysis/README.md), and
+[probability](../General/Probability/README.md) libraries. The current
+manuscript-facing proof retains the direct logarithmic-average route.
+`RandomClumpMUSICAudit` checks both the reusable alternative results and the
+actual dependencies of the public theorem.
+
+
 The manuscript places the proof and its translation and row-selection lemmas
 in Appendix C; the corresponding Lean declarations retain their stable names.
 

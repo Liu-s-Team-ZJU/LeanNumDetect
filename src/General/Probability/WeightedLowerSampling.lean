@@ -119,5 +119,62 @@ theorem mean_weighted_posDef {N d : ℕ} (hN : 0 < N)
   simpa only [quadratic, Matrix.toLpLin_apply, EuclideanSpace.inner_eq_star_dotProduct,
     dotProduct_comm, ofLp_toLp, RCLike.re_eq_complex_re] using hpos
 
+/-- A bounded auxiliary population supplies a lower bound for the original rows
+with the same `3*S/ρ²` sample count. -/
+theorem sampleMean_weighted_half_lower_bound_probability
+    {N d m : ℕ} (hN : 0 < N) (hd : 0 < d) (hm : 1 ≤ m) (hmN : m ≤ N)
+    (X : Fin N → Matrix (Fin d) (Fin d) ℂ) (w : Fin N → ℝ)
+    {S ρ ε γ : ℝ} (hS : 0 < S) (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (hε : 0 < ε)
+    (hX : ∀ k, (X k).PosSemidef)
+    (hw0 : ∀ k, 0 ≤ w k) (hw1 : ∀ k, w k ≤ 1)
+    (hG : (mean (weightedPopulation X w)).PosDef)
+    (hlower : ∀ x : EuclideanSpace ℂ (Fin d),
+      γ * quadratic (mean X) x ≤ quadratic (mean (weightedPopulation X w)) x)
+    (hbound : ∀ k (x : EuclideanSpace ℂ (Fin d)),
+      quadratic (weightedPopulation X w k) x ≤
+        (5/2 : ℝ) * S * quadratic (mean (weightedPopulation X w)) x)
+    (hsample : 3 * S / ρ^2 * Real.log ((d : ℝ)/ε) ≤ (m : ℝ)) :
+    1 - ε ≤ probability (fun Ω : Sample N m =>
+      ∀ x : EuclideanSpace ℂ (Fin d),
+        ((1-ρ)/2) * γ * quadratic (mean X) x ≤ quadratic (sampleMean X Ω) x) := by
+  have hprob := sampleMean_relative_half_lower_bound_probability hN hd hm hmN
+    (weightedPopulation X w) hS hρ0 hρ1
+    (weightedPopulation_posSemidef X w hX hw0) hG hbound
+  have hdpos : (0 : ℝ) < d := by exact_mod_cast hd
+  have hq : 0 < ρ^2 := pow_pos hρ0 _
+  have hs : 3*S*Real.log ((d : ℝ)/ε) ≤ (m : ℝ)*ρ^2 := by
+    apply (div_le_iff₀ hq).mp
+    calc
+      _ = 3*S/ρ^2*Real.log ((d : ℝ)/ε) := by ring
+      _ ≤ (m : ℝ) := hsample
+  have hl : Real.log ((d : ℝ)/ε) ≤ ((m : ℝ)*ρ^2)/(3*S) := by
+    apply (le_div_iff₀ (by positivity : 0 < 3*S)).mpr
+    nlinarith
+  have he : Real.exp (-Real.log ((d : ℝ)/ε)) = ε/(d : ℝ) := by
+    rw [Real.exp_neg, Real.exp_log (div_pos hdpos hε)]
+    exact inv_div _ _
+  have htail : (d : ℝ)*Real.exp (-((m : ℝ)*ρ^2)/(3*S)) ≤ ε := by
+    have hh : Real.exp (-((m : ℝ)*ρ^2)/(3*S)) ≤ ε/(d : ℝ) := by
+      rw [← he]
+      apply Real.exp_le_exp.mpr
+      simpa only [neg_div] using neg_le_neg hl
+    have h := mul_le_mul_of_nonneg_left hh hdpos.le
+    have heq : (d : ℝ)*(ε/(d : ℝ)) = ε := by field_simp
+    rwa [heq] at h
+  apply ((sub_le_sub_left htail 1).trans hprob).trans
+  apply probability_mono
+  intro Ω hΩ x
+  have h := mul_le_mul_of_nonneg_left (hlower x)
+    (show 0 ≤ (1-ρ)/2 by linarith)
+  have h' := hΩ x
+  have heq : 1 - (1+ρ)/2 = (1-ρ)/2 := by ring
+  rw [heq] at h'
+  calc
+    _ = ((1-ρ)/2) * (γ * quadratic (mean X) x) := by ring
+    _ ≤ quadratic (sampleMean X Ω) x :=
+      h.trans (h'.trans (sampleMean_weighted_le X w hX hw1 Ω x))
+
+
 end
 end LeanNumDetect.FiniteMatrixSampling

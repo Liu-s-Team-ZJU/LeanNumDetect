@@ -50,6 +50,9 @@ argument at the critical separation.
 | Basis residual propagation, eligible-shift counts, and translated-point multiplicities | [ConnectedBasisBounds.lean](ConnectedBasisBounds.lean) |
 | Connected greedy bases with quantitative coefficient and coordinate-width bounds | [ConnectedCubeBasis.lean](ConnectedCubeBasis.lean) |
 | Connected-basis interface and bandwidth-independent conditioning threshold | [CubeFrameBasis.lean](CubeFrameBasis.lean): `cubeFrameRow_connectedBasis`, `cubeFrameThreshold` |
+| Standalone subspace-thickness estimates from translated conditioned rows | [TranslatedBasisThickness.lean](TranslatedBasisThickness.lean): `thick_card_of_translated_l1LowerBound`, `cube_thick_card` |
+| Subspace-thickness consequence for a selected connected cube basis | [ConnectedCubeBasisThickness.lean](ConnectedCubeBasisThickness.lean): `CubeBasisPrefix.thick_card` |
+| Subspace-thickness consequence for the concrete whitened Fourier cube | [CubeFrameThickness.lean](CubeFrameThickness.lean): `cubeFrameRow_thickCard` |
 | Direct logarithmic determinant average for the concrete whitened Fourier cube (manuscript `lem:cube-logdet-mean`, `eq:cube-logdet-mean`) | [CubeFrameLogDet.lean](CubeFrameLogDet.lean): `cubeFrameRow_logDetMean_lower` |
 | Polynomial Markov, point-evaluation and coefficient-energy bounds | [PolynomialEvaluationBounds.lean](PolynomialEvaluationBounds.lean) |
 | Stability of the polynomial evaluation bound under uniform perturbations | [JetPolynomialPerturbation.lean](JetPolynomialPerturbation.lean) |
@@ -65,6 +68,11 @@ argument at the critical separation.
 
 All frequencies in this chain are angular frequencies with period $2\pi$ and
 phase $e^{ikx_j}$.
+
+The thickness modules retain general results for other sampling arguments.
+The current random-clump theorem obtains its logarithmic average directly
+from `CubeFrameBasis` and Hadamard's inequality in `CubeFrameLogDet`.
+
 
 `hasFineCubeFrame_of_translatedCube` converts the proved translated-cube
 Fourier-frame theorem into the manuscript's angular one-sided cube. The real

@@ -14,6 +14,10 @@
 | [SmoothFramePotential.lean](SmoothFramePotential.lean) | Smooth logarithmic frame potential and its scalar entropy and weight bounds |
 | [SmoothWeightExistence.lean](SmoothWeightExistence.lean) | Compact potential sublevels, a smooth minimum, and a direct inverse-eigenvalue lower bound from a logarithmic average |
 | [LogarithmicFrameSampling.lean](LogarithmicFrameSampling.lean) | Uniform sampling from stationary logarithmic frame weights, with a direct normalized rank-one row cap |
+| [CappedWeightEntropy.lean](CappedWeightEntropy.lean) | Capped entropy, scalar weight bounds, and threshold-counting estimates |
+| [CappedWeightSpectralCoercivity.lean](CappedWeightSpectralCoercivity.lean) | Subspace-thickness spectral estimates and determinant floors for capped potentials |
+| [ThickFrameSampling.lean](ThickFrameSampling.lean) | Standalone uniform lower sampling theorem from quantitative subspace thickness and capped weights |
+| [SmoothWeightThickness.lean](SmoothWeightThickness.lean) | Smooth potential bounds, minimizers, and inverse determinant floors derived from subspace thickness |
 | [MatrixChernoffBounds.lean](MatrixChernoffBounds.lean) | Simultaneous lower and upper sample-mean bounds, with normalization and the union bound proved |
 | [FinitePopulationReindex.lean](FinitePopulationReindex.lean) | Transport of uniform subset probabilities and matrix means to any finite population, including multidimensional frequency cubes |
 | [FiniteScalarConcentration.lean](FiniteScalarConcentration.lean) | Fully proved real and complex Hoeffding bounds for uniform sampling without replacement, via bounded exponential moments and convex comparison |
@@ -162,10 +166,19 @@ $m\ge3n\rho^{-2}\log(n/\epsilon)$.
 For the actual Fourier cube, the needed logarithmic average follows directly
 from Hadamard's determinant inequality and the connected row basis in
 [CubeFrameLogDet.lean](../Fourier/CubeFrameLogDet.lean). The public cube
-sampler exposes no logarithmic-average or leverage hypothesis. The superseded
-capped-weight iteration, subspace-thickness sampling wrappers, and spectral
-threshold-counting proofs have been removed. The reusable frame, inverse-metric,
-and determinant tools used by the direct proof remain in
+sampler exposes no logarithmic-average or leverage hypothesis. Its proof uses
 [FiniteFrameGram.lean](../MatrixAnalysis/FiniteFrameGram.lean),
 [InverseMetric.lean](../MatrixAnalysis/InverseMetric.lean), and
 [PositiveDefiniteDeterminant.lean](../MatrixAnalysis/PositiveDefiniteDeterminant.lean).
+
+The alternative subspace-thickness route remains available as standalone
+proved results. [CappedWeightEntropy.lean](CappedWeightEntropy.lean) and
+[CappedWeightSpectralCoercivity.lean](CappedWeightSpectralCoercivity.lean)
+provide the threshold-counting and spectral estimates.
+[ThickFrameSampling.lean](ThickFrameSampling.lean) combines them with finite
+capped-weight iteration to prove `sampleMean_thick_frame_lower_bound_probability`.
+[SmoothWeightThickness.lean](SmoothWeightThickness.lean) also derives smooth
+potential minima and inverse determinant floors from thickness. These results
+are checked together with the direct construction by the strict random-clump
+audit; its dependency checks require the public cube theorem to keep the direct
+logarithmic-average route.

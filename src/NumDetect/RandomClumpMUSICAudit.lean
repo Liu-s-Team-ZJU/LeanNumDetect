@@ -1,10 +1,17 @@
 import NumDetect.RandomClumpMUSIC
+import RandSamp.CubeThicknessLowerSampling
+import General.Fourier.CubeFrameThickness
+import General.MatrixAnalysis.CappedWeightSequence
+import General.Probability.ThickFrameSampling
+import General.Probability.SmoothWeightThickness
 import Lean.Util.CollectAxioms
 import Lean.Util.Sorry
 
 /-! Strict trust-boundary audit of the unconditional manuscript-model random
 VDM, GHM, MUSIC correlation, and number-detection chain under Li's geometry
-with sample counts proportional to the total node count n. -/
+with sample counts proportional to the total node count n. The retained
+standalone thickness and capped-weight alternatives are audited in the same
+environment; the public theorem keeps its direct logarithmic route. -/
 
 open Lean Elab Command
 
@@ -33,6 +40,14 @@ run_cmd do
       if (info.value? true).any Expr.hasSorry then
         throwError "Admission in {origin}: {name}"
   for name in #[
+      ``LeanNumDetect.CappedWeightIteration.exists_capped_weights_of_determinant_floor,
+      ``LeanNumDetect.FiniteMatrixSampling.framePotential_realDet_lower_slack_of_card,
+      ``LeanNumDetect.FiniteMatrixSampling.sampleMean_thick_frame_lower_bound_probability,
+      ``LeanNumDetect.FiniteMatrixSampling.exists_smoothFramePotential_minimizer,
+      ``LeanNumDetect.FiniteMatrixSampling.smoothFramePotential_realDet_inverse_lower_slack_of_card,
+      ``LeanNumDetect.CubeFrameThickness.cubeFrameRow_thickCard,
+      ``LeanNumDetect.RandSamp.cubeFixedSupport_lowerGram_of_whitened_thickness,
+      ``LeanNumDetect.RandSamp.cubeFixedSupport_thickness_lowerGram_probability,
       ``LeanNumDetect.CubeFrameBasis.cubeFrameRow_connectedBasis,
       ``LeanNumDetect.CubeFrameLogDet.cubeFrameRow_logDetMean_lower,
       ``LeanNumDetect.CubeFrameLogDet.cubeFrameRow_entropyMean_spectral_six_fifths,
@@ -62,8 +77,14 @@ run_cmd do
   -- Audit the actual public cube and number-detection proofs. The new route
   -- must use the direct Hadamard average, the smooth minimum, its first-order
   -- condition, and direct eigenvalue and normalized rank-one bounds.
-  -- Historical names below are regression guards for the deleted proof route.
+  -- Retained standalone alternatives must remain outside the public proof route.
   let forbidden : Array Name := #[
+    `LeanNumDetect.RandSamp.cubeFixedSupport_lowerGram_of_whitened_thickness,
+    `LeanNumDetect.RandSamp.cubeFixedSupport_thickness_lowerGram_probability,
+    `LeanNumDetect.FiniteMatrixSampling.exists_thick_frame_weights,
+    `LeanNumDetect.FiniteMatrixSampling.sampleMean_thick_frame_lower_bound_probability,
+    `LeanNumDetect.FiniteMatrixSampling.exists_smoothFramePotential_minimizer,
+    `LeanNumDetect.ConnectedBasisBounds.CubeBasisPrefix.thick_card,
     `LeanNumDetect.CappedWeightIteration.exists_nondescending_step,
     `LeanNumDetect.CappedWeightIteration.realDet_drop_of_not_relative_lower,
     `LeanNumDetect.CubeFrameThickness.cubeFrameRow_thickCard,
@@ -73,9 +94,29 @@ run_cmd do
     `LeanNumDetect.FiniteMatrixSampling.matrix_sum_smoothEntropy_spectral_lower_radius,
     `LeanNumDetect.FiniteMatrixSampling.smooth_entropyMean_spectral_six_fifths,
     `LeanNumDetect.FiniteMatrixSampling.smoothFramePotential_realDet_inverse_lower_slack_of_card]
+  let alternativeModules : Array Name := #[
+    `General.MatrixAnalysis.CappedRowLeverage,
+    `General.MatrixAnalysis.CappedWeightIteration,
+    `General.MatrixAnalysis.CappedWeightMap,
+    `General.MatrixAnalysis.CappedWeightSequence,
+    `General.Probability.CappedWeightEntropy,
+    `General.Probability.CappedWeightSpectralCoercivity,
+    `General.Probability.ThickFrameSampling,
+    `General.Probability.SmoothWeightThickness,
+    `General.Fourier.TranslatedBasisThickness,
+    `General.Fourier.ConnectedCubeBasisThickness,
+    `General.Fourier.CubeFrameThickness,
+    `RandSamp.CubeThicknessLowerSampling]
   let mut pending : Array Name := #[
+    ``LeanNumDetect.RandSamp.cubeFixedSupport_weak_lowerGram_probability,
     ``LeanNumDetect.RandSamp.cubeFixedSupport_weak_minSingularValue_probability,
-    ``LeanNumDetect.NumDetect.positiveCubeClumpGHM_numberDetection_highProbability]
+    ``LeanNumDetect.NumDetect.positiveCubeClumpVandermonde_normalized_lower_probability,
+    ``LeanNumDetect.NumDetect.positiveCubeClumpVandermonde_lower_highProbability,
+    ``LeanNumDetect.NumDetect.positiveCubeClumpFactorPair_lower_probability,
+    ``LeanNumDetect.NumDetect.positiveCubeClumpMUSIC_correlation_stability_highProbability,
+    ``LeanNumDetect.NumDetect.positiveCubeClumpGHM_signalSingularValue_lower_highProbability,
+    ``LeanNumDetect.NumDetect.positiveCubeClumpGHM_numberDetection_highProbability,
+    ``LeanNumDetect.NumDetect.positiveCubeClumpMUSIC_and_numberDetection_highProbability]
   let mut seen : NameSet := {}
   while let some name := pending.back? do
     pending := pending.pop
@@ -85,8 +126,8 @@ run_cmd do
         let origin := match env.getModuleIdxFor? name with
           | some idx => env.header.moduleNames[idx]!
           | none => env.mainModule
-        if origin == `General.MatrixAnalysis.CappedWeightSequence || forbidden.contains name then
-          throwError "Superseded proof route appears in direct cube sampling proof: {name}"
+        if alternativeModules.contains origin || forbidden.contains name then
+          throwError "Standalone alternative appears in direct cube sampling proof: {name}"
         if roots.any (fun root => root.isPrefixOf origin) then
           pending := pending ++ info.type.getUsedConstants
           if let some value := info.value? true then
@@ -123,4 +164,4 @@ run_cmd do
           capPending := capPending ++ info.type.getUsedConstants
           if let some value := info.value? true then
             capPending := capPending ++ value.getUsedConstants
-  logInfo "Random-clump audit passed: Li geometry, direct Fourier logarithmic determinant average, smooth potential minimum and stationary weights, direct eigenvalue and rank-one bounds, unchanged n-based sample counts and uniform sampling, unnormalized VDM, GHM noise, MUSIC correlation and number detection use no admissions or project axioms."
+  logInfo "Random-clump audit passed: Li geometry, direct Fourier logarithmic determinant average, smooth potential minimum and stationary weights, direct eigenvalue and rank-one bounds, unchanged n-based sample counts and uniform sampling, unnormalized VDM, GHM noise, MUSIC correlation and number detection, together with retained standalone capped-weight and thickness alternatives, use no admissions or project axioms."

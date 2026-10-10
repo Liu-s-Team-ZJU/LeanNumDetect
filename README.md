@@ -38,6 +38,15 @@ sampling, and off-grid relative Gram results of the RandSamp manuscript.
 
 See more in [NumDetect guide](src/NumDetect/README.md).
 
+The general library also retains standalone capped-weight iteration,
+subspace-thickness estimates, and smooth weight constructions from thickness.
+See the [matrix-analysis](src/General/MatrixAnalysis/README.md),
+[Fourier](src/General/Fourier/README.md), and
+[probability](src/General/Probability/README.md) guides for these reusable
+alternatives. The current random-clump theorem uses the direct logarithmic
+determinant and stationary-weight construction; its audit checks that proof
+route as well as the trust boundary of the retained alternatives.
+
 ## Repository structure
 
 | Path | Purpose |
