@@ -11,6 +11,9 @@
 | [UniformCounting.lean](UniformCounting.lean) | Equality of counting probability with Mathlib's uniform PMF probability |
 | [ChernoffFactors.lean](ChernoffFactors.lean) | Proofs that the exact Chernoff factors are bounded by the standard Gaussian-type exponentials |
 | [ChernoffSamplingSlack.lean](ChernoffSamplingSlack.lean) | Exact lower-tail entropy with half the retained relative energy and the enlarged leverage budget $5S/2$ |
+| [SmoothFramePotential.lean](SmoothFramePotential.lean) | Smooth logarithmic frame potential and its scalar entropy and weight bounds |
+| [SmoothWeightExistence.lean](SmoothWeightExistence.lean) | Compact potential sublevels, a smooth minimum, and a direct inverse-eigenvalue lower bound from a logarithmic average |
+| [LogarithmicFrameSampling.lean](LogarithmicFrameSampling.lean) | Uniform sampling from stationary logarithmic frame weights, with a direct normalized rank-one row cap |
 | [MatrixChernoffBounds.lean](MatrixChernoffBounds.lean) | Simultaneous lower and upper sample-mean bounds, with normalization and the union bound proved |
 | [FinitePopulationReindex.lean](FinitePopulationReindex.lean) | Transport of uniform subset probabilities and matrix means to any finite population, including multidimensional frequency cubes |
 | [FiniteScalarConcentration.lean](FiniteScalarConcentration.lean) | Fully proved real and complex Hoeffding bounds for uniform sampling without replacement, via bounded exponential moments and convex comparison |
@@ -139,18 +142,30 @@ Chernoff factor, including whitening. If the row leverage is at most
 $5S/2$, the lower Gram event retains $(1-\rho)/2$ of the population energy
 with failure at most $n\exp(-m\rho^2/(3S))$.
 
-[WeightedLowerSampling.lean](WeightedLowerSampling.lean) transfers this
-lower event from auxiliary weights bounded by one to the original sampled
-Gram matrix. [CappedWeightEntropy.lean](CappedWeightEntropy.lean) and
-[CappedWeightSpectralCoercivity.lean](CappedWeightSpectralCoercivity.lean)
-prove scalar entropy and spectral layercake bounds. Together with the
-finite monotone iteration in `General.MatrixAnalysis.CappedWeightSequence`,
-[ThickFrameSampling.lean](ThickFrameSampling.lean) derives the required
-weights from quantitative subspace thickness. No minimizer or limiting
-covariance is assumed. The radius $12n/5$ and relative-update factor $24/25$
-give row budget $5n/2$ and the explicit determinant floor
-$\exp[-5n-6n\log((12n/5)/\theta^2)]$.
+[WeightedLowerSampling.lean](WeightedLowerSampling.lean) supplies covariance
+and sample-mean comparisons for auxiliary weights bounded by one.
+[SmoothFramePotential.lean](SmoothFramePotential.lean) defines
+the smooth entropy $\psi_R(t)=R\log(1+t/R)$ and the precision-matrix potential.
+[SmoothWeightExistence.lean](SmoothWeightExistence.lean) proves compact
+sublevel bounds and attainment of a minimum from a logarithmic spectral
+average lower bound. The first-order condition in
+[SmoothFrameStationarity.lean](../MatrixAnalysis/SmoothFrameStationarity.lean)
+identifies the inverse precision matrix with the weighted frame covariance.
+`logarithmicFrameFloor` records the unchanged positive coefficient.
+A direct eigenvalue estimate gives the covariance lower bound
+$\exp[-5n-6n\log((12n/5)/\theta^2)]I$.
+[LogarithmicFrameSampling.lean](LogarithmicFrameSampling.lean) applies this construction
+and bounds each normalized rank-one row directly by
+$R=12n/5\le5n/2$. This retains the sample count
+$m\ge3n\rho^{-2}\log(n/\epsilon)$.
 
-The actual Fourier rows satisfy this thickness condition by the proved
-`General.Fourier.CubeFrameThickness` theorem; the final cube sampler exposes
-no thickness or leverage assumption.
+For the actual Fourier cube, the needed logarithmic average follows directly
+from Hadamard's determinant inequality and the connected row basis in
+[CubeFrameLogDet.lean](../Fourier/CubeFrameLogDet.lean). The public cube
+sampler exposes no logarithmic-average or leverage hypothesis. The superseded
+capped-weight iteration, subspace-thickness sampling wrappers, and spectral
+threshold-counting proofs have been removed. The reusable frame, inverse-metric,
+and determinant tools used by the direct proof remain in
+[FiniteFrameGram.lean](../MatrixAnalysis/FiniteFrameGram.lean),
+[InverseMetric.lean](../MatrixAnalysis/InverseMetric.lean), and
+[PositiveDefiniteDeterminant.lean](../MatrixAnalysis/PositiveDefiniteDeterminant.lean).

@@ -8,7 +8,7 @@ set_option backward.isDefEq.respectTransparency false
 open Matrix WithLp
 open scoped BigOperators InnerProductSpace ComplexOrder MatrixOrder
 
-namespace LeanNumDetect.CappedWeightIteration
+namespace LeanNumDetect.FrameMatrixBounds
 
 open FiniteMatrixSampling
 noncomputable section
@@ -78,4 +78,4 @@ theorem trace_mul_weightedMean {N d : ℕ}
     zero_mul, sub_zero, trace_mul_framePopulation]
 
 end
-end LeanNumDetect.CappedWeightIteration
+end LeanNumDetect.FrameMatrixBounds

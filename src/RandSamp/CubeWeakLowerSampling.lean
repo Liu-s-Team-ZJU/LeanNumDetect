@@ -1,6 +1,7 @@
-import General.Probability.ThickFrameSampling
+import General.Probability.LogarithmicFrameSampling
 import General.Fourier.CubeShiftBounds
-import General.Fourier.CubeFrameThickness
+import General.Fourier.CubeFrameBasis
+import General.Fourier.CubeFrameLogDet
 import RandSamp.MultidimensionalMultiClumpSampling
 
 set_option autoImplicit false
@@ -11,7 +12,7 @@ open scoped BigOperators InnerProductSpace ComplexOrder MatrixOrder
 
 namespace LeanNumDetect.RandSamp
 
-open FiniteMatrixSampling CubeShiftBounds CappedWeightIteration
+open FiniteMatrixSampling CubeShiftBounds FrameMatrixBounds
 noncomputable section
 attribute [local instance] Classical.propDecidable
 
@@ -111,7 +112,7 @@ theorem sampleMean_real_smul {N n m : ℕ}
 def CubeWeakLowerGramEvent {d M n m : ℕ} (Y : Fin n → Fin d → ℝ) (θ ρ : ℝ)
     (Ω : FiniteSample (CubeFrequency d M) m) : Prop :=
   ∀ z : EuclideanSpace ℂ (Fin n),
-    ((1-ρ)/2)*thickFrameDetFloor n θ*FiniteMatrixSampling.quadratic (cubeFullGram M Y) z ≤
+    ((1-ρ)/2)*logarithmicFrameFloor n θ*FiniteMatrixSampling.quadratic (cubeFullGram M Y) z ≤
       FiniteMatrixSampling.quadratic (finiteSampleMean (cubeFourierPopulation Y) Ω) z
 
 
@@ -120,13 +121,13 @@ theorem cubeWeakLowerGramEvent_singularValue {d M n m : ℕ}
     (Y : Fin n → Fin d → ℝ) {θ ρ : ℝ} (hρ1 : ρ ≤ 1)
     (Ω : FiniteSample (CubeFrequency d M) m) (hrelative : CubeWeakLowerGramEvent Y θ ρ Ω)
     {i : ℕ} (hi : i < n) :
-    Real.sqrt (((1-ρ)/2)*thickFrameDetFloor n θ) *
+    Real.sqrt (((1-ρ)/2)*logarithmicFrameFloor n θ) *
       matrixSingularValue (cubeFullVandermonde M Y) i ≤
       matrixSingularValue (cubeSampledVandermonde m Y Ω.val) i := by
-  let a := ((1-ρ)/2)*thickFrameDetFloor n θ
+  let a := ((1-ρ)/2)*logarithmicFrameFloor n θ
   have ha : 0 ≤ a := mul_nonneg
     (div_nonneg (sub_nonneg.mpr hρ1) (by norm_num))
-    (thickFrameDetFloor_pos n θ).le
+    (logarithmicFrameFloor_pos n θ).le
   have he : 1-(1-a) = a := by ring
   have hh : CubeLowerGramEvent Y (1-a) Ω := by
     intro z
@@ -145,16 +146,17 @@ theorem cubeRootGram_posDef_of_cubeFullGram {d M n : ℕ}
     exact_mod_cast pow_pos (Nat.succ_pos M) d)
 
 /-- The finite-frame result transferred through the actual cube whitening. -/
-theorem cubeFixedSupport_lowerGram_of_whitened_thickness {d M n m : ℕ}
+theorem cubeFixedSupport_lowerGram_of_whitened_entropy {d M n m : ℕ}
     (hn : 0 < n) (hm : 1 ≤ m) (hmN : m ≤ (M+1)^d)
     (Y : Fin n → Fin d → ℝ) (P : Matrix (Fin n) (Fin n) ℂ)
     (hP : IsUnit P) (hwhite : Pᴴ * cubeRootGram (cubeUnitRoots Y) (M+1) * P = 1)
     {θ ρ ε : ℝ} (hθ : 0 < θ)
     (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (hε : 0 < ε)
-    (hthick : ∀ U : Submodule ℂ (EuclideanSpace ℂ (Fin n)),
-      (n+1)*(n-Module.finrank ℂ U)*Fintype.card (CubeFrequency d M) ≤
-      2*n^2*(Finset.univ.filter (fun k : CubeFrequency d M =>
-        ∀ u : U, θ < ‖cubeWhitenedFrame Y P k-(u : EuclideanSpace ℂ (Fin n))‖)).card)
+    (hentropy : ∀ (H : Matrix (Fin n) (Fin n) ℂ) (hH : H.PosDef),
+      (6 / 5 : ℝ) * (∑ j,
+        Real.log (1 + θ ^ 2 * hH.isHermitian.eigenvalues j / ((12 / 5 : ℝ) * n))) ≤
+        (Fintype.card (CubeFrequency d M) : ℝ)⁻¹ *
+          ∑ k, smoothEntropy ((12 / 5 : ℝ) * n) (FiniteMatrixSampling.quadratic H (cubeWhitenedFrame (M := M) Y P k)))
     (hsample : 3*(n : ℝ)/ρ^2*Real.log ((n : ℝ)/ε) ≤ (m : ℝ)) :
     1-ε ≤ probability (fun Ω : FiniteSample (CubeFrequency d M) m =>
       CubeWeakLowerGramEvent Y θ ρ Ω) := by
@@ -181,20 +183,18 @@ theorem cubeFixedSupport_lowerGram_of_whitened_thickness {d M n m : ℕ}
     rw [mean_real_smul, mean_congruence, hMean]
     rw [cubeRootGram_eq_card_smul_cubeFullGram] at hwhite
     simpa only [Matrix.mul_smul, Matrix.smul_mul, N, card_cubeFrequency, Complex.ofReal_natCast] using hwhite
-  have hthick' : ∀ U : Submodule ℂ (EuclideanSpace ℂ (Fin n)),
-      (n+1)*(n-Module.finrank ℂ U)*N ≤
-      2*n^2*(Finset.univ.filter (fun k =>
-        ∀ u : U, θ < ‖f k-(u : EuclideanSpace ℂ (Fin n))‖)).card := by
-    intro U
-    have hc := Fintype.card_congr (e.subtypeEquiv (fun _ => Iff.rfl) :
-      {i : Fin N // ∀ u : U, θ < ‖f i-(u : EuclideanSpace ℂ (Fin n))‖} ≃
-      {k : CubeFrequency d M // ∀ u : U, θ < ‖cubeWhitenedFrame Y P k-(u : EuclideanSpace ℂ (Fin n))‖})
-    simp only [Fintype.card_subtype] at hc
-    have hh := hthick U
-    rw [← hc] at hh
+  have hentropy' : ∀ (H : Matrix (Fin n) (Fin n) ℂ) (hH : H.PosDef),
+      (6 / 5 : ℝ) * (∑ j,
+        Real.log (1 + θ ^ 2 * hH.isHermitian.eigenvalues j / ((12 / 5 : ℝ) * n))) ≤
+        (N : ℝ)⁻¹ * ∑ k, smoothEntropy ((12 / 5 : ℝ) * n) (FiniteMatrixSampling.quadratic H (f k)) := by
+    intro H hH
+    have hs := Equiv.sum_comp e (fun k =>
+      smoothEntropy ((12 / 5 : ℝ) * n) (FiniteMatrixSampling.quadratic H (cubeWhitenedFrame (M := M) Y P k)))
+    have hh := hentropy H hH
+    rw [← hs] at hh
     exact hh
-  have hprob := sampleMean_thick_frame_lower_bound_probability hN hn hm hmcard f hfull
-    hθ hρ0 hρ1 hε hthick' hsample
+  have hprob := sampleMean_logarithmic_frame_lower_bound_probability hN hn hm hmcard f hfull
+    hθ hρ0 hρ1 hε hentropy' hsample
   rw [← probability_comp_equiv (finiteSampleEquiv e m) (CubeWeakLowerGramEvent Y θ ρ)]
   apply hprob.trans
   apply probability_mono
@@ -222,20 +222,21 @@ theorem cubeFixedSupport_lowerGram_of_whitened_thickness {d M n m : ℕ}
   rw [hSample, hmetric] at hy
   simp only [← Complex.ofReal_natCast] at hy
   rw [quadratic_smul_matrix, quadratic_congruence, hxy] at hy
-  change ((1-ρ)/2)*thickFrameDetFloor n θ*FiniteMatrixSampling.quadratic (cubeFullGram M Y) x ≤ _
+  change ((1-ρ)/2)*logarithmicFrameFloor n θ*FiniteMatrixSampling.quadratic (cubeFullGram M Y) x ≤ _
   apply (mul_le_mul_iff_right₀ hNR).mp
   convert hy using 1 <;> first | rfl | ring
 
 
 /-- The uniform sampling coefficient depends only on dimension and node count. -/
 def cubeWeakSamplingCoefficient (d n : ℕ) : ℝ :=
-  Real.sqrt (thickFrameDetFloor n (CubeFrameThickness.cubeFrameThreshold d n)/2)
+  Real.sqrt (logarithmicFrameFloor n (CubeFrameBasis.cubeFrameThreshold d n)/2)
 
 theorem cubeWeakSamplingCoefficient_pos (d n : ℕ) :
     0 < cubeWeakSamplingCoefficient d n := by
-  exact Real.sqrt_pos.mpr (div_pos (thickFrameDetFloor_pos n _) (by norm_num))
+  exact Real.sqrt_pos.mpr (div_pos (logarithmicFrameFloor_pos n _) (by norm_num))
 
-/-- The actual Fourier cube has sufficient uniform subspace thickness. -/
+/-- The actual Fourier cube has the logarithmic entropy estimate supplied by
+its translated row bases. -/
 theorem cubeFixedSupport_weak_lowerGram_probability {d L n m : ℕ}
     (hd : 0 < d) (hn : 0 < n) (hL : 2*n ≤ L)
     (hm : 1 ≤ m) (hmN : m ≤ (L+1)^d) (Y : Fin n → Fin d → ℝ)
@@ -243,18 +244,16 @@ theorem cubeFixedSupport_weak_lowerGram_probability {d L n m : ℕ}
     {ρ ε : ℝ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (hε : 0 < ε)
     (hsample : 3*(n : ℝ)/ρ^2*Real.log ((n : ℝ)/ε) ≤ (m : ℝ)) :
     1-ε ≤ probability (fun Ω : FiniteSample (CubeFrequency d L) m =>
-      CubeWeakLowerGramEvent Y (CubeFrameThickness.cubeFrameThreshold d n) ρ Ω) := by
+      CubeWeakLowerGramEvent Y (CubeFrameBasis.cubeFrameThreshold d n) ρ Ω) := by
   letI : NeZero d := ⟨Nat.ne_of_gt hd⟩
   obtain ⟨P, hP, hwhite⟩ := exists_whitening_matrix
     (cubeRootGram (cubeUnitRoots Y) (L+1)) (cubeRootGram_posDef_of_cubeFullGram Y hG)
-  apply cubeFixedSupport_lowerGram_of_whitened_thickness hn hm hmN Y P hP hwhite
-    (CubeFrameThickness.threshold_pos hd hn) hρ0 hρ1 hε _ hsample
-  intro U
-  have hc := CubeFrameThickness.cubeFrameRow_thickCard (cubeUnitRoots Y) P hP hwhite
-    (norm_cubeUnitRoots Y) hn hL U
-  simpa only [Nat.card_eq_fintype_card, Fintype.card_subtype, card_cubeFrequency,
-    cubeWhitenedFrame, CubeFrameThickness.cubeFrameRow,
-    TranslatedBasisThickness.FarFromSubspace] using hc
+  apply cubeFixedSupport_lowerGram_of_whitened_entropy hn hm hmN Y P hP hwhite
+    (CubeFrameBasis.threshold_pos hd hn) hρ0 hρ1 hε _ hsample
+  intro A hA
+  have hc := CubeFrameLogDet.cubeFrameRow_entropyMean_spectral_six_fifths
+    (cubeUnitRoots Y) P hP hwhite (norm_cubeUnitRoots Y) hn hL A hA
+  simpa only [card_cubeFrequency, cubeWhitenedFrame, CubeFrameBasis.cubeFrameRow] using hc
 
 /-- Minimum singular value under uniform sampling with a rate proportional to n. -/
 theorem cubeFixedSupport_weak_minSingularValue_probability {d L n m : ℕ}
@@ -273,8 +272,8 @@ theorem cubeFixedSupport_weak_minSingularValue_probability {d L n m : ℕ}
   apply probability_mono
   intro Ω hΩ
   have hmin := cubeWeakLowerGramEvent_singularValue Y hρ1.le Ω hΩ (by omega : n-1 < n)
-  have he : ((1-ρ)/2)*thickFrameDetFloor n (CubeFrameThickness.cubeFrameThreshold d n) =
-      (1-ρ)*(thickFrameDetFloor n (CubeFrameThickness.cubeFrameThreshold d n)/2) := by ring
+  have he : ((1-ρ)/2)*logarithmicFrameFloor n (CubeFrameBasis.cubeFrameThreshold d n) =
+      (1-ρ)*(logarithmicFrameFloor n (CubeFrameBasis.cubeFrameThreshold d n)/2) := by ring
   rw [he, Real.sqrt_mul (sub_nonneg.mpr hρ1.le)] at hmin
   exact hmin
 

@@ -44,7 +44,9 @@ shown.
 | Lemma `lem:freq_quantization` | Quantized integer frequency with phase separation | [Segmented/NeighborFactors.lean](Segmented/NeighborFactors.lean): `frequency_quantization_manuscript` | **Equivalent**. |
 | Lemma `lem:neighborset_segmented` | Neighbor-set interpolation polynomial and $L^2$ bound | [Segmented/Interpolation.lean](Segmented/Interpolation.lean): `neighborSetSegmented_polynomial_finiteSet` | **Equivalent**. |
 | Lemma `lem:cube-vandermonde-translations` (Appendix C) | Translation identities and bandwidth-independent operator bound for normalized cube rows | [General/Fourier/CubeTranslationBounds.lean](../General/Fourier/CubeTranslationBounds.lean): `LeanNumDetect.CubeShiftBounds.integerIsotropicCubeRootRow_translation`, `LeanNumDetect.CubeShiftBounds.cubeTranslation_neg_mul`, `LeanNumDetect.CubeShiftBounds.cubeTranslation_norm_le` | **Equivalent after Gram whitening and row normalization**; the bound is $K=2^{4dn^2}$ for every integer coordinate displacement of magnitude at most $L$. |
-| Lemma `lem:cube-row-selection` (Appendix C) | Quantitative selection of independent rows within the cube | [General/Fourier/CubeFrameThickness.lean](../General/Fourier/CubeFrameThickness.lean): `LeanNumDetect.CubeFrameThickness.cubeFrameRow_connectedBasis` | **Equivalent after Gram whitening and row normalization**; the coordinate sum is at most $(n-1)Q$ and the coefficient recursion is $\alpha_0=K^{-1}$, $\alpha_r=\alpha_{r-1}^2/(3KM^2)$ with $M=K\sqrt n$. |
+| Lemma `lem:cube-row-selection` (Appendix C) | Quantitative selection of independent rows within the cube | [General/Fourier/CubeFrameBasis.lean](../General/Fourier/CubeFrameBasis.lean): `LeanNumDetect.CubeFrameBasis.cubeFrameRow_connectedBasis` | **Equivalent after Gram whitening and row normalization**; the coordinate sum is at most $(n-1)Q$ and the coefficient recursion is $\alpha_0=K^{-1}$, $\alpha_r=\alpha_{r-1}^2/(3KM^2)$ with $M=K\sqrt n$. |
+| Lemma `lem:cube-logdet-mean` (Appendix C) | Logarithmic determinant average for the normalized Fourier cube | [General/Fourier/CubeFrameLogDet.lean](../General/Fourier/CubeFrameLogDet.lean): `LeanNumDetect.CubeFrameLogDet.cubeFrameRow_logDetMean_lower` | **Equivalent after Gram whitening and row normalization**; every positive-definite matrix and every positive radius are retained, with coefficient $1/(2n)$. |
+| Lemma `lem:chernoff-without-replacement` (Appendix C) | Exact matrix Chernoff lower tail for uniform subsets | [General/Probability/MatrixChernoff.lean](../General/Probability/MatrixChernoff.lean): `LeanNumDetect.FiniteMatrixSampling.matrixChernoff_withoutReplacement_lower` | **Equivalent after enumeration and division by the sample size**; the Rayleigh event is the minimum-eigenvalue event and the exact Chernoff factor equals the stated exponential. |
 
 The well-separated random bounds and the MUSIC location and peak-selection
 modules remain independent fully proved results. They are not active
@@ -90,8 +92,11 @@ upper bound. Li's published cube corollary is stated for $d\ge2$; the
 formalization also proves the interval case in $d=1$ from the same
 localization and interpolation constructions.
 
-The actual Fourier frame thickness is proved in
-[CubeFrameThickness.lean](../General/Fourier/CubeFrameThickness.lean).
+The standalone logarithmic determinant average lemma `lem:cube-logdet-mean`,
+including `eq:cube-logdet-mean`, in Appendix C is proved by `cubeFrameRow_logDetMean_lower` in
+[CubeFrameLogDet.lean](../General/Fourier/CubeFrameLogDet.lean), using the
+Hadamard estimate in
+[FrameLogDetMean.lean](../General/MatrixAnalysis/FrameLogDetMean.lean).
 [CubeWeakLowerSampling.lean](../RandSamp/CubeWeakLowerSampling.lean)
 constructs auxiliary weights and proves the unchanged uniform subset
 sampling event. These weights are internal to the proof; neither the
@@ -129,8 +134,11 @@ $$
 m\ge\frac{3n}{\rho^2}\log\frac n\epsilon.
 $$
 
-The capped-weight row bound is $(5/2)n$, so the sample count is proportional
-to the total node count $n$.
+The smooth potential uses this logarithmic average directly, without
+subspace threshold counting or layer integration. The stationary covariance
+is bounded below by $\delta I$ through a direct precision-eigenvalue bound.
+Each normalized weighted rank-one row has norm at most $12n/5\le(5/2)n$,
+so the sample count is proportional to the total node count $n$.
 
 The manuscript places the proof and its translation and row-selection lemmas
 in Appendix C; the corresponding Lean declarations retain their stable names.

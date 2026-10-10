@@ -22,14 +22,17 @@ thresholding and MUSIC arguments.
 | [GoldenThompsonDyadic.lean](GoldenThompsonDyadic.lean) | Finite dyadic Hölder and Hermitian trace inequalities |
 | [LieTrotter.lean](LieTrotter.lean) | Banach-algebra Lie--Trotter product formula |
 | [GoldenThompson.lean](GoldenThompson.lean) | Complete Golden--Thompson trace inequality for finite complex Hermitian matrices |
-
 | [FiniteFrameGram.lean](FiniteFrameGram.lean) | Rank-one frame populations, quadratic forms and weighted trace identities |
-| [CappedRowLeverage.lean](CappedRowLeverage.lean) | Inverse order, whitening, and the metric Cauchy--Schwarz row bound |
-| [CappedWeightIteration.lean](CappedWeightIteration.lean) | Quantitative determinant floors and a finite noncontracting update |
-| [CappedWeightMap.lean](CappedWeightMap.lean) | Monotone capped covariance and entropy descent |
-| [CappedWeightSequence.lean](CappedWeightSequence.lean) | Complete finite construction of positive auxiliary weights with row cap $5n/2$ |
+| [InverseMetric.lean](InverseMetric.lean) | Inverse order, whitening, and the metric Cauchy--Schwarz row bound |
+| [PositiveDefiniteDeterminant.lean](PositiveDefiniteDeterminant.lean) | Real determinant, logarithmic spectral identities, whitening, and relative log-determinant bounds |
+| [LogDetDirectionalDerivative.lean](LogDetDirectionalDerivative.lean) | Jacobi derivative of the determinant and real log determinant along affine matrix directions |
+| [SmoothFrameStationarity.lean](SmoothFrameStationarity.lean) | First-order condition at a smooth frame-potential minimum and the resulting weighted covariance identity |
+| [FrameLogDetMean.lean](FrameLogDetMean.lean) | Hadamard logarithmic determinant lower bounds from quantitatively independent rows and averaging over translated row sets |
+| [ShiftedLogDetSpectrum.lean](ShiftedLogDetSpectrum.lean) | Spectral sum formula for the logarithmic determinant of a positive scalar shift of a positive-definite matrix |
 
 `matrixSingularValue` uses zero-based indices, so index `n - 1` denotes the
 smallest singular value of a full-column-rank matrix with `n` columns.
 
-All declarations are fully proved and live in the `LeanNumDetect` namespace.
+All declarations are fully proved and live under the `LeanNumDetect` namespace.
+Frame Gram, inverse-metric and positive-definite determinant tools are in
+`LeanNumDetect.FrameMatrixBounds`.

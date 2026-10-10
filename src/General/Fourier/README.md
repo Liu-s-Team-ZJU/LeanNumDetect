@@ -47,9 +47,10 @@ argument at the critical separation.
 | Finite-slab recurrences, cube energy and whitened coordinate-shift bounds | [CubeShiftBounds.lean](CubeShiftBounds.lean) |
 | Mixed-sign coarse cube paths and uniform row-norm comparison | [CubeShiftPaths.lean](CubeShiftPaths.lean) |
 | Common integer and natural cube translations with operator and conorm bounds | [CubeTranslationBounds.lean](CubeTranslationBounds.lean) |
-| Basis residual propagation and finite translated-subspace counting | [TranslatedBasisThickness.lean](TranslatedBasisThickness.lean) |
+| Basis residual propagation, eligible-shift counts, and translated-point multiplicities | [ConnectedBasisBounds.lean](ConnectedBasisBounds.lean) |
 | Connected greedy bases with quantitative coefficient and coordinate-width bounds | [ConnectedCubeBasis.lean](ConnectedCubeBasis.lean) |
-| Uniform subspace thickness for the concrete whitened Fourier cube | [CubeFrameThickness.lean](CubeFrameThickness.lean) |
+| Connected-basis interface and bandwidth-independent conditioning threshold | [CubeFrameBasis.lean](CubeFrameBasis.lean): `cubeFrameRow_connectedBasis`, `cubeFrameThreshold` |
+| Direct logarithmic determinant average for the concrete whitened Fourier cube (manuscript `lem:cube-logdet-mean`, `eq:cube-logdet-mean`) | [CubeFrameLogDet.lean](CubeFrameLogDet.lean): `cubeFrameRow_logDetMean_lower` |
 | Polynomial Markov, point-evaluation and coefficient-energy bounds | [PolynomialEvaluationBounds.lean](PolynomialEvaluationBounds.lean) |
 | Stability of the polynomial evaluation bound under uniform perturbations | [JetPolynomialPerturbation.lean](JetPolynomialPerturbation.lean) |
 | Integer monomial moments, polynomial cross inner products and perturbations | [PolynomialCrossCorrelation.lean](PolynomialCrossCorrelation.lean) |

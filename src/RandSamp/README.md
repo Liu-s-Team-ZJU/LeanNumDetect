@@ -35,8 +35,11 @@ g(n,\theta)=\exp\!\left[-5n-6n\log\!\left(\frac{12n}{5\theta^2}\right)\right].
 $$
 
 The threshold and coefficient depend only on $d,n$. Cube translation and
-connected-basis estimates give the required subspace thickness, which
-bounds a determinant throughout the auxiliary capped-weight iteration.
+connected-basis estimates give a logarithmic determinant average directly
+through Hadamard's inequality. This gives compact sublevels and a minimum of
+the smooth precision-matrix potential. Its first-order condition determines
+the auxiliary weights; a direct eigenvalue bound gives their covariance
+lower bound, and the normalized rank-one row has norm at most $12n/5$.
 The weights enter the proof of concentration; the theorem samples the
 original unweighted Fourier rows.
 

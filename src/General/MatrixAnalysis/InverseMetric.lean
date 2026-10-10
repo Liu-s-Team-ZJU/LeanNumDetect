@@ -9,7 +9,7 @@ set_option backward.isDefEq.respectTransparency false
 open Matrix WithLp
 open scoped BigOperators InnerProductSpace ComplexOrder MatrixOrder Matrix.Norms.L2Operator
 
-namespace LeanNumDetect.CappedWeightIteration
+namespace LeanNumDetect.FrameMatrixBounds
 
 open FiniteMatrixSampling
 noncomputable section
@@ -98,4 +98,4 @@ theorem row_energy_le_inverse_metric {d : ℕ}
   simpa only [mul_pow] using hh
 
 end
-end LeanNumDetect.CappedWeightIteration
+end LeanNumDetect.FrameMatrixBounds
