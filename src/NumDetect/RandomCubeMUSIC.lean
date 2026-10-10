@@ -33,10 +33,10 @@ private theorem probability_prod {α β : Type*} [Fintype α] [Fintype β]
 
 theorem probability_product_lower_bound {α β : Type*}
     [Fintype α] [Fintype β] [Nonempty α] [Nonempty β]
-    (P : α → Prop) (Q : β → Prop) (η : ℝ)
-    (hP : 1 - η / 2 ≤ probability P)
-    (hQ : 1 - η / 2 ≤ probability Q) :
-    1 - η ≤ probability (fun p : α × β => P p.1 ∧ Q p.2) := by
+    (P : α → Prop) (Q : β → Prop) (ε : ℝ)
+    (hP : 1 - ε / 2 ≤ probability P)
+    (hQ : 1 - ε / 2 ≤ probability Q) :
+    1 - ε ≤ probability (fun p : α × β => P p.1 ∧ Q p.2) := by
   rw [probability_prod]
   have hP1 := probability_le_one P
   have hQ1 := probability_le_one Q
@@ -426,26 +426,26 @@ theorem positiveCubeMUSIC_correlation_stability_highProbability
     (hsource : ∀ j, InAngularCube (μ.node j))
     (hM₁ : n < M₁) (hM₂ : n ≤ M₂)
     (hM₁N : M₁ ≤ (L + 1) ^ d) (hM₂N : M₂ ≤ (L + 1) ^ d)
-    {Ω σ ρ η : ℝ}
+    {Ω σ ρ ε : ℝ}
     (hband : (2 * L : ℝ) ≤ Ω)
     (hmeasurement : IsBandMeasurement μ Ω σ measurement)
     (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
-    (hη0 : 0 < η) (hη1 : η < 1)
+    (hε0 : 0 < ε) (hε1 : ε < 1)
     (hqLow :
       2 * Real.pi * (2 * (d : ℝ) - 1) / L <
         periodicMinimumLInfSeparation μ.node hn)
     (hsample₁ :
       3 * (n : ℝ) /
         (cubeSeparatedLower d L (periodicMinimumLInfSeparation μ.node hn) * ρ ^ 2) *
-        Real.log (4 * n / η) ≤ M₁)
+        Real.log (4 * n / ε) ≤ M₁)
     (hsample₂ :
       3 * (n : ℝ) /
         (cubeSeparatedLower d L (periodicMinimumLInfSeparation μ.node hn) * ρ ^ 2) *
-        Real.log (4 * n / η) ≤ M₂)
+        Real.log (4 * n / ε) ≤ M₂)
     (hsmall : 2 * σ < minAmplitude μ (Nat.zero_lt_of_lt hn) *
       ((1 - ρ) * cubeSeparatedLower d L
         (periodicMinimumLInfSeparation μ.node hn))) :
-    1 - η ≤ probability (fun pair :
+    1 - ε ≤ probability (fun pair :
         FiniteSample (CubeFrequency d L) M₁ ×
           FiniteSample (CubeFrequency d L) M₂ =>
       correlationUniformDistance
@@ -474,18 +474,18 @@ theorem positiveCubeMUSIC_correlation_stability_highProbability
     finiteSample_nonempty (by simpa only [card_cubeFrequency] using hM₁N)
   letI : Nonempty (FiniteSample (CubeFrequency d L) M₂) :=
     finiteSample_nonempty (by simpa only [card_cubeFrequency] using hM₂N)
-  have hηhalf0 : 0 < η / 2 := by positivity
-  have hηhalf1 : η / 2 < 1 := by linarith
-  have hlog : 2 * (n : ℝ) / (η / 2) = 4 * (n : ℝ) / η := by
-    have hηne : η ≠ 0 := ne_of_gt hη0
+  have hεhalf0 : 0 < ε / 2 := by positivity
+  have hεhalf1 : ε / 2 < 1 := by linarith
+  have hlog : 2 * (n : ℝ) / (ε / 2) = 4 * (n : ℝ) / ε := by
+    have hεne : ε ≠ 0 := ne_of_gt hε0
     field_simp
     ring
   have hsample₁' :
-      3 * (n : ℝ) / (a * ρ ^ 2) * Real.log (2 * n / (η / 2)) ≤ M₁ := by
+      3 * (n : ℝ) / (a * ρ ^ 2) * Real.log (2 * n / (ε / 2)) ≤ M₁ := by
     rw [hlog]
     exact hsample₁
   have hsample₂' :
-      3 * (n : ℝ) / (a * ρ ^ 2) * Real.log (2 * n / (η / 2)) ≤ M₂ := by
+      3 * (n : ℝ) / (a * ρ ^ 2) * Real.log (2 * n / (ε / 2)) ≤ M₂ := by
     rw [hlog]
     exact hsample₂
   let P : FiniteSample (CubeFrequency d L) M₁ → Prop := fun W =>
@@ -494,18 +494,18 @@ theorem positiveCubeMUSIC_correlation_stability_highProbability
   let Q : FiniteSample (CubeFrequency d L) M₂ → Prop := fun Z =>
     Real.sqrt ((1 - ρ) * a) ≤
       matrixSingularValue (cubeSampledVandermonde M₂ μ.node Z.val) (n - 1)
-  have hprob₁ : 1 - η / 2 ≤ probability P := by
+  have hprob₁ : 1 - ε / 2 ≤ probability P := by
     have h := fixedSeparatedCube_singularValues hd hL hn hm₁ hM₁N
-      hρ0 hρ1 hηhalf0 hηhalf1 hqLow hqHigh μ.node hsep hsample₁'
+      hρ0 hρ1 hεhalf0 hεhalf1 hqLow hqHigh μ.node hsep hsample₁'
     exact h.trans (probability_mono (fun W hW => hW.1))
-  have hprob₂ : 1 - η / 2 ≤ probability Q := by
+  have hprob₂ : 1 - ε / 2 ≤ probability Q := by
     have h := fixedSeparatedCube_singularValues hd hL hn hm₂ hM₂N
-      hρ0 hρ1 hηhalf0 hηhalf1 hqLow hqHigh μ.node hsep hsample₂'
+      hρ0 hρ1 hεhalf0 hεhalf1 hqLow hqHigh μ.node hsep hsample₂'
     exact h.trans (probability_mono (fun Z hZ => hZ.1))
-  have hpair : 1 - η ≤ probability (fun pair :
+  have hpair : 1 - ε ≤ probability (fun pair :
       FiniteSample (CubeFrequency d L) M₁ ×
         FiniteSample (CubeFrequency d L) M₂ => P pair.1 ∧ Q pair.2) :=
-    FiniteMatrixSampling.probability_product_lower_bound P Q η hprob₁ hprob₂
+    FiniteMatrixSampling.probability_product_lower_bound P Q ε hprob₁ hprob₂
   apply hpair.trans
   apply probability_mono
   intro ⟨W, Z⟩ hgood

@@ -186,29 +186,6 @@ def ComparableMultidimensionalClumpSpacing {d n A : ℕ} (P : ClumpPartition n A
     Δ ≤ multidimensionalAngularTorusDistance (Y i) (Y j) ∧
       multidimensionalAngularTorusDistance (Y i) (Y j) ≤ K * Δ
 
-/-- After removing a clump attaining the maximum, each remaining clump
-contains at least one of the remaining sources. -/
-theorem hasMaxClumpSize_clumpCount_sub_one_le {n A nstar : ℕ}
-    {P : ClumpPartition n A} (hmax : HasMaxClumpSize P nstar) :
-    A - 1 ≤ n - nstar := by
-  obtain ⟨a, ha⟩ := hmax.2
-  have hsum : (∑ b ∈ (Finset.univ : Finset (Fin A)).erase a, P.size b) + P.size a = n :=
-    (Finset.sum_erase_add _ _ (Finset.mem_univ a)).trans P.sum_sizes
-  have hcount : A - 1 ≤ ∑ b ∈ (Finset.univ : Finset (Fin A)).erase a, P.size b := by
-    calc
-      A - 1 = ∑ _b ∈ (Finset.univ : Finset (Fin A)).erase a, 1 := by simp
-      _ ≤ _ := Finset.sum_le_sum fun b _ => P.size_pos b
-  omega
-
-/-- An attained maximal clump containing all sources is the only clump. -/
-theorem hasMaxClumpSize_clumpCount_eq_one_of_total_eq_max {n A nstar : ℕ}
-    {P : ClumpPartition n A} (hmax : HasMaxClumpSize P nstar) (hn : n = nstar) :
-    A = 1 := by
-  have hcount := hasMaxClumpSize_clumpCount_sub_one_le hmax
-  obtain ⟨a, _⟩ := hmax.2
-  have hA : 0 < A := Nat.zero_lt_of_lt a.isLt
-  omega
-
 namespace ClumpPartition
 
 variable {n A : ℕ} (P : ClumpPartition n A)
@@ -249,73 +226,6 @@ def cubeColumnSubspace {d : ℕ} (M : ℕ) (Y : Fin n → Fin d → ℝ) (a : Fi
     toLp 2 (fun k => cubeFourierRow (P.multidimensionalNodes Y a) k j))
 
 end ClumpPartition
-
-/-- The earlier fixed-loss section estimate remains available independently
-of the sharp manuscript sampling interface. -/
-def multidimensionalMultiClumpTightLeverageConstant (d : ℕ) : ℝ := 2 * 24 ^ d
-
-/-- Sharp section evaluation and adjustable geometric losses give this
-absolute leverage coefficient in every positive dimension. -/
-def multidimensionalMultiClumpLowerLeverageConstant (_d : ℕ) : ℝ := 3 / 2
-
-/-- Arbitrarily small coordinate losses and near-orthogonal clump energy
-give an absolute sampling constant for the lower Chernoff tail. -/
-def multidimensionalMultiClumpLowerSamplingConstant (_d : ℕ) : ℝ := 3
-
-theorem multidimensionalMultiClumpLowerSamplingConstant_pos (d : ℕ) :
-    0 < multidimensionalMultiClumpLowerSamplingConstant d := by
-  unfold multidimensionalMultiClumpLowerSamplingConstant
-  positivity
-
-/-- A coordinate loss whose product stays bounded independently of the
-ambient dimension. Its smallness is absorbed into the geometry thresholds. -/
-def multidimensionalClumpEvaluationLoss (d : ℕ) : ℝ := 1 + 1 / (4 * (d : ℝ))
-
-theorem multidimensionalClumpEvaluationLoss_gt_one {d : ℕ} (hd : 1 ≤ d) :
-    1 < multidimensionalClumpEvaluationLoss d := by
-  have hdR : (0 : ℝ) < d := by exact_mod_cast (show 0 < d by omega)
-  unfold multidimensionalClumpEvaluationLoss
-  have : 0 < 1 / (4 * (d : ℝ)) := by positivity
-  linarith
-
-theorem multidimensionalClumpEvaluationLoss_pow_le {d : ℕ} (hd : 1 ≤ d) :
-    (multidimensionalClumpEvaluationLoss d)^d ≤ (4 / 3 : ℝ) := by
-  have hdR : (0 : ℝ) < d := by exact_mod_cast (show 0 < d by omega)
-  let y : ℝ := 1 - 1 / (4 * (d : ℝ) + 1)
-  have hden : 0 < 4 * (d : ℝ) + 1 := by positivity
-  have hr : (d : ℝ) / (4 * (d : ℝ) + 1) ≤ 1 / 4 := by
-    apply (div_le_div_iff₀ hden (by norm_num : (0 : ℝ) < 4)).2
-    linarith
-  have hy : 0 ≤ y := by dsimp [y]; apply sub_nonneg.mpr; apply (div_le_one hden).2; linarith
-  have hb := one_add_mul_le_pow (a := -(1 / (4 * (d : ℝ) + 1))) (by
-    have : 1 / (4 * (d : ℝ) + 1) ≤ (1 : ℝ) := (div_le_one hden).2 (by linarith)
-    linarith) d
-  have hylower : (3 / 4 : ℝ) ≤ y^d := by
-    dsimp [y]
-    have he : (d : ℝ) * -(1 / (4 * (d : ℝ) + 1)) = -(d / (4 * (d : ℝ) + 1)) := by ring
-    rw [he] at hb
-    simp only [← sub_eq_add_neg] at hb
-    linarith only [hb, hr]
-  have hx : 0 ≤ multidimensionalClumpEvaluationLoss d :=
-    le_trans (by norm_num) (multidimensionalClumpEvaluationLoss_gt_one hd).le
-  have hxy : multidimensionalClumpEvaluationLoss d * y = 1 := by
-    dsimp [multidimensionalClumpEvaluationLoss, y]
-    field_simp
-    <;> ring
-  have hprod : (multidimensionalClumpEvaluationLoss d)^d * y^d = 1 := by
-    rw [← mul_pow, hxy, one_pow]
-  have h := mul_le_mul_of_nonneg_left hylower (pow_nonneg hx d)
-  nlinarith only [h, hprod]
-
-theorem multidimensionalClumpEvaluationLeverage_le {d : ℕ} (hd : 1 ≤ d)
-    {K : ℝ} (hK : 0 ≤ K) :
-    (K * multidimensionalClumpEvaluationLoss d)^d / (9 / 10 : ℝ) ≤
-      (3 / 2 : ℝ) * K^d := by
-  rw [mul_pow]
-  apply (div_le_iff₀ (by norm_num : (0 : ℝ) < 9 / 10)).2
-  have h := mul_le_mul_of_nonneg_left (multidimensionalClumpEvaluationLoss_pow_le hd)
-    (pow_nonneg hK d)
-  nlinarith only [h, pow_nonneg hK d]
 
 /-- Tensor-box annihilation exponent for an `nstar`-point clump. -/
 def multidimensionalClumpUpperExponent (d nstar : ℕ) : ℕ :=

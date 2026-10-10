@@ -23,6 +23,12 @@ thresholding and MUSIC arguments.
 | [LieTrotter.lean](LieTrotter.lean) | Banach-algebra Lie--Trotter product formula |
 | [GoldenThompson.lean](GoldenThompson.lean) | Complete Golden--Thompson trace inequality for finite complex Hermitian matrices |
 
+| [FiniteFrameGram.lean](FiniteFrameGram.lean) | Rank-one frame populations, quadratic forms and weighted trace identities |
+| [CappedRowLeverage.lean](CappedRowLeverage.lean) | Inverse order, whitening, and the metric Cauchy--Schwarz row bound |
+| [CappedWeightIteration.lean](CappedWeightIteration.lean) | Quantitative determinant floors and a finite noncontracting update |
+| [CappedWeightMap.lean](CappedWeightMap.lean) | Monotone capped covariance and entropy descent |
+| [CappedWeightSequence.lean](CappedWeightSequence.lean) | Complete finite construction of positive auxiliary weights with row cap $5n/2$ |
+
 `matrixSingularValue` uses zero-based indices, so index `n - 1` denotes the
 smallest singular value of a full-column-rank matrix with `n` columns.
 

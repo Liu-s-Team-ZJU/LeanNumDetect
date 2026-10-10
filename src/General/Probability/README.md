@@ -10,6 +10,7 @@
 | [FiniteMatrixSampling.lean](FiniteMatrixSampling.lean) | Fixed-cardinality subsets, counting probability, quadratic forms, unit-sphere extrema, and elementary probability operations |
 | [UniformCounting.lean](UniformCounting.lean) | Equality of counting probability with Mathlib's uniform PMF probability |
 | [ChernoffFactors.lean](ChernoffFactors.lean) | Proofs that the exact Chernoff factors are bounded by the standard Gaussian-type exponentials |
+| [ChernoffSamplingSlack.lean](ChernoffSamplingSlack.lean) | Exact lower-tail entropy with half the retained relative energy and the enlarged leverage budget $5S/2$ |
 | [MatrixChernoffBounds.lean](MatrixChernoffBounds.lean) | Simultaneous lower and upper sample-mean bounds, with normalization and the union bound proved |
 | [FinitePopulationReindex.lean](FinitePopulationReindex.lean) | Transport of uniform subset probabilities and matrix means to any finite population, including multidimensional frequency cubes |
 | [FiniteScalarConcentration.lean](FiniteScalarConcentration.lean) | Fully proved real and complex Hoeffding bounds for uniform sampling without replacement, via bounded exponential moments and convex comparison |
@@ -128,3 +129,28 @@ original coordinate interval width, before convex comparison and Markov.
 extension error $\varepsilon/2$ into a simultaneous bound over an arbitrary
 parameter type, with failure at most
 $4|\mathcal G|\exp(-m\varepsilon^2/16)$.
+
+## Half-energy lower sampling
+
+[ChernoffSamplingSlack.lean](ChernoffSamplingSlack.lean) proves
+`lower_log_bound_half_slack` and
+`sampleMean_relative_half_lower_bound_probability` directly from the exact
+Chernoff factor, including whitening. If the row leverage is at most
+$5S/2$, the lower Gram event retains $(1-\rho)/2$ of the population energy
+with failure at most $n\exp(-m\rho^2/(3S))$.
+
+[WeightedLowerSampling.lean](WeightedLowerSampling.lean) transfers this
+lower event from auxiliary weights bounded by one to the original sampled
+Gram matrix. [CappedWeightEntropy.lean](CappedWeightEntropy.lean) and
+[CappedWeightSpectralCoercivity.lean](CappedWeightSpectralCoercivity.lean)
+prove scalar entropy and spectral layercake bounds. Together with the
+finite monotone iteration in `General.MatrixAnalysis.CappedWeightSequence`,
+[ThickFrameSampling.lean](ThickFrameSampling.lean) derives the required
+weights from quantitative subspace thickness. No minimizer or limiting
+covariance is assumed. The radius $12n/5$ and relative-update factor $24/25$
+give row budget $5n/2$ and the explicit determinant floor
+$\exp[-5n-6n\log((12n/5)/\theta^2)]$.
+
+The actual Fourier rows satisfy this thickness condition by the proved
+`General.Fourier.CubeFrameThickness` theorem; the final cube sampler exposes
+no thickness or leverage assumption.

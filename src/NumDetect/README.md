@@ -25,19 +25,12 @@ shown.
 | Definition `defi:high_dim_clumps` | Multidimensional clump structure | [Basic.lean](Basic.lean): `IsAngularClumpStructure` | **Equivalent**. |
 | Theorem `thm:segmented-vandermonde` | Segmented-grid minimum singular value | [Segmented/Main.lean](Segmented/Main.lean): `segmentedVandermonde_minimumSingularValue` | **Equivalent**. |
 | Theorem `thm:segmented_threshold` | Segmented-grid singular-value threshold | [Segmented/Main.lean](Segmented/Main.lean): `segmentedGHM_singularValueThreshold` | **Equivalent**. |
-| Lemma `lem:random-cube-vandermonde` | Fixed-support random cube Vandermonde minimum singular-value lower bound | [RandomCubeMUSIC.lean](RandomCubeMUSIC.lean): `positiveCubeVandermonde_lower_highProbability` | **Equivalent**; only the lower bound is exposed, and the automatic periodic upper spacing bound is proved internally. |
-| Lemma `lem:random-cube-multiclump` | Unnormalized multi-clump random cube Vandermonde minimum singular-value lower bound | [RandomClumpVandermonde.lean](RandomClumpVandermonde.lean): `positiveCubeClumpVandermonde_lower_highProbability` | **Equivalent**; exact $(A,\infty,\tau,\eta,n^\star)$ geometry, literal sampling coefficient $3$, $C(d,n^\star)$, and $\sqrt{m(1-\rho)}$ on the right. No upper spectral conclusion or comparable-spacing premise. |
-| Paragraph following `lem:random-cube-multiclump` | Random-GHM number detection under multi-clump and well-separated geometry | [RandomClumpMUSIC.lean](RandomClumpMUSIC.lean): `positiveCubeClumpGHM_numberDetection_highProbability`; [RandomCubeNumberDetection.lean](RandomCubeNumberDetection.lean): `positiveCubeGHM_numberDetection_highProbability` | **Equivalent**; proves the strict signal and tail thresholds and exactly $n$ values above $\sigma\sqrt{M_1M_2}$. |
+| Theorem `thm:random-cube-multiclump` | Unnormalized multi-clump random cube Vandermonde minimum singular-value lower bound | [RandomClumpVandermonde.lean](RandomClumpVandermonde.lean): `positiveCubeClumpVandermonde_lower_highProbability` | **Equivalent**; exact $(A,\infty,\tau,\eta,n^\star)$ geometry, literal sampling coefficient $3$, $C(d,n,n^\star,\beta)$ independent of bandwidth and spacing, and $\sqrt{m(1-\rho)}$ on the right. Li geometry and all sampling prerequisites are proved without additional leverage or thickness assumptions. |
+| Paragraph following `thm:random-cube-multiclump` | Random-GHM number detection under multi-clump geometry | [RandomClumpMUSIC.lean](RandomClumpMUSIC.lean): `positiveCubeClumpGHM_signalSingularValue_lower_highProbability`, `positiveCubeClumpGHM_numberDetection_highProbability` | **Equivalent**; proves the strict signal and tail thresholds and exactly $n$ values above $\sigma\sqrt{M_1M_2}$. |
 | Theorem `thm:resolutionrandghmnumber1` | Random-GHM noise and signal thresholds | [Random.lean](Random.lean): `realizedRandomGHM_tail_singularValue_lt` (noise), `randomGHM_signalThreshold_of_separation` (signal) | **Equivalent**. |
 | Theorem `thm:nonuniform_vdm_scaling` | Nonuniform one-dimensional Vandermonde scaling | [RandSamp/NonuniformVandermonde.lean](../RandSamp/NonuniformVandermonde.lean): `RandSamp.nonuniformVandermonde_minimumSingularValue` | **Equivalent**. |
 | Lemma `lem:stability_ghm_music` | General GHM-MUSIC perturbation | [MUSIC.lean](MUSIC.lean): `ghmMUSIC_correlation_stability` | **Equivalent**. |
-| Theorem `thm:ghm-music-location-stability` | Location stability for the separated continuous MUSIC selection | [MUSICLocation.lean](MUSICLocation.lean): `ghmMUSIC_location_stability`; [MUSICSelector.lean](MUSICSelector.lean): `exists_ghmMUSIC_location_stability` | **Equivalent**; the selector theorem also proves existence and universal minimization on compact search regions. |
-| Theorem `thm:ghm-music-peak-stability` | Continuous selection of the `n` lowest local minima with a location bound | [MUSICPeakSelection.lean](MUSICPeakSelection.lean): `exists_top_MUSIC_peaks_of_globalGrowth_and_strictConvex`; [MUSICPeakReciprocal.lean](MUSICPeakReciprocal.lean): `top_squaredResidual_minima_are_extendedMUSIC_peaks` | **Conditional selection layer**; derives the exterior value gap and location error from growth and residual perturbation, assuming strict convexity of the noisy squared residual on source neighborhoods. The reciprocal theorem identifies these minima with the highest continuous MUSIC peaks, including zeros of the residual. |
-| Corollary `cor:segmented-music-peaks` | Largest continuous MUSIC peaks for equally distributed arrays | [SegmentedMUSICPeakFinal.lean](SegmentedMUSICPeakFinal.lean): `exists_segmentedMUSIC_highestExtendedPeaks_explicit` | **Equivalent for continuous local peaks**; proves one of the top `n` peaks near each source, strict dominance over all other local peaks, and the displayed explicit location error. The reciprocal image is extended real valued, with value $\infty$ at residual zeros. The analytic curvature bounds are proved in the Fourier and projector modules below. |
-| Proposition `prop:segmented-music-growth` | Explicit noiseless MUSIC residual growth for equally distributed arrays | [SegmentedMUSICGrowth.lean](SegmentedMUSICGrowth.lean): `segmentedMUSIC_growth` | **Equivalent**; proves full column rank and positivity of the exact displayed growth constant. |
 | Corollary `cor:stability_multidim_segmented` | Segmented-grid MUSIC perturbation | [MUSIC.lean](MUSIC.lean): `segmentedMUSIC_correlation_stability` | **Equivalent**. |
-| Corollary `cor:segmented-music-location` | Explicit location error for equally distributed arrays under multi-clump geometry | [SegmentedMUSICLocation.lean](SegmentedMUSICLocation.lean): `exists_segmentedMUSIC_location_stability_explicit` | **Equivalent** for the separated continuous minimax selection; proves existence, the displayed measurement-noise condition, and the displayed location-error constant. |
-| Corollary `cor:random-ghm-music-well-separated` | Fixed-support high-probability random-GHM MUSIC correlation bound | [RandomCubeMUSIC.lean](RandomCubeMUSIC.lean): `positiveCubeMUSIC_correlation_stability_highProbability` | **Equivalent**. |
 | Corollary `cor:random-ghm-music-multiclump` | Fixed-source high-probability random-GHM MUSIC correlation stability under the original multi-clump geometry | [RandomClumpMUSIC.lean](RandomClumpMUSIC.lean): `positiveCubeClumpMUSIC_correlation_stability_highProbability` | **Equivalent**; exact periodic one-norm spacing, independent uniform subsets, and the deterministic measurement-noise bound. No arrangement or comparable-spacing hypothesis is introduced. |
 | Lemma `lem:nonnegative_to_centered` | Unitary conversion from nonnegative to centered frequency grid | [UniformCentering.lean](UniformCentering.lean): `uniformVandermonde_centering` | **Equivalent**. |
 | Lemma `lem2:uniform-Vandermonde` | Centered interpolation polynomial with a neighbor-product bound | [UniformInterpolation.lean](UniformInterpolation.lean): `CenteredPacket.exists_centeredUnitTorusInterpolation` | **Equivalent**. |
@@ -50,6 +43,13 @@ shown.
 | Lemma `lem:localization` | Polynomial vanishing outside an anchor neighborhood | [Segmented/ClumpBounds.lean](Segmented/ClumpBounds.lean): `localizationPolynomial_of_angularClumpStructure` | **Equivalent**. |
 | Lemma `lem:freq_quantization` | Quantized integer frequency with phase separation | [Segmented/NeighborFactors.lean](Segmented/NeighborFactors.lean): `frequency_quantization_manuscript` | **Equivalent**. |
 | Lemma `lem:neighborset_segmented` | Neighbor-set interpolation polynomial and $L^2$ bound | [Segmented/Interpolation.lean](Segmented/Interpolation.lean): `neighborSetSegmented_polynomial_finiteSet` | **Equivalent**. |
+| Lemma `lem:cube-vandermonde-translations` (Appendix C) | Translation identities and bandwidth-independent operator bound for normalized cube rows | [General/Fourier/CubeTranslationBounds.lean](../General/Fourier/CubeTranslationBounds.lean): `LeanNumDetect.CubeShiftBounds.integerIsotropicCubeRootRow_translation`, `LeanNumDetect.CubeShiftBounds.cubeTranslation_neg_mul`, `LeanNumDetect.CubeShiftBounds.cubeTranslation_norm_le` | **Equivalent after Gram whitening and row normalization**; the bound is $K=2^{4dn^2}$ for every integer coordinate displacement of magnitude at most $L$. |
+| Lemma `lem:cube-row-selection` (Appendix C) | Quantitative selection of independent rows within the cube | [General/Fourier/CubeFrameThickness.lean](../General/Fourier/CubeFrameThickness.lean): `LeanNumDetect.CubeFrameThickness.cubeFrameRow_connectedBasis` | **Equivalent after Gram whitening and row normalization**; the coordinate sum is at most $(n-1)Q$ and the coefficient recursion is $\alpha_0=K^{-1}$, $\alpha_r=\alpha_{r-1}^2/(3KM^2)$ with $M=K\sqrt n$. |
+
+The well-separated random bounds and the MUSIC location and peak-selection
+modules remain independent fully proved results. They are not active
+statements in the current manuscript and are omitted from this correspondence
+table.
 
 ## Organization and conventions
 
@@ -71,86 +71,96 @@ lower bound by a direct finite-difference construction.
 
 ## Multi-clump random-GHM MUSIC
 
-The exact periodic coordinate, one-norm and infinity-norm metric equalities
-are proved in [RandomClumpModel.lean](RandomClumpModel.lean). Atomic-measure
-injectivity on $(-\pi,\pi]^d$ proves torus distinctness, and the chosen
-nonempty clump partition preserves its attained maximum and every clump
-cardinality. The global periodic $\Delta_1$ supplies the lower intraclump
-spacing required by the sampling theorem.
-
-The clump predicate is exactly the manuscript's
-$(A,\infty,\tau,\eta,n^\star)$ model. Lean's `nStar` is $n^\star$;
-$\eta$ is the between-clump separation and $\epsilon$ is the failure
-probability. The geometry constants $c_0,C_0$ depend only on $d,n,n^\star$
-and are chosen before bandwidth, nodes and probability parameters. Require
-$L\ge C_0$, $\tau\le c_0/L$, $\eta\ge C_0/L$, and $2L\le\Omega$.
-The lower constant depends only on $d,n^\star$:
+[RandomClumpModel.lean](RandomClumpModel.lean) identifies the manuscript's
+periodic metrics and preserves its exact nonempty clump partition and sizes.
+[LiCubeClumpBounds.lean](LiCubeClumpBounds.lean) proves the deterministic
+full-cube interpolation bound rather than importing it as an axiom. Its
+`LiCubeClumpGeometry` uses precisely
 
 $$
-C(d,n^\star)=\frac{3}{\sqrt{10n^\star}\,2^{n^\star-1}\sqrt{2^d}
-(3n^\star d)^{n^\star-1}}.
+L\text{ even},\quad L\ge8n,\quad
+\beta>\frac1{2\log2},\quad
+\frac{8\pi\beta d n^\star}{L}\le\tau\le\frac\pi{2d},\quad
+\Delta_1\le\frac{4\pi n^\star}{L},
 $$
 
-For one uniform sample of $m$ rows, the manuscript-facing theorem exposes
-only the unnormalized Vandermonde lower bound
+together with the original $(A,\infty,\tau,\eta,n^\star)$ clump predicate,
+including $\tau\le\eta$. The parameter $\tau$ is a selectable diameter
+upper bound. Li's published cube corollary is stated for $d\ge2$; the
+formalization also proves the interval case in $d=1$ from the same
+localization and interpolation constructions.
+
+The actual Fourier frame thickness is proved in
+[CubeFrameThickness.lean](../General/Fourier/CubeFrameThickness.lean).
+[CubeWeakLowerSampling.lean](../RandSamp/CubeWeakLowerSampling.lean)
+constructs auxiliary weights and proves the unchanged uniform subset
+sampling event. These weights are internal to the proof; neither the
+sampling distribution nor either algorithm is modified. The exact public
+coefficient is
+
+$$
+C(d,n,n^\star,\beta)=\sqrt{\delta(d,n)/2}\,
+\frac{(2-e^{1/(2\beta)})^{n^\star/2}}
+{\sqrt n(\sqrt2)^{n^\star-1}(\sqrt{3n^\star})^d
+(4\pi n^\star)^{n^\star-1}}.
+$$
+
+Here $K=2^{4dn^2}$, $M=K\sqrt n$,
+$\alpha_0=1/K$, $\alpha_{r+1}=\alpha_r^2/(3KM^2)$,
+$\theta=\alpha_{n-1}/(2K)$, and
+
+$$
+\delta(d,n)=\exp[-5n-6n\log(12n/(5\theta^2))].
+$$
+
+Thus $C>0$ and is independent of $L,\Delta_1,\rho,\epsilon$.
+Its dependence on $n$ is conservative. The manuscript-facing node-only
+result in [RandomClumpVandermonde.lean](RandomClumpVandermonde.lean) proves
 
 $$
 \sigma_{\min}(\mathcal V_{\mathcal W}(\mathcal X))
-\ge\sqrt{m(1-\rho)}\,C(d,n^\star)(L\Delta_1)^{n^\star-1}
+\ge\sqrt{m(1-\rho)}\,C(d,n,n^\star,\beta)(L\Delta_1)^{n^\star-1}
 $$
 
 with probability at least $1-\epsilon$, under
 
 $$
-m\ge\frac{3}{\rho^2}
-\left(\sum_a n_a^{2d}\right)\log\frac n\epsilon.
+1\le m\le(L+1)^d,\qquad
+m\ge\frac3{\rho^2}\left(\sum_a n_a^{2d}\right)\log\frac n\epsilon.
 $$
 
-The sampling coefficient is $3$ in every dimension $d\ge1$.
-The dimension dependence remains in $\sum_a n_a^{2d}$.
-The manuscript-facing rate hypotheses also use the literal number $3$.
+The manuscript places the proof and its translation and row-selection lemmas
+in Appendix C; the corresponding Lean declarations retain their stable names.
 
-The public geometry thresholds are explicit finite formulas in
-[QuantitativeClumpSectionBounds.lean](../General/Fourier/QuantitativeClumpSectionBounds.lean).
-They separately bound the clump width, the bandwidth and the interclump
-separation. The separation coefficient is the minimum of the pairwise
-polynomial-variation bound and the global size-weighted bound. The latter
-uses $A-1\le n-n^\star$, $\sum_a n_a^2\le nn^\star$ and
-$\sum_a n_a^4\le n(n^\star)^3$. All three public results use the same
-specified constants. The lower-only sampler
-`multidimensionalMultiClump_lower_sampling_explicit` retains the spectral
-coefficient $C(d,n^\star)$ and the sampling coefficient $3$. Its energy
-estimate retains $3/4$ of the clump energy sum, with coordinate row factor
-$1+1/(16d)$; the refined interpolation estimate at $L\ge16n^\star$
-compensates for this energy factor. The exact formulas are shared with
-`main.tex`; the bandwidth threshold is independent of the separation
-threshold.
+No leverage, thickness, arrangement, comparable-spacing, or norming
+hypothesis appears in this theorem. Unit amplitudes are internal witnesses
+for its node-only statement. There is no upper singular-value conclusion.
 
-The two independent samples for MUSIC use $n<M_1$, $n\le M_2$,
-$M_i\le(L+1)^d$, and the same rate with $\log(2n/\epsilon)$.
-When
+The two independent uniform samples for MUSIC use $n\le M_1,M_2\le(L+1)^d$
+and the same rate with $\log(2n/\epsilon)$. This rate implies $n<M_i$;
+the deterministic noise-space proof derives the strict row count internally.
+[RandomClumpMUSIC.lean](RandomClumpMUSIC.lean) proves the noiseless GHM lower
+bound and, when
 
 $$
-2\sigma<a_{\min}(1-\rho)C(d,n^\star)^2
+2\sigma<m_{\min}(1-\rho)C(d,n,n^\star,\beta)^2
 (L\Delta_1)^{2n^\star-2},
 $$
 
-the probability of the uniform correlation bound is at least $1-\epsilon$:
+the uniform correlation bound with probability at least $1-\epsilon$:
 
 $$
 \|R_\sigma-R\|_\infty\le
-\frac{2\sigma}{a_{\min}(1-\rho)C(d,n^\star)^2
+\frac{2\sigma}{m_{\min}(1-\rho)C(d,n,n^\star,\beta)^2
 (L\Delta_1)^{2n^\star-2}}.
 $$
 
-The same factor event gives exactly $n$ measured singular values above
-$\sigma\sqrt{M_1M_2}$, proving the manuscript's number-detection
-consequence. The source tuple is fixed, and one projector event controls
-all search points. No source-dependent Gram or leverage assumption,
-comparable-spacing premise, or upper singular-value conclusion is exposed.
-[RandomClumpMUSICAudit.lean](RandomClumpMUSICAudit.lean) audits the public
-lower bound, number detection, correlation result and their model,
-normalization, noise and probability conversions.
+The same factor event proves exactly $n$ measured singular values above
+$\sigma\sqrt{M_1M_2}$. The source tuple is fixed; the noise need not be
+independent of the sample. No location-distance conclusion is asserted.
+[RandomClumpMUSICAudit.lean](RandomClumpMUSICAudit.lean) audits the geometry,
+weight construction, unchanged sampling distribution, normalization,
+noise, correlation and number-detection chain.
 
 ## Verification
 

@@ -8,7 +8,7 @@ import RandSamp.UniformOffGridRelativeGram
 import RandSamp.SeparatedOffGridRelativeGram
 import RandSamp.OffGridBiasOperator
 import RandSamp.MultiClumpTheorem
-import RandSamp.MultidimensionalMultiClumpLowerSampling
+import RandSamp.CubeWeakLowerSampling
 
 /-! Public entry point for nonuniform Vandermonde scaling, uniform and fixed
 separated-node random sampling, simultaneous DFT-grid RIP in any dimension,
@@ -18,10 +18,12 @@ multiclump relative cube sampling with the rate
 lower spectral exponent, and the exact dimension-one corollary with the
 original absolute constant `3072`.
 
-The manuscript lower-only multiclump interface additionally uses
-`4*24^d ρ⁻² (Σ n_a^(2d)) log(n/ε)` and a coefficient depending only on
-dimension and maximal clump size. Its model and algorithm conversions are
-audited in `NumDetect.RandomClumpMUSICAudit`.
+The separate manuscript lower-only multiclump interface uses
+`3 ρ⁻² (Σ n_a^(2d)) log(n/ε)` and a bandwidth-independent coefficient
+`C(d,n,nStar,β)`. `CubeWeakLowerSampling` proves the uniform lower sampling
+step; the Li geometric estimate and model conversions are assembled in
+`NumDetect.RandomClumpVandermonde` and audited with the algorithms in
+`NumDetect.RandomClumpMUSICAudit`.
 
 Every result is fully proved. `RandSamp.OffGridAudit` checks the complete
 off-grid probability chain, and `RandSamp.MultiClumpAudit` checks the
