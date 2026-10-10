@@ -18,16 +18,12 @@ noncomputable section
 
 /-- The existing pair-sampling rate already provides a nonzero noise space. -/
 theorem positiveCubeClump_sampleCount_gt
-    {d n nStar A m : ℕ} (hd : 1 ≤ d) (hn : 2 ≤ n)
-    (μ : AtomicMeasure d n) {τ η ρ ε : ℝ}
-    (hclumps : IsAngularClumpStructure μ.node A nStar τ η)
+    {n m : ℕ} (hn : 2 ≤ n) {ρ ε : ℝ}
     (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (hε0 : 0 < ε) (hε1 : ε < 1)
     (hsample : (3 : ℝ) / ρ ^ 2 *
-      ((angularClumpPartition hclumps).sizePowerSum d : ℝ) *
+      (n : ℝ) *
         Real.log (2 * (n : ℝ) / ε) ≤ (m : ℝ)) : n < m := by
   have hn0 : (0 : ℝ) < n := by exact_mod_cast (show 0 < n by omega)
-  have hnS : (n : ℝ) ≤ ((angularClumpPartition hclumps).sizePowerSum d : ℝ) := by
-    exact_mod_cast (angularClumpPartition hclumps).n_le_sizePowerSum hd
   have hρsq : 0 < ρ ^ 2 := sq_pos_of_pos hρ0
   have hcoef : (3 : ℝ) ≤ 3 / ρ ^ 2 := by
     apply (le_div_iff₀ hρsq).mpr
@@ -43,12 +39,12 @@ theorem positiveCubeClump_sampleCount_gt
   have hlog : (1 / 2 : ℝ) ≤ Real.log (2 * (n : ℝ) / ε) :=
     hhalf.trans (Real.log_le_log (by norm_num) hratio)
   have hproduct : 3 * (n : ℝ) ≤ 3 / ρ ^ 2 *
-      ((angularClumpPartition hclumps).sizePowerSum d : ℝ) :=
-    mul_le_mul hcoef hnS hn0.le (by positivity)
+      (n : ℝ) :=
+    mul_le_mul_of_nonneg_right hcoef hn0.le
   have hlt : (n : ℝ) < (m : ℝ) := calc
     (n : ℝ) < 3 * (n : ℝ) * (1 / 2) := by nlinarith
     _ ≤ (3 : ℝ) / ρ ^ 2 *
-        ((angularClumpPartition hclumps).sizePowerSum d : ℝ) *
+        (n : ℝ) *
           Real.log (2 * (n : ℝ) / ε) :=
       mul_le_mul hproduct hlog (by norm_num) (by positivity)
     _ ≤ (m : ℝ) := hsample
@@ -65,10 +61,10 @@ theorem positiveCubeClumpFactorPair_lower_probability
     (hM₁N : M₁ ≤ (L + 1) ^ d) (hM₂N : M₂ ≤ (L + 1) ^ d)
     (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (hε0 : 0 < ε) (hε1 : ε < 1)
     (hsample₁ : (3 : ℝ) / ρ ^ 2 *
-      ((angularClumpPartition hclumps).sizePowerSum d : ℝ) *
+      (n : ℝ) *
         Real.log (2 * (n : ℝ) / ε) ≤ (M₁ : ℝ))
     (hsample₂ : (3 : ℝ) / ρ ^ 2 *
-      ((angularClumpPartition hclumps).sizePowerSum d : ℝ) *
+      (n : ℝ) *
         Real.log (2 * (n : ℝ) / ε) ≤ (M₂ : ℝ)) :
     1 - ε ≤ probability (fun pair :
         FiniteSample (CubeFrequency d L) M₁ × FiniteSample (CubeFrequency d L) M₂ =>
@@ -85,11 +81,11 @@ theorem positiveCubeClumpFactorPair_lower_probability
     have hεne : ε ≠ 0 := ne_of_gt hε0
     field_simp
   have hs₁ : (3 : ℝ) / ρ ^ 2 *
-      ((angularClumpPartition hclumps).sizePowerSum d : ℝ) *
+      (n : ℝ) *
         Real.log ((n : ℝ) / (ε / 2)) ≤ (M₁ : ℝ) := by
     rw [hlog]; exact hsample₁
   have hs₂ : (3 : ℝ) / ρ ^ 2 *
-      ((angularClumpPartition hclumps).sizePowerSum d : ℝ) *
+      (n : ℝ) *
         Real.log ((n : ℝ) / (ε / 2)) ≤ (M₂ : ℝ) := by
     rw [hlog]; exact hsample₂
   let RowGood : FiniteSample (CubeFrequency d L) M₁ → Prop := fun W =>
@@ -122,10 +118,10 @@ theorem positiveCubeClumpGHM_signalSingularValue_lower_highProbability
     (hM₁N : M₁ ≤ (L + 1) ^ d) (hM₂N : M₂ ≤ (L + 1) ^ d)
     (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (hε0 : 0 < ε) (hε1 : ε < 1)
     (hsample₁ : (3 : ℝ) / ρ ^ 2 *
-      ((angularClumpPartition hclumps).sizePowerSum d : ℝ) *
+      (n : ℝ) *
         Real.log (2 * (n : ℝ) / ε) ≤ (M₁ : ℝ))
     (hsample₂ : (3 : ℝ) / ρ ^ 2 *
-      ((angularClumpPartition hclumps).sizePowerSum d : ℝ) *
+      (n : ℝ) *
         Real.log (2 * (n : ℝ) / ε) ≤ (M₂ : ℝ)) :
     1 - ε ≤ probability (fun pair :
         FiniteSample (CubeFrequency d L) M₁ × FiniteSample (CubeFrequency d L) M₂ =>
@@ -206,16 +202,16 @@ def PositiveCubeClumpMUSICConclusion (d n nStar : ℕ) (hn : 2 ≤ n)
     (β : ℝ) : Prop :=
   ∀ (L A M₁ M₂ : ℕ) (μ : AtomicMeasure d n) (measurement : Point d → ℂ)
     (τ η Ω σ ρ ε : ℝ)
-    (hclumps : IsAngularClumpStructure μ.node A nStar τ η),
+    (_hclumps : IsAngularClumpStructure μ.node A nStar τ η),
     LiCubeClumpGeometry μ A nStar L τ η β hn →
     n ≤ M₁ → n ≤ M₂ → M₁ ≤ (L + 1) ^ d → M₂ ≤ (L + 1) ^ d →
     (2 * L : ℝ) ≤ Ω → IsBandMeasurement μ Ω σ measurement →
     0 < ρ → ρ < 1 → 0 < ε → ε < 1 →
     (3 : ℝ) / ρ ^ 2 *
-      ((angularClumpPartition hclumps).sizePowerSum d : ℝ) *
+      (n : ℝ) *
         Real.log (2 * (n : ℝ) / ε) ≤ (M₁ : ℝ) →
     (3 : ℝ) / ρ ^ 2 *
-      ((angularClumpPartition hclumps).sizePowerSum d : ℝ) *
+      (n : ℝ) *
         Real.log (2 * (n : ℝ) / ε) ≤ (M₂ : ℝ) →
     2 * σ < minAmplitude μ (Nat.zero_lt_of_lt hn) * ((1 - ρ) *
       (positiveCubeClumpCoefficient d n nStar β) ^ 2 *
@@ -239,16 +235,16 @@ def PositiveCubeClumpNumberDetectionConclusion (d n nStar : ℕ) (hn : 2 ≤ n)
     (β : ℝ) : Prop :=
   ∀ (L A M₁ M₂ : ℕ) (μ : AtomicMeasure d n) (measurement : Point d → ℂ)
     (τ η Ω σ ρ ε : ℝ)
-    (hclumps : IsAngularClumpStructure μ.node A nStar τ η),
+    (_hclumps : IsAngularClumpStructure μ.node A nStar τ η),
     LiCubeClumpGeometry μ A nStar L τ η β hn →
     n ≤ M₁ → n ≤ M₂ → M₁ ≤ (L + 1) ^ d → M₂ ≤ (L + 1) ^ d →
     (2 * L : ℝ) ≤ Ω → IsBandMeasurement μ Ω σ measurement →
     0 < ρ → ρ < 1 → 0 < ε → ε < 1 →
     (3 : ℝ) / ρ ^ 2 *
-      ((angularClumpPartition hclumps).sizePowerSum d : ℝ) *
+      (n : ℝ) *
         Real.log (2 * (n : ℝ) / ε) ≤ (M₁ : ℝ) →
     (3 : ℝ) / ρ ^ 2 *
-      ((angularClumpPartition hclumps).sizePowerSum d : ℝ) *
+      (n : ℝ) *
         Real.log (2 * (n : ℝ) / ε) ≤ (M₂ : ℝ) →
     2 * σ < minAmplitude μ (Nat.zero_lt_of_lt hn) * ((1 - ρ) *
       (positiveCubeClumpCoefficient d n nStar β) ^ 2 *
@@ -280,7 +276,7 @@ theorem positiveCubeClumpMUSIC_and_numberDetection_highProbability
       hM₁ hM₂ hM₁N hM₂N hband hmeasurement hρ0 hρ1 hε0 hε1 hsample₁ hsample₂ hsmall
     have hn : 2 ≤ n := by omega
     have hn0 : 0 < n := by omega
-    have hM₁lt : n < M₁ := positiveCubeClump_sampleCount_gt hd hn μ hclumps
+    have hM₁lt : n < M₁ := positiveCubeClump_sampleCount_gt hn
       hρ0 hρ1 hε0 hε1 hsample₁
     have hL0 : 0 < L := by
       have h := hgeom.2.1
@@ -339,7 +335,7 @@ theorem positiveCubeClumpMUSIC_and_numberDetection_highProbability
       hM₁ hM₂ hM₁N hM₂N hband hmeasurement hρ0 hρ1 hε0 hε1 hsample₁ hsample₂ hsmall
     have hn : 2 ≤ n := by omega
     have hn0 : 0 < n := by omega
-    have hM₁lt : n < M₁ := positiveCubeClump_sampleCount_gt hd hn μ hclumps
+    have hM₁lt : n < M₁ := positiveCubeClump_sampleCount_gt hn
       hρ0 hρ1 hε0 hε1 hsample₁
     have hL0 : 0 < L := by
       have h := hgeom.2.1

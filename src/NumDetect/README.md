@@ -126,8 +126,11 @@ with probability at least $1-\epsilon$, under
 
 $$
 1\le m\le(L+1)^d,\qquad
-m\ge\frac3{\rho^2}\left(\sum_a n_a^{2d}\right)\log\frac n\epsilon.
+m\ge\frac{3n}{\rho^2}\log\frac n\epsilon.
 $$
+
+The capped-weight row bound is $(5/2)n$, so the sample count is proportional
+to the total node count $n$.
 
 The manuscript places the proof and its translation and row-selection lemmas
 in Appendix C; the corresponding Lean declarations retain their stable names.
@@ -137,7 +140,7 @@ hypothesis appears in this theorem. Unit amplitudes are internal witnesses
 for its node-only statement. There is no upper singular-value conclusion.
 
 The two independent uniform samples for MUSIC use $n\le M_1,M_2\le(L+1)^d$
-and the same rate with $\log(2n/\epsilon)$. This rate implies $n<M_i$;
+and the rate $M_i\ge3n\rho^{-2}\log(2n/\epsilon)$. This rate implies $n<M_i$;
 the deterministic noise-space proof derives the strict row count internally.
 [RandomClumpMUSIC.lean](RandomClumpMUSIC.lean) proves the noiseless GHM lower
 bound and, when

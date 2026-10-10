@@ -11,10 +11,10 @@ complete interface. Declarations are in `LeanNumDetect.RandSamp`.
 [CubeWeakLowerSampling.lean](CubeWeakLowerSampling.lean) proves
 `cubeFixedSupport_weak_minSingularValue_probability` for actual uniform
 subsets of the Fourier cube. For $d,n\ge1$, a positive-definite full cube
-Gram matrix, $L\ge8n$, $S\ge n$, $0<\rho,\epsilon<1$, and
+Gram matrix, $L\ge8n$, $0<\rho,\epsilon<1$, and
 
 $$
-m\ge3\rho^{-2}S\log(n/\epsilon),\qquad 1\le m\le(L+1)^d,
+m\ge3\rho^{-2}n\log(n/\epsilon),\qquad 1\le m\le(L+1)^d,
 $$
 
 its event of probability at least $1-\epsilon$ gives
@@ -43,7 +43,7 @@ original unweighted Fourier rows.
 [NumDetect/LiCubeClumpBounds.lean](../NumDetect/LiCubeClumpBounds.lean)
 supplies the deterministic full-cube singular-value lower bound under
 Li's clump geometry. The manuscript-facing theorem combines it with this
-sampling result and chooses $S=\sum_a n_a^{2d}$ in
+sampling result with the total node count $n$ in
 [NumDetect/RandomClumpVandermonde.lean](../NumDetect/RandomClumpVandermonde.lean).
 The geometric conditions enter the deterministic estimate; the uniform
 sampling coefficient is independent of bandwidth and node separation.

@@ -60,7 +60,7 @@ theorem positiveCubeClumpVandermonde_normalized_lower_probability
     (hm : 1 ≤ m) (hmN : m ≤ (L + 1) ^ d)
     (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (hε0 : 0 < ε) (_hε1 : ε < 1)
     (hsample : (3 : ℝ) / ρ ^ 2 *
-      ((angularClumpPartition hclumps).sizePowerSum d : ℝ) *
+      (n : ℝ) *
         Real.log ((n : ℝ) / ε) ≤ (m : ℝ)) :
     1 - ε ≤ probability (fun W : FiniteSample (CubeFrequency d L) m =>
       Real.sqrt (1 - ρ) * positiveCubeClumpLower d n nStar L β
@@ -69,14 +69,12 @@ theorem positiveCubeClumpVandermonde_normalized_lower_probability
   have hL : 8 * n ≤ L := hgeom.2.1
   have hG := cube_fullGram_posDef_of_distinct hd (by omega : n ≤ L) μ.node
     (μ.distinctMultidimensionalAngularNodes hclumps.2.2.2.1)
-  have hnS : (n : ℝ) ≤ ((angularClumpPartition hclumps).sizePowerSum d : ℝ) := by
-    exact_mod_cast (angularClumpPartition hclumps).n_le_sizePowerSum hd
-  have hs : 3 * ((angularClumpPartition hclumps).sizePowerSum d : ℝ) / ρ ^ 2 *
+  have hs : 3 * (n : ℝ) / ρ ^ 2 *
       Real.log ((n : ℝ) / ε) ≤ (m : ℝ) := by
-    convert hsample using 1 <;> ring
+    convert hsample using 1; ring
   have hp := cubeFixedSupport_weak_minSingularValue_probability
     (d := d) (n := n) (m := m) (by omega) (by omega) hL hm hmN μ.node hG
-    hnS hρ0 hρ1 hε0 hs
+    hρ0 hρ1 hε0 hs
   have hfull := liCubeClumpVandermonde_normalized_uniform_lower μ hd hn hgeom
   apply hp.trans
   apply probability_mono
@@ -99,7 +97,7 @@ theorem positiveCubeClumpVandermonde_unnormalized_lower_probability
     (hm : 1 ≤ m) (hmN : m ≤ (L + 1) ^ d)
     (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (hε0 : 0 < ε) (hε1 : ε < 1)
     (hsample : (3 : ℝ) / ρ ^ 2 *
-      ((angularClumpPartition hclumps).sizePowerSum d : ℝ) *
+      (n : ℝ) *
         Real.log ((n : ℝ) / ε) ≤ (m : ℝ)) :
     1 - ε ≤ probability (fun W : FiniteSample (CubeFrequency d L) m =>
       Real.sqrt ((m : ℝ) * (1 - ρ)) * positiveCubeClumpCoefficient d n nStar β *
@@ -133,7 +131,7 @@ theorem positiveCubeClumpVandermonde_lower_highProbability
     (hm : 1 ≤ m) (hmN : m ≤ (L + 1) ^ d)
     (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (hε0 : 0 < ε) (hε1 : ε < 1)
     (hsample : (3 : ℝ) / ρ ^ 2 *
-      ((angularClumpPartition hclumps).sizePowerSum d : ℝ) *
+      (n : ℝ) *
         Real.log ((n : ℝ) / ε) ≤ (m : ℝ)) :
     1 - ε ≤ probability (fun W : FiniteSample (CubeFrequency d L) m =>
       Real.sqrt ((m : ℝ) * (1 - ρ)) * positiveCubeClumpCoefficient d n nStar β *

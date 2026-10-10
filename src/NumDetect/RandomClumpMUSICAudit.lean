@@ -3,7 +3,8 @@ import Lean.Util.CollectAxioms
 import Lean.Util.Sorry
 
 /-! Strict trust-boundary audit of the unconditional manuscript-model random
-VDM, GHM, MUSIC correlation, and number-detection chain under Li's geometry. -/
+VDM, GHM, MUSIC correlation, and number-detection chain under Li's geometry
+with sample counts proportional to the total node count n. -/
 
 open Lean Elab Command
 
@@ -55,4 +56,4 @@ run_cmd do
     for ax in ← collectAxioms name do
       unless ordinary.contains ax do
         throwError "Unexpected axiom {ax} in random-clump result {name}"
-  logInfo "Random-clump audit passed: Li geometry, actual Fourier frame thickness, capped weights, unchanged uniform sampling, unnormalized VDM, GHM noise, MUSIC correlation and number detection use no admissions or project axioms."
+  logInfo "Random-clump audit passed: Li geometry, actual Fourier frame thickness, capped weights, n-based sample counts, unchanged uniform sampling, unnormalized VDM, GHM noise, MUSIC correlation and number detection use no admissions or project axioms."

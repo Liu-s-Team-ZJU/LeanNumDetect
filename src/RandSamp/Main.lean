@@ -19,7 +19,7 @@ lower spectral exponent, and the exact dimension-one corollary with the
 original absolute constant `3072`.
 
 The separate manuscript lower-only multiclump interface uses
-`3 ρ⁻² (Σ n_a^(2d)) log(n/ε)` and a bandwidth-independent coefficient
+`3 n ρ⁻² log(n/ε)` and a bandwidth-independent coefficient
 `C(d,n,nStar,β)`. `CubeWeakLowerSampling` proves the uniform lower sampling
 step; the Li geometric estimate and model conversions are assembled in
 `NumDetect.RandomClumpVandermonde` and audited with the algorithms in

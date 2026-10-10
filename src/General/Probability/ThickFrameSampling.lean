@@ -47,26 +47,19 @@ theorem exists_thick_frame_weights {N n : ℕ} (hN : 0 < N) (hn : 0 < n)
 theorem sampleMean_thick_frame_lower_bound_probability {N n m : ℕ}
     (hN : 0 < N) (hn : 0 < n) (hm : 1 ≤ m) (hmN : m ≤ N)
     (f : Fin N → EuclideanSpace ℂ (Fin n)) (hfull : mean (framePopulation f) = 1)
-    {θ S ρ ε : ℝ} (hθ : 0 < θ) (hnS : (n : ℝ) ≤ S)
+    {θ ρ ε : ℝ} (hθ : 0 < θ)
     (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (hε : 0 < ε)
     (hthick : ∀ U : Submodule ℂ (EuclideanSpace ℂ (Fin n)),
       (n+1)*(n-Module.finrank ℂ U)*N ≤ 2*n^2*(Finset.univ.filter (fun k =>
         ∀ u : U, θ < ‖f k-(u : EuclideanSpace ℂ (Fin n))‖)).card)
-    (hsample : 3*S/ρ^2*Real.log ((n : ℝ)/ε) ≤ (m : ℝ)) :
+    (hsample : 3*(n : ℝ)/ρ^2*Real.log ((n : ℝ)/ε) ≤ (m : ℝ)) :
     1-ε ≤ probability (fun Ω : Sample N m => ∀ x : EuclideanSpace ℂ (Fin n),
       ((1-ρ)/2)*thickFrameDetFloor n θ*‖x‖^2 ≤ quadratic (sampleMean (framePopulation f) Ω) x) := by
   obtain ⟨w, hw, hG, hlower, hbound⟩ := exists_thick_frame_weights hN hn f hfull hθ hthick
   have hn' : (0 : ℝ) < n := by exact_mod_cast hn
-  have hS : 0 < S := hn'.trans_le hnS
-  have hb (k : Fin N) (x : EuclideanSpace ℂ (Fin n)) :
-      quadratic (weightedPopulation (framePopulation f) w k) x ≤
-        (5/2 : ℝ)*S*quadratic (mean (weightedPopulation (framePopulation f) w)) x := by
-    apply (hbound k x).trans
-    exact mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hnS (by norm_num))
-      (quadratic_nonneg hG.posSemidef x)
   have hp := sampleMean_weighted_half_lower_bound_probability hN hn hm hmN (framePopulation f) w
-    hS hρ0 hρ1 hε (framePopulation_posSemidef f) (fun k => (hw k).1.le)
-    (fun k => (hw k).2) hG (by simpa only [hfull, quadratic_identity] using hlower) hb hsample
+    hn' hρ0 hρ1 hε (framePopulation_posSemidef f) (fun k => (hw k).1.le)
+    (fun k => (hw k).2) hG (by simpa only [hfull, quadratic_identity] using hlower) hbound hsample
   simpa only [hfull, quadratic_identity] using hp
 
 end
