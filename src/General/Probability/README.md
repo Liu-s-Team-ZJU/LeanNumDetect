@@ -14,6 +14,10 @@
 | [SmoothFramePotential.lean](SmoothFramePotential.lean) | Smooth logarithmic frame potential and its scalar entropy and weight bounds |
 | [SmoothWeightExistence.lean](SmoothWeightExistence.lean) | Compact potential sublevels, a smooth minimum, and a direct inverse-eigenvalue lower bound from a logarithmic average |
 | [LogarithmicFrameSampling.lean](LogarithmicFrameSampling.lean) | Uniform sampling from stationary logarithmic frame weights, with a direct normalized rank-one row cap |
+| [GreedyCyclePotential.lean](GreedyCyclePotential.lean) | Exact acceptance/reset potential identities, codimension counting and finite iid contraction |
+| [GreedyFrameProcess.lean](GreedyFrameProcess.lean) | Actual accepted-prefix transitions and completed-basis Gram energy invariants |
+| [GreedyFrameSampling.lean](GreedyFrameSampling.lean) | Convex comparison, matrix Laplace lower tail and the budget $3n\log(n/\epsilon)$ |
+| [GreedyThickFrameSampling.lean](GreedyThickFrameSampling.lean) | Complete finite-frame sampling theorem from row norms and codimension-sensitive subspace thickness |
 | [CappedWeightEntropy.lean](CappedWeightEntropy.lean) | Capped entropy, scalar weight bounds, and threshold-counting estimates |
 | [CappedWeightSpectralCoercivity.lean](CappedWeightSpectralCoercivity.lean) | Subspace-thickness spectral estimates and determinant floors for capped potentials |
 | [ThickFrameSampling.lean](ThickFrameSampling.lean) | Standalone uniform lower sampling theorem from quantitative subspace thickness and capped weights |
@@ -163,9 +167,9 @@ and bounds each normalized rank-one row directly by
 $R=12n/5\le5n/2$. This retains the sample count
 $m\ge3n\rho^{-2}\log(n/\epsilon)$.
 
-For the actual Fourier cube, the needed logarithmic average follows directly
+For the retained logarithmic Fourier-cube sampler, the needed average follows directly
 from Hadamard's determinant inequality and the connected row basis in
-[CubeFrameLogDet.lean](../Fourier/CubeFrameLogDet.lean). The public cube
+[CubeFrameLogDet.lean](../Fourier/CubeFrameLogDet.lean). That cube
 sampler exposes no logarithmic-average or leverage hypothesis. Its proof uses
 [FiniteFrameGram.lean](../MatrixAnalysis/FiniteFrameGram.lean),
 [InverseMetric.lean](../MatrixAnalysis/InverseMetric.lean), and
@@ -179,6 +183,37 @@ provide the threshold-counting and spectral estimates.
 capped-weight iteration to prove `sampleMean_thick_frame_lower_bound_probability`.
 [SmoothWeightThickness.lean](SmoothWeightThickness.lean) also derives smooth
 potential minima and inverse determinant floors from thickness. These results
-are checked together with the direct construction by the strict random-clump
-audit; its dependency checks require the public cube theorem to keep the direct
-logarithmic-average route.
+are checked together with the other complete constructions by the strict
+random-clump audit.
+
+## Greedy-cycle lower sampling
+
+The manuscript's `lem:greedy-sampling` uses a finite frame with
+$\|f_k\|\le M$ and, for every $r$-dimensional subspace $U$,
+$\mathbb P\{\operatorname{dist}(f_k,U)>\tau\}\ge(n-r)/(2n)$.
+The exact constants are
+
+$$
+b=\frac{\tau^{2n}}{(nM^2)^{n-1}},\qquad
+\kappa=\frac{b}{15n\log(4n+1)}.
+$$
+
+`GreedyFrameProcess` retains complete accepted bases and a current accepted
+prefix. `GreedyBasisBounds` proves their common Gram energy $b$ by the
+Gram--Schmidt determinant and trace bounds. The scalar potential is
+
+$$
+Z=q^J\frac{n-r+1/4}{n+1/4},\qquad q=(4n+1)^{-1}.
+$$
+
+Every accepted row subtracts $q^J/(n+1/4)$, including the row completing a
+group. The iid expected potential contracts by $1-2/(5n)$, and the trace
+exponential is at most $nZ$. The fully proved `SamplingConvexOrder` comparison
+transfers its expectation to uniform sampling without replacement; the
+Laplace step gives failure at most $n\exp(-m/(3n))$.
+`sampleMean_greedy_thick_frame_lower_tail` proves this tail, and
+`sampleMean_greedy_thick_frame_probability` gives success at least $1-\epsilon$
+when $m\ge3n\log(n/\epsilon)$. Both assume only row norms, subspace thickness
+and the stated sample budget. The random-clump audit requires the public
+theorem to use this proof chain and excludes the retained variational and
+capped-weight constructions from that theorem's dependencies.

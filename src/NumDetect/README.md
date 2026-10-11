@@ -25,7 +25,7 @@ shown.
 | Definition `defi:high_dim_clumps` | Multidimensional clump structure | [Basic.lean](Basic.lean): `IsAngularClumpStructure` | **Equivalent**. |
 | Theorem `thm:segmented-vandermonde` | Segmented-grid minimum singular value | [Segmented/Main.lean](Segmented/Main.lean): `segmentedVandermonde_minimumSingularValue` | **Equivalent**. |
 | Theorem `thm:segmented_threshold` | Segmented-grid singular-value threshold | [Segmented/Main.lean](Segmented/Main.lean): `segmentedGHM_singularValueThreshold` | **Equivalent**. |
-| Theorem `thm:random-cube-multiclump` | Unnormalized multi-clump random cube Vandermonde minimum singular-value lower bound | [RandomClumpVandermonde.lean](RandomClumpVandermonde.lean): `positiveCubeClumpVandermonde_lower_highProbability` | **Equivalent**; exact $(A,\infty,\tau,\eta,n^\star)$ geometry, literal sampling coefficient $3$, $C(d,n,n^\star,\beta)$ independent of bandwidth and spacing, and $\sqrt{m(1-\rho)}$ on the right. Li geometry and all sampling prerequisites are proved without additional leverage or thickness assumptions. |
+| Theorem `thm:random-cube-multiclump` | Unnormalized multi-clump random cube Vandermonde minimum singular-value lower bound | [RandomClumpVandermonde.lean](RandomClumpVandermonde.lean): `positiveCubeClumpVandermonde_lower_highProbability` | **Equivalent**; exact $(A,\infty,\tau,\eta,n^\star)$ geometry, sample budget $3n\log(n/\epsilon)$, $C(d,n,n^\star,\beta)$ independent of bandwidth and spacing, and $\sqrt m$ on the right. Li geometry and all sampling prerequisites are proved without additional leverage or thickness assumptions. |
 | Paragraph following `thm:random-cube-multiclump` | Random-GHM number detection under multi-clump geometry | [RandomClumpMUSIC.lean](RandomClumpMUSIC.lean): `positiveCubeClumpGHM_signalSingularValue_lower_highProbability`, `positiveCubeClumpGHM_numberDetection_highProbability` | **Equivalent**; proves the strict signal and tail thresholds and exactly $n$ values above $\sigma\sqrt{M_1M_2}$. |
 | Theorem `thm:resolutionrandghmnumber1` | Random-GHM noise and signal thresholds | [Random.lean](Random.lean): `realizedRandomGHM_tail_singularValue_lt` (noise), `randomGHM_signalThreshold_of_separation` (signal) | **Equivalent**. |
 | Theorem `thm:nonuniform_vdm_scaling` | Nonuniform one-dimensional Vandermonde scaling | [RandSamp/NonuniformVandermonde.lean](../RandSamp/NonuniformVandermonde.lean): `RandSamp.nonuniformVandermonde_minimumSingularValue` | **Equivalent**. |
@@ -45,8 +45,8 @@ shown.
 | Lemma `lem:neighborset_segmented` | Neighbor-set interpolation polynomial and $L^2$ bound | [Segmented/Interpolation.lean](Segmented/Interpolation.lean): `neighborSetSegmented_polynomial_finiteSet` | **Equivalent**. |
 | Lemma `lem:cube-vandermonde-translations` (Appendix C) | Translation identities and bandwidth-independent operator bound for normalized cube rows | [General/Fourier/CubeTranslationBounds.lean](../General/Fourier/CubeTranslationBounds.lean): `LeanNumDetect.CubeShiftBounds.integerIsotropicCubeRootRow_translation`, `LeanNumDetect.CubeShiftBounds.cubeTranslation_neg_mul`, `LeanNumDetect.CubeShiftBounds.cubeTranslation_norm_le` | **Equivalent after Gram whitening and row normalization**; the bound is $K=2^{4dn^2}$ for every integer coordinate displacement of magnitude at most $L$. |
 | Lemma `lem:cube-row-selection` (Appendix C) | Quantitative selection of independent rows within the cube | [General/Fourier/CubeFrameBasis.lean](../General/Fourier/CubeFrameBasis.lean): `LeanNumDetect.CubeFrameBasis.cubeFrameRow_connectedBasis` | **Equivalent after Gram whitening and row normalization**; the coordinate sum is at most $(n-1)Q$ and the coefficient recursion is $\alpha_0=K^{-1}$, $\alpha_r=\alpha_{r-1}^2/(3KM^2)$ with $M=K\sqrt n$. |
-| Lemma `lem:cube-logdet-mean` (Appendix C) | Logarithmic determinant average for the normalized Fourier cube | [General/Fourier/CubeFrameLogDet.lean](../General/Fourier/CubeFrameLogDet.lean): `LeanNumDetect.CubeFrameLogDet.cubeFrameRow_logDetMean_lower` | **Equivalent after Gram whitening and row normalization**; every positive-definite matrix and every positive radius are retained, with coefficient $1/(2n)$. |
-| Lemma `lem:chernoff-without-replacement` (Appendix C) | Exact matrix Chernoff lower tail for uniform subsets | [General/Probability/MatrixChernoff.lean](../General/Probability/MatrixChernoff.lean): `LeanNumDetect.FiniteMatrixSampling.matrixChernoff_withoutReplacement_lower` | **Equivalent after enumeration and division by the sample size**; the Rayleigh event is the minimum-eigenvalue event and the exact Chernoff factor equals the stated exponential. |
+| Lemma `lem:cube-subspace-thickness` (Appendix C) | Uniform fraction of cube rows at distance strictly greater than the threshold from every proper subspace | [General/Fourier/CubeFrameThickness.lean](../General/Fourier/CubeFrameThickness.lean): `LeanNumDetect.CubeFrameThickness.cubeFrameRow_thickCard`; [General/Fourier/CubeGreedyFrameBounds.lean](../General/Fourier/CubeGreedyFrameBounds.lean): `LeanNumDetect.CubeGreedyFrameBounds.cubeFrameRow_probability_far_real` | **Equivalent after Gram whitening and row normalization**; threshold $\theta=\alpha_{n-1}/(2K)$ and proportion $(n-r)/(2n)$. |
+| Lemma `lem:greedy-sampling` (Appendix C) | Explicit lower tail for sampling a subspace-thick finite frame without replacement | [General/Probability/GreedyThickFrameSampling.lean](../General/Probability/GreedyThickFrameSampling.lean): `LeanNumDetect.FiniteMatrixSampling.sampleMean_greedy_thick_frame_lower_tail`, `sampleMean_greedy_thick_frame_probability` | **Equivalent after enumeration**; $b=a^{2n}/(nM^2)^{n-1}$, $\kappa=b/(15n\log(4n+1))$, and the closed lower-tail event has probability at most $ne^{-m/(3n)}$. Determinant basis estimates, the actual greedy process, scalar potential and convex comparison are proved internally. |
 
 The well-separated random bounds and the MUSIC location and peak-selection
 modules remain independent fully proved results. They are not active
@@ -92,19 +92,18 @@ upper bound. Li's published cube corollary is stated for $d\ge2$; the
 formalization also proves the interval case in $d=1$ from the same
 localization and interpolation constructions.
 
-The standalone logarithmic determinant average lemma `lem:cube-logdet-mean`,
-including `eq:cube-logdet-mean`, in Appendix C is proved by `cubeFrameRow_logDetMean_lower` in
-[CubeFrameLogDet.lean](../General/Fourier/CubeFrameLogDet.lean), using the
-Hadamard estimate in
-[FrameLogDetMean.lean](../General/MatrixAnalysis/FrameLogDetMean.lean).
-[CubeWeakLowerSampling.lean](../RandSamp/CubeWeakLowerSampling.lean)
-constructs auxiliary weights and proves the unchanged uniform subset
-sampling event. These weights are internal to the proof; neither the
-sampling distribution nor either algorithm is modified. The exact public
-coefficient is
+Appendix C derives the subspace-thickness estimate
+`lem:cube-subspace-thickness` from the cube translation and row-selection
+lemmas. Its generic `lem:greedy-sampling` is implemented in
+[GreedyThickFrameSampling.lean](../General/Probability/GreedyThickFrameSampling.lean).
+[CubeGreedyLowerSampling.lean](../RandSamp/CubeGreedyLowerSampling.lean)
+applies this theorem to the whitened Fourier cube and proves the event for
+the original uniform subsets.
+
+The exact public coefficient is
 
 $$
-C(d,n,n^\star,\beta)=\sqrt{\delta(d,n)/2}\,
+C(d,n,n^\star,\beta)=\sqrt{\kappa(d,n)}\,
 \frac{(2-e^{1/(2\beta)})^{n^\star/2}}
 {\sqrt n(\sqrt2)^{n^\star-1}(\sqrt{3n^\star})^d
 (4\pi n^\star)^{n^\star-1}}.
@@ -115,55 +114,62 @@ $\alpha_0=1/K$, $\alpha_{r+1}=\alpha_r^2/(3KM^2)$,
 $\theta=\alpha_{n-1}/(2K)$, and
 
 $$
-\delta(d,n)=\exp[-5n-6n\log(12n/(5\theta^2))].
+b(d,n)=\frac{\theta^{2n}}{(nM^2)^{n-1}},
+\qquad
+\kappa(d,n)=\frac{b(d,n)}{15n\log(4n+1)}.
 $$
 
-Thus $C>0$ and is independent of $L,\Delta_1,\rho,\epsilon$.
-Its dependence on $n$ is conservative. The manuscript-facing node-only
-result in [RandomClumpVandermonde.lean](RandomClumpVandermonde.lean) proves
+The constant $C>0$ depends only on $d,n,n^\star,\beta$.
+The node-only result in
+[RandomClumpVandermonde.lean](RandomClumpVandermonde.lean) proves
 
 $$
 \sigma_{\min}(\mathcal V_{\mathcal W}(\mathcal X))
-\ge\sqrt{m(1-\rho)}\,C(d,n,n^\star,\beta)(L\Delta_1)^{n^\star-1}
+\ge\sqrt m\,C(d,n,n^\star,\beta)(L\Delta_1)^{n^\star-1}
 $$
 
 with probability at least $1-\epsilon$, under
 
 $$
 1\le m\le(L+1)^d,\qquad
-m\ge\frac{3n}{\rho^2}\log\frac n\epsilon.
+m\ge3n\log\frac n\epsilon.
 $$
 
-The smooth potential uses this logarithmic average directly, without
-subspace threshold counting or layer integration. The stationary covariance
-is bounded below by $\delta I$ through a direct precision-eigenvalue bound.
-Each normalized weighted rank-one row has norm at most $12n/5\le(5/2)n$,
-so the sample count is proportional to the total node count $n$.
+For the iid comparison, [GreedyFrameProcess.lean](../General/Probability/GreedyFrameProcess.lean)
+accepts each row whose distance from the current span is strictly greater
+than $\theta$, resets after $n$ accepted rows, and retains the completed
+Gram contributions. [GreedyBasisBounds.lean](../General/MatrixAnalysis/GreedyBasisBounds.lean)
+proves the energy bound $b$ by the Gram determinant and row norm bound.
+The scalar potential is
+$q^J(n-r+1/4)/(n+1/4)$, with $q=(4n+1)^{-1}$, completed-cycle count $J$
+and current dimension $r$. Its conditional mean contracts by
+$1-2/(5n)$, and it bounds the trace exponential at
+$t=\log(4n+1)/b$.
+[SamplingConvexOrder.lean](../General/Probability/SamplingConvexOrder.lean)
+transfers the iid trace moment to uniform sampling without replacement.
+Markov's inequality yields the tail $ne^{-m/(3n)}$.
 
-Standalone subspace-thickness, capped-iteration, and smooth-thickness results
-remain available in the [Fourier](../General/Fourier/README.md),
+The geometric thickness hypothesis is derived from the cube and does not
+appear as an additional hypothesis of the manuscript theorem. Unit
+amplitudes are internal witnesses for its node-only statement.
+The logarithmic-potential, capped-weight and smooth-thickness results
+remain reusable independent results in the
+[Fourier](../General/Fourier/README.md),
 [matrix-analysis](../General/MatrixAnalysis/README.md), and
-[probability](../General/Probability/README.md) libraries. The current
-manuscript-facing proof retains the direct logarithmic-average route.
-`RandomClumpMUSICAudit` checks both the reusable alternative results and the
-actual dependencies of the public theorem.
+[probability](../General/Probability/README.md) libraries.
+[RandomClumpMUSICAudit.lean](RandomClumpMUSICAudit.lean) checks each public
+theorem's actual dependencies for the concrete greedy process, basis
+bounds, cycle potential and convex comparison, and excludes these legacy
+routes while independently auditing their trust boundaries.
 
-
-The manuscript places the proof and its translation and row-selection lemmas
-in Appendix C; the corresponding Lean declarations retain their stable names.
-
-No leverage, thickness, arrangement, comparable-spacing, or norming
-hypothesis appears in this theorem. Unit amplitudes are internal witnesses
-for its node-only statement. There is no upper singular-value conclusion.
-
-The two independent uniform samples for MUSIC use $n\le M_1,M_2\le(L+1)^d$
-and the rate $M_i\ge3n\rho^{-2}\log(2n/\epsilon)$. This rate implies $n<M_i$;
-the deterministic noise-space proof derives the strict row count internally.
+The two independent uniform samples for MUSIC use
+$n\le M_1,M_2\le(L+1)^d$ and the rate
+$M_i\ge3n\log(2n/\epsilon)$. This rate implies $n<M_i$.
 [RandomClumpMUSIC.lean](RandomClumpMUSIC.lean) proves the noiseless GHM lower
 bound and, when
 
 $$
-2\sigma<m_{\min}(1-\rho)C(d,n,n^\star,\beta)^2
+2\sigma<m_{\min}C(d,n,n^\star,\beta)^2
 (L\Delta_1)^{2n^\star-2},
 $$
 
@@ -171,16 +177,14 @@ the uniform correlation bound with probability at least $1-\epsilon$:
 
 $$
 \|R_\sigma-R\|_\infty\le
-\frac{2\sigma}{m_{\min}(1-\rho)C(d,n,n^\star,\beta)^2
+\frac{2\sigma}{m_{\min}C(d,n,n^\star,\beta)^2
 (L\Delta_1)^{2n^\star-2}}.
 $$
 
 The same factor event proves exactly $n$ measured singular values above
 $\sigma\sqrt{M_1M_2}$. The source tuple is fixed; the noise need not be
-independent of the sample. No location-distance conclusion is asserted.
-[RandomClumpMUSICAudit.lean](RandomClumpMUSICAudit.lean) audits the geometry,
-weight construction, unchanged sampling distribution, normalization,
-noise, correlation and number-detection chain.
+independent of the sample. The deterministic perturbation and
+number-detection lemmas are specialized at distortion parameter zero.
 
 ## Verification
 

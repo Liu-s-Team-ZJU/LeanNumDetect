@@ -19,6 +19,8 @@ thresholding and MUSIC arguments.
 | [MUSICSubspacePerturbation.lean](MUSICSubspacePerturbation.lean) | Proved fixed-rank perturbation bound for trailing left singular subspaces |
 | [TraceExponential.lean](TraceExponential.lean) | Spectral expansion, Jensen, convexity, and detection of Rayleigh events by the trace exponential |
 | [TraceExponentialBounds.lean](TraceExponentialBounds.lean) | PSD exponential chord and weighted trace bounds |
+| [GreedyBasisBounds.lean](GreedyBasisBounds.lean) | Exact Gram--Schmidt determinant identity, accepted-prefix independence, and common Gram energy lower bounds on the span and on the full space (manuscript `lem:greedy-sampling`) |
+| [GreedyCycleTraceBounds.lean](GreedyCycleTraceBounds.lean) | Trace-exponential bound from a global Gram floor and an additional floor on an $r$-dimensional subspace (manuscript `eq:greedy-trace-potential`) |
 | [GoldenThompsonDyadic.lean](GoldenThompsonDyadic.lean) | Finite dyadic Hölder and Hermitian trace inequalities |
 | [LieTrotter.lean](LieTrotter.lean) | Banach-algebra Lie--Trotter product formula |
 | [GoldenThompson.lean](GoldenThompson.lean) | Complete Golden--Thompson trace inequality for finite complex Hermitian matrices |
@@ -41,7 +43,9 @@ All declarations are fully proved and live under the `LeanNumDetect` namespace.
 Frame Gram, inverse-metric and positive-definite determinant tools are in
 `LeanNumDetect.FrameMatrixBounds`.
 
-The capped-weight modules remain reusable alongside the direct smooth
-variational construction. The current random-clump sampling theorem uses
-`FrameMatrixBounds`, the logarithmic determinant average, and
-`SmoothFrameStationarity`; its strict audit checks the actual dependency chain.
+The current random-clump sampling theorem uses `GreedyBasisBounds` and
+`GreedyCycleTraceBounds` with the accepted-vector process. The common lower
+energy is exactly $b=\theta^{2n}/(nM^2)^{n-1}$ for every accepted prefix;
+completed bases contribute $bI$. The strict audit checks the actual dependency
+chain. The capped-weight and logarithmic determinant modules remain reusable
+standalone results.

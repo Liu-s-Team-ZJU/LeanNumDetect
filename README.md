@@ -28,9 +28,9 @@ sampling, and off-grid relative Gram results of the RandSamp manuscript.
 | Exact one-dimensional multiclump corollary | [MultiClumpTheorem.lean](src/RandSamp/MultiClumpTheorem.lean): `multiClump_sampling_statement` |
 | Segmented-grid number-detection singular-value threshold (`thm:segmented_threshold`) | [Segmented/Main.lean](src/NumDetect/Segmented/Main.lean): theorem `segmentedGHM_singularValueThreshold` |
 | Random-GHM number-detection threshold (`thm:resolutionrandghmnumber1`) | [Random.lean](src/NumDetect/Random.lean): theorem `randomGHM_singularValueThreshold_of_separation` |
-| Fourier-cube logarithmic determinant average (`lem:cube-logdet-mean`) | [CubeFrameLogDet.lean](src/General/Fourier/CubeFrameLogDet.lean): `cubeFrameRow_logDetMean_lower`, using the Hadamard estimate in [FrameLogDetMean.lean](src/General/MatrixAnalysis/FrameLogDetMean.lean) |
-| Smooth variational frame weights for random sampling | [SmoothWeightExistence.lean](src/General/Probability/SmoothWeightExistence.lean): `exists_smoothFramePotential_minimizer_of_entropy` and `smoothFramePotential_inverse_quadratic_lower_of_entropy`, [SmoothFrameStationarity.lean](src/General/MatrixAnalysis/SmoothFrameStationarity.lean): `smoothFramePotential_minimizer_stationary`, and [LogarithmicFrameSampling.lean](src/General/Probability/LogarithmicFrameSampling.lean): `sampleMean_logarithmic_frame_lower_bound_probability` |
-| Multi-clump random VDM lower bound (`thm:random-cube-multiclump`) | [RandomClumpVandermonde.lean](src/NumDetect/RandomClumpVandermonde.lean): `positiveCubeClumpVandermonde_lower_highProbability`, with the exact [manuscript model bridge](src/NumDetect/RandomClumpModel.lean), unnormalized $\mathcal V_{\mathcal W}$, explicit independent bandwidth and separation thresholds, $C(d,n,n^\star,\beta)$ and sample count $m\ge3n\rho^{-2}\log(n/\epsilon)$ |
+| Fourier-cube subspace thickness (`lem:cube-subspace-thickness`) | [CubeGreedyFrameBounds.lean](src/General/Fourier/CubeGreedyFrameBounds.lean): `cubeFrameRow_probability_far_real`, from the exact translated-row count in [CubeFrameThickness.lean](src/General/Fourier/CubeFrameThickness.lean) |
+| Greedy sampling of a thick finite frame (`lem:greedy-sampling`, `eq:greedy-sampling-tail`) | [GreedyThickFrameSampling.lean](src/General/Probability/GreedyThickFrameSampling.lean): `sampleMean_greedy_thick_frame_lower_tail` and `sampleMean_greedy_thick_frame_probability`, with the accepted-prefix process, exact Gram energy and scalar cycle potential fully proved |
+| Multi-clump random VDM lower bound (`thm:random-cube-multiclump`) | [RandomClumpVandermonde.lean](src/NumDetect/RandomClumpVandermonde.lean): `positiveCubeClumpVandermonde_lower_highProbability`, with the exact [manuscript model bridge](src/NumDetect/RandomClumpModel.lean), unnormalized $\mathcal V_{\mathcal W}$, explicit independent bandwidth and separation thresholds, $C(d,n,n^\star,\beta)$ and sample count $m\ge3n\log(n/\epsilon)$ |
 | Multi-clump random-GHM number detection | [RandomClumpMUSIC.lean](src/NumDetect/RandomClumpMUSIC.lean): `positiveCubeClumpGHM_numberDetection_highProbability`, with the strict noise threshold and exact singular-value count |
 | Multi-clump random-GHM MUSIC correlation stability (`cor:random-ghm-music-multiclump`) | [RandomClumpMUSIC.lean](src/NumDetect/RandomClumpMUSIC.lean): `positiveCubeClumpMUSIC_correlation_stability_highProbability` |
 | General GHM-MUSIC stability (`lem:stability_ghm_music`) | [MUSIC.lean](src/NumDetect/MUSIC.lean): theorem `ghmMUSIC_correlation_stability` |
@@ -39,13 +39,14 @@ sampling, and off-grid relative Gram results of the RandSamp manuscript.
 See more in [NumDetect guide](src/NumDetect/README.md).
 
 The general library also retains standalone capped-weight iteration,
-subspace-thickness estimates, and smooth weight constructions from thickness.
+logarithmic determinant estimates, and smooth weight constructions.
 See the [matrix-analysis](src/General/MatrixAnalysis/README.md),
 [Fourier](src/General/Fourier/README.md), and
 [probability](src/General/Probability/README.md) guides for these reusable
-alternatives. The current random-clump theorem uses the direct logarithmic
-determinant and stationary-weight construction; its audit checks that proof
-route as well as the trust boundary of the retained alternatives.
+alternatives. The current random-clump theorem uses subspace thickness,
+greedy accepted bases, the scalar cycle potential, convex comparison of
+sampling laws, and the matrix Laplace bound. Its audit checks this actual
+proof chain as well as the trust boundary of the retained alternatives.
 
 ## Repository structure
 

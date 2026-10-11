@@ -53,7 +53,8 @@ argument at the critical separation.
 | Standalone subspace-thickness estimates from translated conditioned rows | [TranslatedBasisThickness.lean](TranslatedBasisThickness.lean): `thick_card_of_translated_l1LowerBound`, `cube_thick_card` |
 | Subspace-thickness consequence for a selected connected cube basis | [ConnectedCubeBasisThickness.lean](ConnectedCubeBasisThickness.lean): `CubeBasisPrefix.thick_card` |
 | Subspace-thickness consequence for the concrete whitened Fourier cube | [CubeFrameThickness.lean](CubeFrameThickness.lean): `cubeFrameRow_thickCard` |
-| Direct logarithmic determinant average for the concrete whitened Fourier cube (manuscript `lem:cube-logdet-mean`, `eq:cube-logdet-mean`) | [CubeFrameLogDet.lean](CubeFrameLogDet.lean): `cubeFrameRow_logDetMean_lower` |
+| Fourier-cube norm, acceptance probability, and exact greedy energy constants (manuscript `lem:cube-subspace-thickness`, `eq:greedy-basis-constant`) | [CubeGreedyFrameBounds.lean](CubeGreedyFrameBounds.lean): `cubeFrameRow_probability_far_real`, `cubeGreedyEnergy` |
+| Standalone logarithmic determinant average for the concrete whitened Fourier cube | [CubeFrameLogDet.lean](CubeFrameLogDet.lean): `cubeFrameRow_logDetMean_lower` |
 | Polynomial Markov, point-evaluation and coefficient-energy bounds | [PolynomialEvaluationBounds.lean](PolynomialEvaluationBounds.lean) |
 | Stability of the polynomial evaluation bound under uniform perturbations | [JetPolynomialPerturbation.lean](JetPolynomialPerturbation.lean) |
 | Integer monomial moments, polynomial cross inner products and perturbations | [PolynomialCrossCorrelation.lean](PolynomialCrossCorrelation.lean) |
@@ -69,10 +70,15 @@ argument at the critical separation.
 All frequencies in this chain are angular frequencies with period $2\pi$ and
 phase $e^{ikx_j}$.
 
-The thickness modules retain general results for other sampling arguments.
-The current random-clump theorem obtains its logarithmic average directly
-from `CubeFrameBasis` and Hadamard's inequality in `CubeFrameLogDet`.
-
+The current random-clump sampling theorem uses the connected basis in
+`CubeFrameBasis`, the translated-basis count in `CubeFrameThickness`, and the
+codimension-sensitive probability in `CubeGreedyFrameBounds`. Its constants
+are exactly those of Appendix C: $K=2^{4dn^2}$, $M=K\sqrt n$,
+$\alpha_0=1/K$, $\alpha_r=\alpha_{r-1}^2/(3KM^2)$,
+$\theta=\alpha_{n-1}/(2K)$, and $b=\theta^{2n}/(nM^2)^{n-1}$.
+`comparisonConstant_closedForm` and `cubeBasisCoefficient_succ` prove the
+closed-form and recurrence normalizations. The logarithmic determinant
+modules remain standalone results.
 
 `hasFineCubeFrame_of_translatedCube` converts the proved translated-cube
 Fourier-frame theorem into the manuscript's angular one-sided cube. The real

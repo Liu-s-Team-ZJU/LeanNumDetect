@@ -8,51 +8,56 @@ complete interface. Declarations are in `LeanNumDetect.RandSamp`.
 
 ## Unconditional lower cube sampling
 
-[CubeWeakLowerSampling.lean](CubeWeakLowerSampling.lean) proves
-`cubeFixedSupport_weak_minSingularValue_probability` for actual uniform
+[CubeGreedyLowerSampling.lean](CubeGreedyLowerSampling.lean) proves
+`cubeFixedSupport_greedy_lowerGram_probability` and
+`cubeFixedSupport_greedy_minSingularValue_probability` for actual uniform
 subsets of the Fourier cube. For $d,n\ge1$, a positive-definite full cube
-Gram matrix, $L\ge8n$, $0<\rho,\epsilon<1$, and
+Gram matrix, $L\ge8n$, $\epsilon>0$, and
 
 $$
-m\ge3\rho^{-2}n\log(n/\epsilon),\qquad 1\le m\le(L+1)^d,
+m\ge3n\log(n/\epsilon),\qquad 1\le m\le(L+1)^d,
 $$
 
 its event of probability at least $1-\epsilon$ gives
 
 $$
 \sigma_{\min}(V_\Omega)
-\ge\sqrt{1-\rho}\,c(d,n)\,\sigma_{\min}(V_{\mathrm{full}}),
+\ge\sqrt{\kappa(d,n)}\,\sigma_{\min}(V_{\mathrm{full}}),
 $$
 
-where each matrix is normalized by the square root of its row count. The
-proved positive constant is
-`cubeWeakSamplingCoefficient d n`. With
-$\theta=\texttt{cubeFrameThreshold}\ d\ n$, its exact definition is
+where each matrix is normalized by the square root of its row count.
+The proved positive constant is `cubeGreedySamplingCoefficient d n`.
+With $\theta=\texttt{cubeFrameThreshold}\ d\ n$,
+$K=2^{4dn^2}$ and $M=K\sqrt n$, its exact definition is
 
 $$
-c(d,n)=\sqrt{g(n,\theta)/2},\qquad
-g(n,\theta)=\exp\!\left[-5n-6n\log\!\left(\frac{12n}{5\theta^2}\right)\right].
+b(d,n)=\frac{\theta^{2n}}{(nM^2)^{n-1}},
+\qquad
+\kappa(d,n)=\frac{b(d,n)}{15n\log(4n+1)}.
 $$
 
-The threshold and coefficient depend only on $d,n$. Cube translation and
-connected-basis estimates give a logarithmic determinant average directly
-through Hadamard's inequality. This gives compact sublevels and a minimum of
-the smooth precision-matrix potential. Its first-order condition determines
-the auxiliary weights; a direct eigenvalue bound gives their covariance
-lower bound, and the normalized rank-one row has norm at most $12n/5$.
-The weights enter the proof of concentration; the theorem samples the
-original unweighted Fourier rows.
+The threshold and coefficient depend only on $d,n$. Translation and
+connected-basis estimates prove that at least $(n-r)/(2n)$ of the whitened
+cube rows have distance strictly greater than $\theta$ from any
+$r$-dimensional subspace. The iid greedy process accepts these rows and
+resets after $n$ acceptances. Gram determinant estimates control the energy
+of every partial or completed basis. A scalar cycle potential bounds the
+trace exponential, and the convex sampling comparison transfers its mean
+to uniform subsets without replacement. The resulting lower tail is
+$ne^{-m/(3n)}$.
 
+[CubeFrameNormalization.lean](CubeFrameNormalization.lean) supplies the
+shared whitening and normalization identities. The relative Gram event
+also implies the corresponding lower comparison for every ordered
+singular value through `cubeGreedyLowerGramEvent_singularValue`.
+
+[CubeWeakLowerSampling.lean](CubeWeakLowerSampling.lean) retains its
+logarithmic-potential construction, and
 [CubeThicknessLowerSampling.lean](CubeThicknessLowerSampling.lean) retains
-`cubeFixedSupport_lowerGram_of_whitened_thickness` and
-`cubeFixedSupport_thickness_lowerGram_probability` as reusable applications
-of the standalone cube-thickness and capped-weight sampling results.
-The primary [CubeWeakLowerSampling.lean](CubeWeakLowerSampling.lean) proves
-`cubeFixedSupport_weak_lowerGram_probability` and the minimum-singular-value
-theorem through the logarithmic-average construction. The random-clump audit
-checks the retained alternative results and the actual public proof route
-separately.
-
+the capped-weight construction. These are independently audited reusable
+results. The current manuscript-facing proof uses the greedy route;
+its audit checks that the public theorem actually depends on the greedy
+process, basis bounds, scalar potential and convex comparison.
 
 [NumDetect/LiCubeClumpBounds.lean](../NumDetect/LiCubeClumpBounds.lean)
 supplies the deterministic full-cube singular-value lower bound under
