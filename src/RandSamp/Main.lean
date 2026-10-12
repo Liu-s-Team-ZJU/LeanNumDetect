@@ -22,8 +22,8 @@ The separate manuscript lower-only multiclump interface uses
 `3 n ρ⁻² log(n/ε)` and a bandwidth-independent coefficient
 `C(d,n,nStar,β)`. `CubeWeakLowerSampling` proves the uniform lower sampling
 step; the Li geometric estimate and model conversions are assembled in
-`NumDetect.RandomClumpVandermonde` and audited with the algorithms in
-`NumDetect.RandomClumpMUSICAudit`.
+`NumDetect.Random.ClumpVandermonde` and audited with the algorithms in
+`NumDetect.Random.ClumpAudit`.
 
 Every result is fully proved. `RandSamp.OffGridAudit` checks the complete
 off-grid probability chain, and `RandSamp.MultiClumpAudit` checks the

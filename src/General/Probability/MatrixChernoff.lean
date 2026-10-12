@@ -16,7 +16,7 @@ set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
 open Matrix NormedSpace
-open scoped BigOperators ComplexOrder Matrix.Norms.L2Operator
+open scoped BigOperators InnerProductSpace ComplexOrder Matrix.Norms.L2Operator
 open LeanNumDetect.TraceExponential
 
 namespace LeanNumDetect.FiniteMatrixSampling
@@ -148,5 +148,154 @@ theorem matrixChernoff_withoutReplacement_upper
       have := Real.one_le_exp_iff.mpr (show 0 ≤ θ * R by positivity)
       linarith
     simpa only [mul_assoc] using mul_le_mul_of_nonneg_left (hmean x).2 hc
+
+
+/-- The least eigenvalue of a nonempty Hermitian matrix. This definition uses
+its spectral eigenvalues, rather than defining it as a Rayleigh infimum. -/
+noncomputable def matrixMinimumEigenvalue {d : ℕ} (hd : 0 < d)
+    {A : Matrix (Fin d) (Fin d) ℂ} (hA : A.IsHermitian) : ℝ :=
+  Finset.univ.inf' ⟨⟨0, hd⟩, Finset.mem_univ _⟩ hA.eigenvalues
+
+/-- The greatest eigenvalue of a nonempty Hermitian matrix. -/
+noncomputable def matrixMaximumEigenvalue {d : ℕ} (hd : 0 < d)
+    {A : Matrix (Fin d) (Fin d) ℂ} (hA : A.IsHermitian) : ℝ :=
+  Finset.univ.sup' ⟨⟨0, hd⟩, Finset.mem_univ _⟩ hA.eigenvalues
+
+theorem matrixMinimumEigenvalue_le_eigenvalue {d : ℕ} (hd : 0 < d)
+    {A : Matrix (Fin d) (Fin d) ℂ} (hA : A.IsHermitian) (i : Fin d) :
+    matrixMinimumEigenvalue hd hA ≤ hA.eigenvalues i :=
+  Finset.inf'_le _ (Finset.mem_univ i)
+
+theorem eigenvalue_le_matrixMaximumEigenvalue {d : ℕ} (hd : 0 < d)
+    {A : Matrix (Fin d) (Fin d) ℂ} (hA : A.IsHermitian) (i : Fin d) :
+    hA.eigenvalues i ≤ matrixMaximumEigenvalue hd hA :=
+  Finset.le_sup' _ (Finset.mem_univ i)
+
+/-- The spectral minimum is attained by a unit eigenvector and bounds every
+unit-vector quadratic form. -/
+theorem matrixMinimumEigenvalue_isLeast_rayleigh {d : ℕ} (hd : 0 < d)
+    {A : Matrix (Fin d) (Fin d) ℂ} (hA : A.IsHermitian) :
+    IsLeast (rayleighValues A) (matrixMinimumEigenvalue hd hA) := by
+  obtain ⟨i, _, hi⟩ := Finset.exists_mem_eq_inf'
+    (s := Finset.univ) ⟨⟨0, hd⟩, Finset.mem_univ _⟩ hA.eigenvalues
+  constructor
+  · refine ⟨hA.eigenvectorBasis i, hA.eigenvectorBasis.orthonormal.1 i, ?_⟩
+    rw [quadratic_eigenvector]
+    exact hi.symm
+  · rintro q ⟨x, hx, rfl⟩
+    rw [quadratic_eq_sum hA]
+    calc
+      matrixMinimumEigenvalue hd hA =
+          ∑ i, matrixMinimumEigenvalue hd hA *
+            ‖⟪hA.eigenvectorBasis i, x⟫_ℂ‖ ^ 2 := by
+        rw [← Finset.mul_sum, hA.eigenvectorBasis.sum_sq_norm_inner_right, hx,
+          one_pow, mul_one]
+      _ ≤ _ := Finset.sum_le_sum fun i _ =>
+        mul_le_mul_of_nonneg_right (matrixMinimumEigenvalue_le_eigenvalue hd hA i)
+          (sq_nonneg _)
+
+/-- The spectral maximum bounds the quadratic form on every vector. -/
+theorem quadratic_le_matrixMaximumEigenvalue {d : ℕ} (hd : 0 < d)
+    {A : Matrix (Fin d) (Fin d) ℂ} (hA : A.IsHermitian)
+    (x : EuclideanSpace ℂ (Fin d)) :
+    quadratic A x ≤ matrixMaximumEigenvalue hd hA * ‖x‖ ^ 2 := by
+  rw [quadratic_eq_sum hA, ← hA.eigenvectorBasis.sum_sq_norm_inner_right,
+    Finset.mul_sum]
+  exact Finset.sum_le_sum fun i _ =>
+    mul_le_mul_of_nonneg_right (eigenvalue_le_matrixMaximumEigenvalue hd hA i)
+      (sq_nonneg _)
+
+theorem mean_isHermitian {N d : ℕ}
+    (X : Fin N → Matrix (Fin d) (Fin d) ℂ)
+    (hX : ∀ k, (X k).IsHermitian) : (mean X).IsHermitian := by
+  have hs : (∑ k, X k).IsHermitian := by
+    simp only [Matrix.IsHermitian, Matrix.conjTranspose_sum, (hX _).eq]
+  exact hs.smul (by simp : IsSelfAdjoint ((N : ℂ)⁻¹))
+
+theorem sampleMean_isHermitian {N d m : ℕ}
+    (X : Fin N → Matrix (Fin d) (Fin d) ℂ)
+    (hX : ∀ k, (X k).IsHermitian) (Ω : Sample N m) :
+    (sampleMean X Ω).IsHermitian :=
+  (sampleSum_isHermitian X hX Ω).smul (by simp : IsSelfAdjoint ((m : ℂ)⁻¹))
+
+/-- The manuscript's minimum-eigenvalue event is exactly the sum Rayleigh
+lower-tail event; division by the positive sample size introduces no loss. -/
+theorem sampleMean_minimumEigenvalue_le_iff {N d m : ℕ}
+    (hd : 0 < d) (hm : 1 ≤ m)
+    (X : Fin N → Matrix (Fin d) (Fin d) ℂ)
+    (hX : ∀ k, (X k).IsHermitian) (Ω : Sample N m) (t : ℝ) :
+    matrixMinimumEigenvalue hd (sampleMean_isHermitian X hX Ω) ≤ t ↔
+      ∃ x : EuclideanSpace ℂ (Fin d), ‖x‖ = 1 ∧
+        quadratic (sampleSum X Ω) x ≤ (m : ℝ) * t := by
+  have hmpos : (0 : ℝ) < m := by exact_mod_cast (show 0 < m by omega)
+  have hleast := matrixMinimumEigenvalue_isLeast_rayleigh hd
+    (sampleMean_isHermitian X hX Ω)
+  have hq (x : EuclideanSpace ℂ (Fin d)) :
+      quadratic (sampleMean X Ω) x = (m : ℝ)⁻¹ * quadratic (sampleSum X Ω) x := by
+    simpa only [sampleMean, Complex.ofReal_inv, Complex.ofReal_natCast] using
+      quadratic_smul_matrix (sampleSum X Ω) (m : ℝ)⁻¹ x
+  constructor
+  · intro h
+    obtain ⟨x, hx, he⟩ := hleast.1
+    refine ⟨x, hx, ?_⟩
+    rw [← he, hq] at h
+    exact (inv_mul_le_iff₀ hmpos).mp h
+  · rintro ⟨x, hx, h⟩
+    apply (hleast.2 ⟨x, hx, rfl⟩).trans
+    rw [hq]
+    exact (inv_mul_le_iff₀ hmpos).mpr h
+
+/-- The real-power lower Chernoff factor equals the exact exponential factor
+in the sample-mean formulation. -/
+theorem lower_chernoff_factor_eq_exp {u t : ℝ} (hu : u < 1) :
+    (Real.exp (-u) / (1 - u) ^ (1 - u)) ^ t =
+      Real.exp (-t * (u + (1 - u) * Real.log (1 - u))) := by
+  have hp : 0 < 1 - u := sub_pos.mpr hu
+  rw [Real.rpow_def_of_pos (div_pos (Real.exp_pos _) (Real.rpow_pos_of_pos hp _)),
+    Real.log_div (Real.exp_ne_zero _) (ne_of_gt (Real.rpow_pos_of_pos hp _)),
+    Real.log_exp, Real.log_rpow hp]
+  congr 1
+  ring
+
+set_option linter.unusedVariables false in
+/-- Exact manuscript Matrix Chernoff lemma for a uniform subset: the average
+minimum-eigenvalue event and the logarithmic exponential factor are retained.
+Only the stated Hermitian spectral bounds and positivity assumptions occur. -/
+theorem matrixChernoff_sampleMean_minimumEigenvalue_lower
+    {N d m : ℕ} (hN : 0 < N) (hd : 0 < d) (hm : 1 ≤ m) (hmN : m ≤ N)
+    (X : Fin N → Matrix (Fin d) (Fin d) ℂ)
+    (hX : ∀ k, (X k).IsHermitian) {b u : ℝ} (hb : 0 < b)
+    (hbound : ∀ k, 0 ≤ matrixMinimumEigenvalue hd (hX k) ∧
+      matrixMinimumEigenvalue hd (hX k) ≤ matrixMaximumEigenvalue hd (hX k) ∧
+      matrixMaximumEigenvalue hd (hX k) ≤ b)
+    (hμ : 0 < matrixMinimumEigenvalue hd (mean_isHermitian X hX))
+    (hu0 : 0 < u) (hu1 : u < 1) :
+    let μ := matrixMinimumEigenvalue hd (mean_isHermitian X hX)
+    probability (fun Ω : Sample N m =>
+      matrixMinimumEigenvalue hd (sampleMean_isHermitian X hX Ω) ≤ (1 - u) * μ) ≤
+      (d : ℝ) * Real.exp (-((m : ℝ) * μ / b) *
+        (u + (1 - u) * Real.log (1 - u))) := by
+  dsimp only
+  have hPSD (k : Fin N) : (X k).PosSemidef :=
+    (hX k).posSemidef_iff_eigenvalues_nonneg.mpr fun i =>
+      (hbound k).1.trans (matrixMinimumEigenvalue_le_eigenvalue hd (hX k) i)
+  have hquadratic (k : Fin N) (x : EuclideanSpace ℂ (Fin d)) :
+      quadratic (X k) x ≤ b * ‖x‖ ^ 2 :=
+    (quadratic_le_matrixMaximumEigenvalue hd (hX k) x).trans
+      (mul_le_mul_of_nonneg_right (hbound k).2.2 (sq_nonneg _))
+  have h := matrixChernoff_withoutReplacement_lower hN hd hm hmN X hb hPSD
+    hquadratic (matrixMinimumEigenvalue_isLeast_rayleigh hd (mean_isHermitian X hX))
+    hu0.le hu1
+  rw [lower_chernoff_factor_eq_exp hu1] at h
+  convert h using 1
+  apply congrArg probability
+  funext Ω
+  apply propext
+  rw [sampleMean_minimumEigenvalue_le_iff hd hm X hX Ω]
+  have he : (m : ℝ) * ((1 - u) *
+      matrixMinimumEigenvalue hd (mean_isHermitian X hX)) =
+      (1 - u) * (m : ℝ) * matrixMinimumEigenvalue hd (mean_isHermitian X hX) :=
+    (mul_left_comm (m : ℝ) (1 - u) _).trans (mul_assoc _ _ _).symm
+  rw [he]
 
 end LeanNumDetect.FiniteMatrixSampling

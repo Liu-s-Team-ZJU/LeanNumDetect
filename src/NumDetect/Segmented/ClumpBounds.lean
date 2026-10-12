@@ -2,8 +2,8 @@ import NumDetect.Segmented.ClumpBasics
 import General.Fourier.FineCubeFrame
 import General.Fourier.TranslatedCubeFourier
 import General.Fourier.TrigonometricPolynomialParseval
-import NumDetect.Matrices
-import NumDetect.UniformInterpolation
+import NumDetect.Segmented.MatrixFacts
+import NumDetect.Uniform.Interpolation
 import SegmentedVDM.Interpolation
 import SegmentedVDM.UniformFrame
 import SegmentedVDM.UniformInterpolation
@@ -817,37 +817,12 @@ namespace NumDetect
 
 noncomputable section
 
-/-- Every singular value at or beyond the rank vanishes. -/
-theorem matrixSingularValue_eq_zero_of_rank_le'
-    {m n : Type*} [Fintype m] [Fintype n] [DecidableEq n]
-    (A : Matrix m n ℂ) {i : ℕ} (hi : A.rank ≤ i) :
-    matrixSingularValue A i = 0 := by
-  rw [matrixSingularValue]
-  apply (A.toEuclideanLin.singularValues_eq_zero_iff_le_finrank_range).2
-  change Module.finrank ℂ (LinearMap.range
-    ((Matrix.toLin (EuclideanSpace.basisFun n ℂ).toBasis
-      (EuclideanSpace.basisFun m ℂ).toBasis) A)) ≤ i
-  rw [← A.rank_eq_finrank_range_toLin
-    (EuclideanSpace.basisFun m ℂ).toBasis
-    (EuclideanSpace.basisFun n ℂ).toBasis]
-  exact hi
-
-/-- A product through `n` columns vanishes from singular-value index `n` onward. -/
-theorem matrixSingularValue_mul_eq_zero_of_card_le'
-    {m n p : Type*} [Fintype m] [Fintype n] [Fintype p] [DecidableEq p]
-    (A : Matrix m n ℂ) (B : Matrix n p ℂ) {i : ℕ}
-    (hi : Fintype.card n ≤ i) :
-    matrixSingularValue (A * B) i = 0 := by
-  apply matrixSingularValue_eq_zero_of_rank_le'
-  exact (Matrix.rank_mul_le_left A B).trans
-    ((Matrix.rank_le_card_width A).trans hi)
-
 /-- The noiseless segmented matrix has no singular values beyond the source count. -/
 theorem segmentedNoiseless_singularValue_eq_zero
     {d n m r D i : ℕ} (μ : AtomicMeasure d n) (hi : n ≤ i) :
     matrixSingularValue (segmentedNoiselessMatrix m r D μ) i = 0 := by
   rw [segmentedNoiselessMatrix]
-  apply matrixSingularValue_eq_zero_of_rank_le'
+  apply matrixSingularValue_eq_zero_of_rank_le
   have hcard : Fintype.card (Fin n) ≤ i := by simpa using hi
   exact
     (Matrix.rank_mul_le_left

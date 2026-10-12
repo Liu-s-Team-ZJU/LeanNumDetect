@@ -37,7 +37,7 @@ theorem segmentedVandermonde_minimumSingularValue_of_fineCubeFrame
   let Δ := periodicMinimumL1Separation μ.node hn
   have hDpos : 0 < D := Nat.zero_lt_of_lt (hm.trans_lt hD)
   have hΔ : 0 < Δ :=
-    segmented_periodicMinimumL1Separation_pos μ hn hclumps.2.2.2.1
+    periodicMinimumL1Separation_pos μ hn hclumps.2.2.2.1
   have hmin : ∀ i j, i ≠ j →
       Δ ≤ periodicL1Distance (μ.node i) (μ.node j) := by
     intro i j hij
@@ -120,7 +120,7 @@ theorem segmentedVandermonde_minimumSingularValue_oneDimensional_of_halfFrameRan
   let Δ := periodicMinimumL1Separation μ.node hn
   have hDpos : 0 < D := Nat.zero_lt_of_lt (hm.trans_lt hD)
   have hΔ : 0 < Δ :=
-    segmented_periodicMinimumL1Separation_pos μ hn hclumps.2.2.2.1
+    periodicMinimumL1Separation_pos μ hn hclumps.2.2.2.1
   have hmin : ∀ i j, i ≠ j →
       Δ ≤ periodicL1Distance (μ.node i) (μ.node j) := by
     intro i j hij

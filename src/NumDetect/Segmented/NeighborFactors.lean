@@ -1,4 +1,4 @@
-import NumDetect.Basic
+import NumDetect.Preliminaries.PeriodicGeometry
 import NumDetect.Segmented.Polynomial
 import General.Finite.FiniteRealGeometry
 import SegmentedVDM.Quantization
@@ -177,35 +177,6 @@ theorem periodicMinimumL1Separation_le
       rw [distinctPairs, Finset.mem_filter]
       exact ⟨Finset.mem_univ _, hij⟩)
 
-theorem segmented_periodicMinimumL1Separation_pos
-    {d n : ℕ} (μ : AtomicMeasure d n) (hn : 2 ≤ n)
-    (hcube : ∀ j, InAngularCube (μ.node j)) :
-    0 < periodicMinimumL1Separation μ.node hn := by
-  rw [periodicMinimumL1Separation, minimumOverDistinctPairs,
-    Finset.lt_inf'_iff]
-  intro ij hij
-  have hne : ij.1 ≠ ij.2 := by
-    simpa [distinctPairs] using hij
-  obtain ⟨k, hk⟩ : ∃ k, μ.node ij.1 k ≠ μ.node ij.2 k := by
-    by_contra h
-    apply hne
-    apply μ.node_injective
-    funext k
-    exact not_ne_iff.mp (not_exists.mp h k)
-  unfold periodicL1Distance
-  apply Finset.sum_pos'
-  · intro k _
-    rw [← abs_wrappedCoordinateDifference (hcube ij.1 k) (hcube ij.2 k)]
-    exact abs_nonneg _
-  · refine ⟨k, Finset.mem_univ k, ?_⟩
-    unfold periodicCoordinateDistance
-    rw [lt_min_iff]
-    constructor
-    · exact abs_pos.mpr (sub_ne_zero.mpr hk)
-    · rw [sub_pos, abs_lt]
-      constructor <;>
-        linarith [(hcube ij.1 k).1, (hcube ij.1 k).2,
-          (hcube ij.2 k).1, (hcube ij.2 k).2, Real.pi_pos]
 
 
 end

@@ -1,9 +1,9 @@
-import NumDetect.Basic
+import NumDetect.Preliminaries.Basic
 import General.Fourier.FineCubeFrame
 import General.Fourier.TranslatedCubeFourier
 import General.Fourier.TrigonometricPolynomialParseval
-import NumDetect.Matrices
-import NumDetect.UniformInterpolation
+import NumDetect.Preliminaries.Matrices
+import NumDetect.Uniform.Interpolation
 import SegmentedVDM.Interpolation
 import SegmentedVDM.UniformFrame
 import SegmentedVDM.UniformInterpolation

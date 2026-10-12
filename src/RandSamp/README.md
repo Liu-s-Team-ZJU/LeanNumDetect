@@ -2,8 +2,8 @@
 
 This directory formalizes uniform separated-node, fixed-support, Cartesian
 DFT-grid, fixed multiclump, and uniform off-grid relative Gram random Fourier sampling from the
-RandSamp manuscript, together with the existing nonuniform Fourier--Vandermonde
-estimate from the NumDetect manuscript. Import [Main.lean](Main.lean) for the
+RandSamp manuscript, together with the retained nonuniform Fourier--Vandermonde
+estimate from an earlier version of the NumDetect manuscript. Import [Main.lean](Main.lean) for the
 complete interface. Declarations are in `LeanNumDetect.RandSamp`.
 
 ## Unconditional lower cube sampling
@@ -54,11 +54,11 @@ checks the retained alternative results and the actual public proof route
 separately.
 
 
-[NumDetect/LiCubeClumpBounds.lean](../NumDetect/LiCubeClumpBounds.lean)
+[NumDetect/LiCubeClumpBounds.lean](../NumDetect/Random/CubeClumpBounds.lean)
 supplies the deterministic full-cube singular-value lower bound under
 Li's clump geometry. The manuscript-facing theorem combines it with this
 sampling result with the total node count $n$ in
-[NumDetect/RandomClumpVandermonde.lean](../NumDetect/RandomClumpVandermonde.lean).
+[NumDetect/RandomClumpVandermonde.lean](../NumDetect/Random/ClumpVandermonde.lean).
 The geometric conditions enter the deterministic estimate; the uniform
 sampling coefficient is independent of bandwidth and node separation.
 
@@ -496,9 +496,15 @@ value. Thus the corollary has the original $N-1$ logarithmic factor, the same
 assumptions, and the same endpoints. Its proof invokes the higher-dimensional
 theorem; there is no independent one-dimensional probability proof.
 
-## Nonuniform VDM scaling
+## Retained nonuniform VDM scaling
 
-| Manuscript result | Exact Lean location |
+This theorem and its sampling-spread definition remain available in Lean.
+They belonged to the earlier NumDetect manuscript; the current manuscript
+uses the random-cube theorem and its number-detection corollary instead.
+The retained theorem treats fixed frequency families, so its hypotheses and
+conclusion differ from those of the uniform-subset probability bound.
+
+| Former manuscript result | Retained Lean location |
 | --- | --- |
 | Nonuniform VDM scaling (`thm:nonuniform_vdm_scaling`) | [NonuniformVandermonde.lean](NonuniformVandermonde.lean): theorem `nonuniformVandermonde_minimumSingularValue` |
 
@@ -525,7 +531,7 @@ $$
 $$
 
 Thus the remainder estimate is discharged inside the proof rather than exposed
-as a hypothesis of the manuscript-facing theorem.
+as a hypothesis of the retained theorem.
 
 ## Nonuniform scaling proof organization
 
@@ -533,7 +539,7 @@ as a hypothesis of the manuscript-facing theorem.
 | --- | --- |
 | [SquareVandermonde.lean](SquareVandermonde.lean) | Lagrange inverse and quantitative lower bound for normalized square power Vandermonde matrices |
 | [TaylorFactorization.lean](TaylorFactorization.lean) | Frequency and source Taylor factors, exponential remainder, raw bound, and explicit $n$-dependent constant |
-| [NonuniformVandermonde.lean](NonuniformVandermonde.lean) | Translation invariance, sampling spread and its maximizing row selection, and the manuscript-facing theorem |
+| [NonuniformVandermonde.lean](NonuniformVandermonde.lean) | Translation invariance, sampling spread and its maximizing row selection, and the retained nonuniform scaling theorem |
 | [Main.lean](Main.lean) | Aggregate public import |
 
 All estimates are proved in Lean. In particular, the Lagrange coefficient

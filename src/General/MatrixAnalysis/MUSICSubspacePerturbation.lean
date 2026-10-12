@@ -1,5 +1,5 @@
 import General.MatrixAnalysis.SingularValueBounds
-import NumDetect.Matrices
+import NumDetect.MUSIC.Definitions
 
 /-!
 Fixed-rank perturbation bounds for the trailing left singular subspace.

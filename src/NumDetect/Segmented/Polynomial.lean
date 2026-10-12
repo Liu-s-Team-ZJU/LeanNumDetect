@@ -1,4 +1,5 @@
-import NumDetect.Matrices
+import NumDetect.Uniform.MatrixDefinitions
+import NumDetect.Segmented.MatrixDefinitions
 import General.Fourier.TrigonometricPolynomialParseval
 import General.Fourier.FineCubeFrame
 import General.Fourier.TranslatedCubeFourier

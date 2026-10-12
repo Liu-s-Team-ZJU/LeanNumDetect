@@ -51,7 +51,7 @@ The carrier `Point d`, the fundamental-domain condition `InAngularCube`, and
 the wrapped coordinatewise and `ℓ^∞` distances `periodicCoordinateDistance`
 and `periodicLInfDistance` on the angular torus.  These shared definitions of
 the NumDetect observation model live in `General` because both
-`NumDetect.Basic` and `General.Fourier.FineCubeFrame` build on them while
+`NumDetect.Preliminaries.Basic` and `General.Fourier.FineCubeFrame` build on them while
 `General` may not import `NumDetect`. -/
 
 namespace NumDetect

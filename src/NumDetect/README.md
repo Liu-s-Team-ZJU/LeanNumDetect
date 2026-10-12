@@ -12,91 +12,119 @@ shown.
 
 | TeX type and label | Subject | Direct Lean declaration | Relationship |
 | --- | --- | --- | --- |
-| Definition `def:generalized-hankel-toeplitz` | Generalized Hankel and Toeplitz matrices | [Matrices.lean](Matrices.lean): `generalizedHankelOn`, `generalizedToeplitzOn` | **Equivalent**. |
-| Definition `generalized vandermonde` | Generalized Vandermonde matrix and steering vector | [Matrices.lean](Matrices.lean): `generalizedVandermonde`, `steeringVector` | **Equivalent**. |
-| Definition `def:generalized-vandermonde-decomposition` | Hankel/Toeplitz type Vandermonde decomposition | [Matrices.lean](Matrices.lean): `AdmitsGeneralizedVandermondeDecomposition` | **Equivalent**. |
-| Definition `def:sigma-admissible-measure` | $\sigma$-admissible and positive $\sigma$-admissible measures | [Basic.lean](Basic.lean): `IsAdmissible`, `IsPositiveAdmissible` | **Equivalent**. |
-| Definition `def:crl-number` | General and positive number-detection CRL | [Basic.lean](Basic.lean): `numberDetectionCRL`, `positiveNumberDetectionCRL`; [CRL.lean](CRL.lean): `numberDetectionCRL_isSmallest`, `positiveNumberDetectionCRL_isSmallest` | **Equivalent**. |
-| Theorem `thm:li-resolution` | Exclusion of admissible measures with fewer supports | [Uniform.lean](Uniform.lean): `noAdmissibleMeasureWithFewerSupports` | **Equivalent**. |
-| Lemma `lem:uniform-Vandermonde` | Contiguous-grid minimum singular value | [UniformVandermonde.lean](UniformVandermonde.lean): `uniformVandermonde_minimumSingularValue` | **Equivalent**. |
-| Theorem `liuthm5.1v2` | Contiguous-grid singular-value threshold | [Uniform.lean](Uniform.lean): `uniformGHM_singularValueThreshold` | **Equivalent**. |
-| Definition `defi:metric_separation` | Periodic distance and minimum separation | [Basic.lean](Basic.lean): `periodicDistance`, `extendedPeriodicMinimumSeparation` | **Equivalent**. |
-| Definition `defi:local_sparsity` | Local neighborhood and sparsity | [Basic.lean](Basic.lean): `localNeighborhood`, `localSparsity` | **Equivalent**. |
-| Definition `defi:high_dim_clumps` | Multidimensional clump structure | [Basic.lean](Basic.lean): `IsAngularClumpStructure` | **Equivalent**. |
+| Definition `def:generalized-hankel-toeplitz` | Generalized Hankel and Toeplitz matrices | [Preliminaries/Matrices.lean](Preliminaries/Matrices.lean): `generalizedHankelOn`, `generalizedToeplitzOn` | **Equivalent**. |
+| Definition `generalized vandermonde` | Generalized Vandermonde matrix and steering vector | [Preliminaries/Matrices.lean](Preliminaries/Matrices.lean): `generalizedVandermonde`, `steeringVector` | **Equivalent**. |
+| Definition `def:generalized-vandermonde-decomposition` | Hankel/Toeplitz type Vandermonde decomposition | [Preliminaries/Matrices.lean](Preliminaries/Matrices.lean): `AdmitsGeneralizedVandermondeDecomposition` | **Equivalent**. |
+| Definition `def:sigma-admissible-measure` | $\sigma$-admissible and positive $\sigma$-admissible measures | [Preliminaries/Basic.lean](Preliminaries/Basic.lean): `IsAdmissible`, `IsPositiveAdmissible` | **Equivalent**. |
+| Definition `def:crl-number` | General and positive number-detection CRL | [CRL/Definitions.lean](CRL/Definitions.lean): `numberDetectionCRL`, `positiveNumberDetectionCRL`; [CRL/Bounds.lean](CRL/Bounds.lean): `numberDetectionCRL_isSmallest`, `positiveNumberDetectionCRL_isSmallest` | **Equivalent**. |
+| Theorem `thm:li-resolution` | Exclusion of admissible measures with fewer supports | [Uniform/NumberDetection.lean](Uniform/NumberDetection.lean): `noAdmissibleMeasureWithFewerSupports` | **Equivalent**. |
+| Lemma `lem:uniform-Vandermonde` | Contiguous-grid minimum singular value | [Uniform/Vandermonde.lean](Uniform/Vandermonde.lean): `uniformVandermonde_minimumSingularValue` | **Equivalent**. |
+| Theorem `liuthm5.1v2` | Contiguous-grid singular-value threshold | [Uniform/NumberDetection.lean](Uniform/NumberDetection.lean): `uniformGHM_singularValueThreshold` | **Equivalent**. |
+| Definition `defi:metric_separation` | Periodic distance and minimum separation | [Preliminaries/Basic.lean](Preliminaries/Basic.lean): `periodicDistance`, `extendedPeriodicMinimumSeparation` | **Equivalent**. |
+| Definition `defi:local_sparsity` | Local neighborhood and sparsity | [Preliminaries/Basic.lean](Preliminaries/Basic.lean): `localNeighborhood`, `localSparsity` | **Equivalent**. |
+| Definition `defi:high_dim_clumps` | Multidimensional clump structure | [Preliminaries/Basic.lean](Preliminaries/Basic.lean): `IsAngularClumpStructure` | **Equivalent**. |
 | Theorem `thm:segmented-vandermonde` | Segmented-grid minimum singular value | [Segmented/Main.lean](Segmented/Main.lean): `segmentedVandermonde_minimumSingularValue` | **Equivalent**. |
 | Theorem `thm:segmented_threshold` | Segmented-grid singular-value threshold | [Segmented/Main.lean](Segmented/Main.lean): `segmentedGHM_singularValueThreshold` | **Equivalent**. |
-| Theorem `thm:random-cube-multiclump` | Unnormalized multi-clump random cube Vandermonde minimum singular-value lower bound | [RandomClumpVandermonde.lean](RandomClumpVandermonde.lean): `positiveCubeClumpVandermonde_lower_highProbability` | **Equivalent**; exact $(A,\infty,\tau,\eta,n^\star)$ geometry, literal sampling coefficient $3$, $C(d,n,n^\star,\beta)$ independent of bandwidth and spacing, and $\sqrt{m(1-\rho)}$ on the right. Li geometry and all sampling prerequisites are proved without additional leverage or thickness assumptions. |
-| Paragraph following `thm:random-cube-multiclump` | Random-GHM number detection under multi-clump geometry | [RandomClumpMUSIC.lean](RandomClumpMUSIC.lean): `positiveCubeClumpGHM_signalSingularValue_lower_highProbability`, `positiveCubeClumpGHM_numberDetection_highProbability` | **Equivalent**; proves the strict signal and tail thresholds and exactly $n$ values above $\sigma\sqrt{M_1M_2}$. |
-| Theorem `thm:resolutionrandghmnumber1` | Random-GHM noise and signal thresholds | [Random.lean](Random.lean): `realizedRandomGHM_tail_singularValue_lt` (noise), `randomGHM_signalThreshold_of_separation` (signal) | **Equivalent**. |
-| Theorem `thm:nonuniform_vdm_scaling` | Nonuniform one-dimensional Vandermonde scaling | [RandSamp/NonuniformVandermonde.lean](../RandSamp/NonuniformVandermonde.lean): `RandSamp.nonuniformVandermonde_minimumSingularValue` | **Equivalent**. |
-| Lemma `lem:stability_ghm_music` | General GHM-MUSIC perturbation | [MUSIC.lean](MUSIC.lean): `ghmMUSIC_correlation_stability` | **Equivalent**. |
-| Corollary `cor:stability_multidim_segmented` | Segmented-grid MUSIC perturbation | [MUSIC.lean](MUSIC.lean): `segmentedMUSIC_correlation_stability` | **Equivalent**. |
-| Corollary `cor:random-ghm-music-multiclump` | Fixed-source high-probability random-GHM MUSIC correlation stability under the original multi-clump geometry | [RandomClumpMUSIC.lean](RandomClumpMUSIC.lean): `positiveCubeClumpMUSIC_correlation_stability_highProbability` | **Equivalent**; exact periodic one-norm spacing, independent uniform subsets, and the deterministic measurement-noise bound. No arrangement or comparable-spacing hypothesis is introduced. |
-| Lemma `lem:nonnegative_to_centered` | Unitary conversion from nonnegative to centered frequency grid | [UniformCentering.lean](UniformCentering.lean): `uniformVandermonde_centering` | **Equivalent**. |
-| Lemma `lem2:uniform-Vandermonde` | Centered interpolation polynomial with a neighbor-product bound | [UniformInterpolation.lean](UniformInterpolation.lean): `CenteredPacket.exists_centeredUnitTorusInterpolation` | **Equivalent**. |
+| Theorem `thm:random-cube-multiclump` | Unnormalized multi-clump random cube Vandermonde minimum singular-value lower bound | [Random/ClumpVandermonde.lean](Random/ClumpVandermonde.lean): `positiveCubeClumpVandermonde_lower_highProbability` | **Equivalent**. |
+| Corollary `cor:random-ghm-number-detection-multiclump` | Random-GHM number detection under multi-clump geometry | [Random/ClumpMUSIC.lean](Random/ClumpMUSIC.lean): `positiveCubeClumpGHM_numberDetection_highProbability` | **Equivalent**. |
+| Lemma `lem:stability_ghm_music` | General GHM-MUSIC perturbation | [MUSIC/Stability.lean](MUSIC/Stability.lean): `ghmMUSIC_correlation_stability` | **Equivalent**. |
+| Corollary `cor:stability_multidim_segmented` | Segmented-grid MUSIC perturbation | [Segmented/MUSICStability.lean](Segmented/MUSICStability.lean): `segmentedMUSIC_correlation_stability` | **Equivalent**. |
+| Corollary `cor:random-ghm-music-multiclump` | Fixed-source high-probability random-GHM MUSIC correlation stability under the original multi-clump geometry | [Random/ClumpMUSIC.lean](Random/ClumpMUSIC.lean): `positiveCubeClumpMUSIC_correlation_stability_highProbability` | **Equivalent**. |
+| Lemma `lem:nonnegative_to_centered` | Unitary conversion from nonnegative to centered frequency grid | [Uniform/Centering.lean](Uniform/Centering.lean): `uniformVandermonde_centering` | **Equivalent**. |
+| Lemma `lem2:uniform-Vandermonde` | Centered interpolation polynomial with a neighbor-product bound | [Uniform/Interpolation.lean](Uniform/Interpolation.lean): `CenteredPacket.exists_centeredUnitTorusInterpolation` | **Equivalent**. |
 | Definition `defi:high_dim_uniform_poly` | Multivariate segmented trigonometric polynomials | [Segmented/Polynomial.lean](Segmented/Polynomial.lean): `SegmentedPolynomial`, `SegmentedPolynomial.eval` | **Equivalent**. |
 | Definition `defi:high_dim_lagrange` | Lagrange interpolant family | [Segmented/Polynomial.lean](Segmented/Polynomial.lean): `SegmentedPolynomial.IsLagrangeFamily` | **Equivalent**. |
 | Lemma `lem:minsvd_bound_by_lagInterp_high_dim` | Interpolants bound inverse minimum singular value | [Segmented/Interpolation.lean](Segmented/Interpolation.lean): `segmentedPolynomial_lagrange_minimumSingularValue` | **Equivalent**. |
 | Lemma `lem:interpolation_via_svd` | Full-rank interpolation and $L^2/L^\infty$ bounds | [Segmented/Interpolation.lean](Segmented/Interpolation.lean): `segmentedPolynomial_interpolation_of_fullColumnRank` | **Equivalent**. |
-| Theorem `thm:well_separated_segmented` | Two-sided singular-value estimate for separated nodes | [WellSeparatedSegmented.lean](WellSeparatedSegmented.lean): `wellSeparatedSegmented_singularValue_bounds` | **Equivalent**. |
+| Theorem `thm:well_separated_segmented` | Two-sided singular-value estimate for separated nodes | [Segmented/WellSeparated.lean](Segmented/WellSeparated.lean): `wellSeparatedSegmented_singularValue_bounds` | **Equivalent**. |
 | Proposition `prop:decomposition` | Partition of a subset into separated classes | [Segmented/ClumpBasics.lean](Segmented/ClumpBasics.lean): `angularClump_decomposition` | **Equivalent**. |
 | Lemma `lem:localization` | Polynomial vanishing outside an anchor neighborhood | [Segmented/ClumpBounds.lean](Segmented/ClumpBounds.lean): `localizationPolynomial_of_angularClumpStructure` | **Equivalent**. |
 | Lemma `lem:freq_quantization` | Quantized integer frequency with phase separation | [Segmented/NeighborFactors.lean](Segmented/NeighborFactors.lean): `frequency_quantization_manuscript` | **Equivalent**. |
 | Lemma `lem:neighborset_segmented` | Neighbor-set interpolation polynomial and $L^2$ bound | [Segmented/Interpolation.lean](Segmented/Interpolation.lean): `neighborSetSegmented_polynomial_finiteSet` | **Equivalent**. |
-| Lemma `lem:cube-vandermonde-translations` (Appendix C) | Translation identities and bandwidth-independent operator bound for normalized cube rows | [General/Fourier/CubeTranslationBounds.lean](../General/Fourier/CubeTranslationBounds.lean): `LeanNumDetect.CubeShiftBounds.integerIsotropicCubeRootRow_translation`, `LeanNumDetect.CubeShiftBounds.cubeTranslation_neg_mul`, `LeanNumDetect.CubeShiftBounds.cubeTranslation_norm_le` | **Equivalent after Gram whitening and row normalization**; the bound is $K=2^{4dn^2}$ for every integer coordinate displacement of magnitude at most $L$. |
-| Lemma `lem:cube-row-selection` (Appendix C) | Quantitative selection of independent rows within the cube | [General/Fourier/CubeFrameBasis.lean](../General/Fourier/CubeFrameBasis.lean): `LeanNumDetect.CubeFrameBasis.cubeFrameRow_connectedBasis` | **Equivalent after Gram whitening and row normalization**; the coordinate sum is at most $(n-1)Q$ and the coefficient recursion is $\alpha_0=K^{-1}$, $\alpha_r=\alpha_{r-1}^2/(3KM^2)$ with $M=K\sqrt n$. |
-| Lemma `lem:cube-logdet-mean` (Appendix C) | Logarithmic determinant average for the normalized Fourier cube | [General/Fourier/CubeFrameLogDet.lean](../General/Fourier/CubeFrameLogDet.lean): `LeanNumDetect.CubeFrameLogDet.cubeFrameRow_logDetMean_lower` | **Equivalent after Gram whitening and row normalization**; every positive-definite matrix and every positive radius are retained, with coefficient $1/(2n)$. |
-| Lemma `lem:chernoff-without-replacement` (Appendix C) | Exact matrix Chernoff lower tail for uniform subsets | [General/Probability/MatrixChernoff.lean](../General/Probability/MatrixChernoff.lean): `LeanNumDetect.FiniteMatrixSampling.matrixChernoff_withoutReplacement_lower` | **Equivalent after enumeration and division by the sample size**; the Rayleigh event is the minimum-eigenvalue event and the exact Chernoff factor equals the stated exponential. |
+| Lemma `lem:cube-vandermonde-translations` (Appendix C) | Normalized Fourier rows, integer translations, inverses, and operator norm bound | [Random/NormalizedRows.lean](Random/NormalizedRows.lean): `cubeNormalizedFourier_translations` | **Equivalent**. |
+| Lemma `lem:cube-row-selection` (Appendix C) | Independent rows with the coordinate maximum and coefficient bounds | [Random/NormalizedRows.lean](Random/NormalizedRows.lean): `cubeNormalizedFourierRow_connectedBasis` | **Equivalent**. |
+| Lemma `lem:cube-logdet-mean` (Appendix C) | Logarithmic determinant average for the normalized Fourier cube | [Random/LogDetMean.lean](Random/LogDetMean.lean): `cubeNormalizedFourierRow_logDetMean_lower` | **Equivalent**. |
+| Lemma `lem:chernoff-without-replacement` (Appendix C) | Matrix Chernoff lower tail for the minimum eigenvalue of a uniform sample average | [General/Probability/MatrixChernoff.lean](../General/Probability/MatrixChernoff.lean): `LeanNumDetect.FiniteMatrixSampling.matrixChernoff_sampleMean_minimumEigenvalue_lower` | **Equivalent**. |
+
+## Retained earlier results
+
+Import [Retained/Main.lean](Retained/Main.lean) for the following declarations,
+which no longer correspond to active statements in `main.tex`. The current random-GHM number-detection corollary uses
+uniform random subsets and a probability bound. The earlier results apply to
+fixed realized frequency families, with the one-dimensional signal estimate
+requiring a sampling-spread condition; the new corollary does not include every
+such deterministic family.
+
+| Former manuscript result | Retained Lean declaration |
+| --- | --- |
+| Theorem `thm:resolutionrandghmnumber1`: noise tail for fixed realized draws and the one-dimensional signal threshold | [Retained/RealizedRandomGHM.lean](Retained/RealizedRandomGHM.lean): `realizedRandomGHM_tail_singularValue_lt`, `randomGHM_signalThreshold_of_separation` |
+| Theorem `thm:nonuniform_vdm_scaling`: one-dimensional nonuniform Vandermonde scaling | [RandSamp/NonuniformVandermonde.lean](../RandSamp/NonuniformVandermonde.lean): `RandSamp.nonuniformVandermonde_minimumSingularValue` |
+| Order-$n$ sampling spread used by those results | [RandSamp/NonuniformVandermonde.lean](../RandSamp/NonuniformVandermonde.lean): `RandSamp.finiteFamilySamplingSpread` |
 
 The well-separated random bounds and the MUSIC location and peak-selection
-modules remain independent fully proved results. They are not active
-statements in the current manuscript and are omitted from this correspondence
-table.
+modules also remain independent fully proved results. They are not active
+statements in the current manuscript.
 
 ## Organization and conventions
 
-| Modules | Contents |
-| --- | --- |
-| [Basic.lean](Basic.lean), [Matrices.lean](Matrices.lean), [MatrixFacts.lean](MatrixFacts.lean) | Atomic measures, Fourier observations, GHM/GTM definitions, factorizations, and matrix estimates |
-| [UniformDefinitions.lean](UniformDefinitions.lean), [UniformInterpolation.lean](UniformInterpolation.lean), [UniformCentering.lean](UniformCentering.lean), [UniformVandermonde.lean](UniformVandermonde.lean), [UniformThreshold.lean](UniformThreshold.lean), [Uniform.lean](Uniform.lean) | Contiguous-grid interpolation, frequency centering, singular-value bounds, and number detection |
-| [Segmented/](Segmented/), [WellSeparatedSegmented.lean](WellSeparatedSegmented.lean) | Clump geometry, segmented polynomials, interpolation, and segmented-grid estimates |
-| [RandomMatrixBounds.lean](RandomMatrixBounds.lean), [Random.lean](Random.lean), [RandSamp/](../RandSamp/) | Fixed realized random-frequency draws and nonuniform Vandermonde bounds |
-| [MUSICPerturbation.lean](MUSICPerturbation.lean), [MUSIC.lean](MUSIC.lean), [SegmentedMUSICGrowth.lean](SegmentedMUSICGrowth.lean), [SegmentedMUSICLocation.lean](SegmentedMUSICLocation.lean), [RandomCubeMUSIC.lean](RandomCubeMUSIC.lean), [RandomClumpModel.lean](RandomClumpModel.lean), [RandomClumpVandermonde.lean](RandomClumpVandermonde.lean), [RandomCubeNumberDetection.lean](RandomCubeNumberDetection.lean), [RandomClumpMUSIC.lean](RandomClumpMUSIC.lean) | MUSIC noise spaces, perturbation stability, segmented-grid residual growth and location error, and well-separated and multi-clump fixed-support random-cube sampling |
-| [MUSICPeakSelection.lean](MUSICPeakSelection.lean), [MUSICPeakReciprocal.lean](MUSICPeakReciprocal.lean), [SegmentedMUSICPeaks.lean](SegmentedMUSICPeaks.lean), [SegmentedMUSICPeakCurvature.lean](SegmentedMUSICPeakCurvature.lean), [SegmentedMUSICPeakFinal.lean](SegmentedMUSICPeakFinal.lean) | Continuous top-`n` local-peak selection and the complete segmented specialization |
-| [MUSICPeakRegularity.lean](MUSICPeakRegularity.lean), [MUSICPeakGrowth.lean](MUSICPeakGrowth.lean), [MUSICPeakFourierDerivativeNorm.lean](MUSICPeakFourierDerivativeNorm.lean), [MUSICPeakFourierLineVector.lean](MUSICPeakFourierLineVector.lean), [MUSICPeakSegmentedFrequency.lean](MUSICPeakSegmentedFrequency.lean), [MUSICPeakQuadraticBounds.lean](MUSICPeakQuadraticBounds.lean), [MUSICPeakProjectionBridge.lean](MUSICPeakProjectionBridge.lean), [MUSICPeakStrictConvex.lean](MUSICPeakStrictConvex.lean) | Squared-residual regularity, source growth, Fourier vector derivatives and norm bounds, projection quadratic bounds, and the source-ball strict-convexity criterion |
-| [MUSICPeakCurvatureIdentity.lean](MUSICPeakCurvatureIdentity.lean), [MUSICPeakFourierCurvature.lean](MUSICPeakFourierCurvature.lean), [MUSICPeakSegmentedRadialLoss.lean](MUSICPeakSegmentedRadialLoss.lean), [MUSICPeakProjectorCurvatureLoss.lean](MUSICPeakProjectorCurvatureLoss.lean), [MUSICPeakFourierProjectorCurvature.lean](MUSICPeakFourierProjectorCurvature.lean), [SegmentedMUSICPeakSignalGap.lean](SegmentedMUSICPeakSignalGap.lean), [SegmentedMUSICPeakProjectorCurvature.lean](SegmentedMUSICPeakProjectorCurvature.lean) | Concrete radial and projector curvature-loss estimates for segmented Fourier MUSIC |
-| [CRLLowerBound.lean](CRLLowerBound.lean), [CRL.lean](CRL.lean) | CRL bounds, including the two-sided and positive-amplitude results corresponding to the manuscript's equation labels |
+Only [Main.lean](Main.lean) is a Lean module at the directory root. It imports
+current manuscript results. Declaration names and the namespace
+`LeanNumDetect.NumDetect` are unchanged by the directory organization.
 
-The equation-only CRL bounds are in [CRL.lean](CRL.lean) and
-[CRLLowerBound.lean](CRLLowerBound.lean). The latter proves the constant-$2$
+| Directory | Contents |
+| --- | --- |
+| [MUSIC/](MUSIC/) | MUSIC definitions, noise spaces, and general GHM perturbation stability |
+| [Segmented/](Segmented/) | Segmented GHM definitions, interpolation, Vandermonde singular-value bounds, number detection, and MUSIC stability |
+| [Random/](Random/) | Random GHM definitions and multi-clump sampling, number detection, and MUSIC stability; Appendix C interfaces and the proof audit |
+| [Uniform/](Uniform/) | Uniform GHM definitions, interpolation, Vandermonde singular-value bounds, and number detection |
+| [Preliminaries/](Preliminaries/) | Atomic measures, Fourier observations, common GHM/GTM/VDM objects, periodic geometry, and general matrix estimates |
+| [Retained/](Retained/) | Earlier realized-frequency and separated random results, MUSIC location and peak-selection results, and their supporting lemmas |
+| [CRL/](CRL/) | Computational resolution limit definitions, upper and lower bounds, feasibility, and attainment |
+
+The active modules do not import `Retained`. Its optional aggregate import is
+[Retained/Main.lean](Retained/Main.lean); each earlier theorem also remains
+available from its own module.
+
+The equation-only CRL bounds are in [CRL/Bounds.lean](CRL/Bounds.lean) and
+[CRL/LowerBound.lean](CRL/LowerBound.lean). The latter proves the constant-$2$
 lower bound by a direct finite-difference construction.
 
-## Multi-clump random-GHM MUSIC
+## Multi-clump random-GHM number detection and MUSIC
 
-[RandomClumpModel.lean](RandomClumpModel.lean) identifies the manuscript's
+[Random/ClumpModel.lean](Random/ClumpModel.lean) identifies the manuscript's
 periodic metrics and preserves its exact nonempty clump partition and sizes.
-[LiCubeClumpBounds.lean](LiCubeClumpBounds.lean) proves the deterministic
+[Random/CubeClumpBounds.lean](Random/CubeClumpBounds.lean) proves the deterministic
 full-cube interpolation bound rather than importing it as an axiom. Its
 `LiCubeClumpGeometry` uses precisely
 
 $$
 L\text{ even},\quad L\ge8n,\quad
 \beta>\frac1{2\log2},\quad
-\frac{8\pi\beta d n^\star}{L}\le\tau\le\frac\pi{2d},\quad
+\frac{8\pi\beta d n^\star}{L}\le\tau\le\eta,\quad
+\tau\le\frac\pi{2d},\quad
 \Delta_1\le\frac{4\pi n^\star}{L},
 $$
 
-together with the original $(A,\infty,\tau,\eta,n^\star)$ clump predicate,
-including $\tau\le\eta$. The parameter $\tau$ is a selectable diameter
+together with the original $(A,\infty,\tau,\eta,n^\star)$ clump predicate.
+The inequality $\tau\le\eta$ is a field of that predicate. The parameter
+$\tau$ is a selectable diameter
 upper bound. Li's published cube corollary is stated for $d\ge2$; the
 formalization also proves the interval case in $d=1$ from the same
 localization and interpolation constructions.
 
-The standalone logarithmic determinant average lemma `lem:cube-logdet-mean`,
-including `eq:cube-logdet-mean`, in Appendix C is proved by `cubeFrameRow_logDetMean_lower` in
-[CubeFrameLogDet.lean](../General/Fourier/CubeFrameLogDet.lean), using the
-Hadamard estimate in
-[FrameLogDetMean.lean](../General/MatrixAnalysis/FrameLogDetMean.lean).
+The Appendix C interfaces in [Random/NormalizedRows.lean](Random/NormalizedRows.lean)
+and [Random/LogDetMean.lean](Random/LogDetMean.lean) use the manuscript's definitions
+of $\mathbf G$, $\mathbf f$, and $\mathbf T$. Their hypotheses are the angular
+node domain, positive dimensions, $L\ge2n$, and full column rank of the original
+Fourier matrix. The logarithmic determinant estimate is
+`cubeNormalizedFourierRow_logDetMean_lower`, proved from
+`cubeFrameRow_logDetMean_lower` in
+[CubeFrameLogDet.lean](../General/Fourier/CubeFrameLogDet.lean) and the Hadamard
+estimate in [FrameLogDetMean.lean](../General/MatrixAnalysis/FrameLogDetMean.lean).
+The Chernoff interface `matrixChernoff_sampleMean_minimumEigenvalue_lower` in
+[MatrixChernoff.lean](../General/Probability/MatrixChernoff.lean) states the
+sample-average minimum-eigenvalue event and the manuscript's exact exponential
+bound. The required coordinate and spectral identities are proved internally.
 [CubeWeakLowerSampling.lean](../RandSamp/CubeWeakLowerSampling.lean)
 constructs auxiliary weights and proves the unchanged uniform subset
 sampling event. These weights are internal to the proof; neither the
@@ -120,7 +148,7 @@ $$
 
 Thus $C>0$ and is independent of $L,\Delta_1,\rho,\epsilon$.
 Its dependence on $n$ is conservative. The manuscript-facing node-only
-result in [RandomClumpVandermonde.lean](RandomClumpVandermonde.lean) proves
+result in [Random/ClumpVandermonde.lean](Random/ClumpVandermonde.lean) proves
 
 $$
 \sigma_{\min}(\mathcal V_{\mathcal W}(\mathcal X))
@@ -136,7 +164,7 @@ $$
 
 The smooth potential uses this logarithmic average directly, without
 subspace threshold counting or layer integration. The stationary covariance
-is bounded below by $\delta I$ through a direct precision-eigenvalue bound.
+has minimum eigenvalue at least $\delta$ through a direct eigenvalue bound.
 Each normalized weighted rank-one row has norm at most $12n/5\le(5/2)n$,
 so the sample count is proportional to the total node count $n$.
 
@@ -145,7 +173,7 @@ remain available in the [Fourier](../General/Fourier/README.md),
 [matrix-analysis](../General/MatrixAnalysis/README.md), and
 [probability](../General/Probability/README.md) libraries. The current
 manuscript-facing proof retains the direct logarithmic-average route.
-`RandomClumpMUSICAudit` checks both the reusable alternative results and the
+[Random/ClumpAudit.lean](Random/ClumpAudit.lean) checks both the reusable alternative results and the
 actual dependencies of the public theorem.
 
 
@@ -156,18 +184,46 @@ No leverage, thickness, arrangement, comparable-spacing, or norming
 hypothesis appears in this theorem. Unit amplitudes are internal witnesses
 for its node-only statement. There is no upper singular-value conclusion.
 
-The two independent uniform samples for MUSIC use $n\le M_1,M_2\le(L+1)^d$
-and the rate $M_i\ge3n\rho^{-2}\log(2n/\epsilon)$. This rate implies $n<M_i$;
-the deterministic noise-space proof derives the strict row count internally.
-[RandomClumpMUSIC.lean](RandomClumpMUSIC.lean) proves the noiseless GHM lower
-bound and, when
+The two independent uniform samples for number detection and MUSIC use
+$n\le M_1,M_2\le(L+1)^d$ and the rate
+$M_i\ge3n\rho^{-2}\log(2n/\epsilon)$. Applying the random Vandermonde theorem
+to each factor with failure probability $\epsilon/2$ gives a common event of
+probability at least $1-\epsilon$. The noiseless GHM bound on this event is
+proved by `positiveCubeClumpGHM_signalSingularValue_lower_highProbability` in
+[Random/ClumpMUSIC.lean](Random/ClumpMUSIC.lean):
+
+$$
+\sigma_n(\mathbf{GH}_0)\ge
+m_{\min}\sqrt{M_1M_2}(1-\rho)C(d,n,n^\star,\beta)^2
+(L\Delta_1)^{2n^\star-2}.
+$$
+
+The rate implies $n<M_i$; the deterministic noise-space proof derives this
+strict row count internally. The measurement assumptions are $2L\le\Omega$
+and $|W(\boldsymbol\omega)|<\sigma$ throughout the frequency band. When
 
 $$
 2\sigma<m_{\min}(1-\rho)C(d,n,n^\star,\beta)^2
 (L\Delta_1)^{2n^\star-2},
 $$
 
-the uniform correlation bound with probability at least $1-\epsilon$:
+the public declaration `positiveCubeClumpGHM_numberDetection_highProbability`
+proves the new corollary `cor:random-ghm-number-detection-multiclump`:
+
+$$
+\sigma_n(\mathbf{GH})>\sigma\sqrt{M_1M_2},\qquad
+\sigma_j(\mathbf{GH})<\sigma\sqrt{M_1M_2}
+\quad(n<j\le\min\{M_1,M_2\}),
+$$
+
+with probability at least $1-\epsilon$. Exactly $n$ singular values exceed
+the algorithm's threshold. The tail estimate follows from the measurement
+bound for every sample; the common factor event supplies the signal estimate.
+
+Under the same assumptions,
+`positiveCubeClumpMUSIC_correlation_stability_highProbability` proves the
+corollary `cor:random-ghm-music-multiclump`, with probability at least
+$1-\epsilon$:
 
 $$
 \|R_\sigma-R\|_\infty\le
@@ -175,10 +231,10 @@ $$
 (L\Delta_1)^{2n^\star-2}}.
 $$
 
-The same factor event proves exactly $n$ measured singular values above
-$\sigma\sqrt{M_1M_2}$. The source tuple is fixed; the noise need not be
+Both public declarations use the same factor event. The source tuple is
+fixed; the noise need not be
 independent of the sample. No location-distance conclusion is asserted.
-[RandomClumpMUSICAudit.lean](RandomClumpMUSICAudit.lean) audits the geometry,
+[Random/ClumpAudit.lean](Random/ClumpAudit.lean) audits the geometry,
 weight construction, unchanged sampling distribution, normalization,
 noise, correlation and number-detection chain.
 

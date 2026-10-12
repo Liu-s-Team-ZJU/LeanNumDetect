@@ -1,5 +1,4 @@
-import NumDetect.Matrices
-import NumDetect.MatrixFacts
+import NumDetect.Segmented.MatrixFacts
 import General.MatrixAnalysis.SingularValueBounds
 
 /-! Definitions used by both segmented Vandermonde and threshold proofs. -/

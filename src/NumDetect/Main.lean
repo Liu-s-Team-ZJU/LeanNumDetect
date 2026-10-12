@@ -1,38 +1,8 @@
-import NumDetect.CRL
-import General.Fourier.BartonCubeFrame
-import General.Fourier.OneDimensionalFineCubeFrame
-import General.Convex.LinewiseSecondDerivative
-import General.Convex.QuadraticGrowthCurvature
-import General.Convex.CurvatureTransfer
-import General.Convex.PeakBallStrictConvex
-import NumDetect.MUSIC
-import NumDetect.MUSICLocation
-import NumDetect.MUSICSelector
-import NumDetect.SegmentedMUSICGrowth
-import NumDetect.SegmentedMUSICLocation
-import NumDetect.MUSICPeakSelection
-import NumDetect.MUSICPeakRegularity
-import NumDetect.MUSICPeakGrowth
-import NumDetect.MUSICPeakFourierDerivativeNorm
-import NumDetect.MUSICPeakFourierLineVector
-import NumDetect.MUSICPeakSegmentedFrequency
-import NumDetect.MUSICPeakQuadraticBounds
-import NumDetect.MUSICPeakProjectionBridge
-import NumDetect.MUSICPeakStrictConvex
-import NumDetect.MUSICPeakReciprocal
-import NumDetect.SegmentedMUSICPeaks
-import NumDetect.SegmentedMUSICPeakCurvature
-import NumDetect.MUSICPeakSegmentedRadialLoss
-import NumDetect.SegmentedMUSICPeakSignalGap
-import NumDetect.SegmentedMUSICPeakProjectorCurvature
-import NumDetect.SegmentedMUSICPeakFinal
-import NumDetect.Random
-import NumDetect.RandomCubeMUSIC
-import NumDetect.RandomClumpVandermonde
-import NumDetect.RandomCubeNumberDetection
-import NumDetect.RandomClumpMUSIC
-import NumDetect.Segmented.Main
-import NumDetect.WellSeparatedSegmented
-import NumDetect.Uniform
+import NumDetect.CRL.Bounds
+import NumDetect.Segmented.MUSICStability
+import NumDetect.Segmented.WellSeparated
+import NumDetect.Random.LogDetMean
+import NumDetect.Random.ClumpMUSIC
 
-/-! Public import for the principal definitions and theorem statements in NumDetect. -/
+/-! Public interface for the definitions and results in the current manuscript.
+Earlier results are available separately through `NumDetect.Retained.Main`. -/
