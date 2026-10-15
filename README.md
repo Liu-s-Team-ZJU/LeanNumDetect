@@ -1,20 +1,26 @@
 # LeanNumDetect
 
-LeanNumDetect formalizes the theoretical results of the NumDetect manuscript on
-source-number detection in multidimensional spectral super-resolution. It
-covers generalized Hankel and Toeplitz factorizations, uniform and segmented
-Vandermonde lower bounds, singular-value detection thresholds, MUSIC stability,
-and computational resolution limits. Algorithms, complexity estimates, and
-numerical experiments are outside the current scope.
+LeanNumDetect formalizes the NumDetect, RandSamp, and MultiTuran manuscripts on
+multidimensional spectral super-resolution. It covers generalized Hankel and
+Toeplitz factorizations, Vandermonde lower bounds, singular-value detection
+thresholds, MUSIC stability, computational resolution limits, random Fourier
+sampling, and Turán estimates for block sampling. Algorithms, complexity
+estimates, and numerical experiments are outside the current scope.
 
 Import `NumDetect.Main` for the NumDetect results and `RandSamp.Main` for the
 nonuniform Fourier--Vandermonde estimate, fixed-support and uniform random
 sampling, and off-grid relative Gram results of the RandSamp manuscript.
+Import `MultiTuran.Main` for the convex-body Turán theorem and single-clump
+block-sampling bound, and `MultiTuran.MultiClump.Results` for the multi-clump
+product-row theorem with the Riemann block condition.
 
 ## Main theoretical results
 
 | Main result | Exact Lean location |
 | --- | --- |
+| Convex-body Turán comparison (`lem:multidim-turan`), including essential $L^\infty$ norms | [Turan.lean](src/MultiTuran/Turan.lean): `exponentialSum_convexBody_supNorm_le`, `exponentialSum_convexBody_eLpNorm_top_le` |
+| Single-clump block-sampling singular-value bound (`lem:sv-md-array`) | [SegmentedArray.lean](src/MultiTuran/SegmentedArray.lean): `segmentedArray_minimumSingularValue_lower` |
+| Multi-clump block-sampling bound for arbitrary product rows and enclosing apertures | [MultiClump/ProductResult.lean](src/MultiTuran/MultiClump/ProductResult.lean): `multiClumpProduct_minimumSingularValue_lower`, with actual largest-clump size and the original Riemann block condition |
 | Contiguous-grid VDM minimum-singular-value estimate (`lem:uniform-Vandermonde`) | [Uniform/Vandermonde.lean](src/NumDetect/Uniform/Vandermonde.lean): theorem `uniformVandermonde_minimumSingularValue` |
 | Multidimensional number-detection resolution (`thm:li-resolution`) | [Uniform/NumberDetection.lean](src/NumDetect/Uniform/NumberDetection.lean): theorem `noAdmissibleMeasureWithFewerSupports` |
 | Number-detection CRL upper bound (`eq:crl-number-upper`) | [CRL/Bounds.lean](src/NumDetect/CRL/Bounds.lean): theorem `numberDetectionCRL_le_numberDetectionSeparationThreshold` |
@@ -34,7 +40,9 @@ sampling, and off-grid relative Gram results of the RandSamp manuscript.
 | General GHM-MUSIC stability (`lem:stability_ghm_music`) | [MUSIC/Stability.lean](src/NumDetect/MUSIC/Stability.lean): theorem `ghmMUSIC_correlation_stability` |
 | Segmented-grid MUSIC stability (`cor:stability_multidim_segmented`) | [Segmented/MUSICStability.lean](src/NumDetect/Segmented/MUSICStability.lean): theorem `segmentedMUSIC_correlation_stability` |
 
-See more in [NumDetect guide](src/NumDetect/README.md).
+See the [NumDetect](src/NumDetect/README.md), [RandSamp](src/RandSamp/README.md),
+and [MultiTuran](src/MultiTuran/README.md) guides for manuscript correspondences
+and proof structure.
 
 ## Retained earlier NumDetect results
 
@@ -64,6 +72,7 @@ route as well as the trust boundary of the retained alternatives.
 | --- | --- |
 | [src/NumDetect](src/NumDetect/README.md) | Manuscript results in MUSIC, Segmented, Random, Uniform, Preliminaries, Retained, and CRL; active interface `NumDetect.Main`, earlier results `NumDetect.Retained.Main` |
 | [src/RandSamp](src/RandSamp/README.md) | Nonuniform Fourier--Vandermonde scaling, fixed-support and uniform random Fourier sampling, and off-grid relative Gram estimates |
+| [src/MultiTuran](src/MultiTuran/README.md) | Fully proved scalar and multidimensional Turán estimates, product Nikolskii and norming bounds, and exact single-clump and [multi-clump](src/MultiTuran/MultiClump/README.md) block-sampling results |
 | [src/SegmentedVDM](src/SegmentedVDM/README.md) | Independent one-dimensional segmented Vandermonde construction and singular-value theorem |
 | [src/General](src/General/README.md) | Reusable finite, Fourier, matrix-analysis, and spectral-perturbation results |
 | [src/External](src/External/README.md) | Source-attribution registry only; no Lean source files |
@@ -85,7 +94,11 @@ rejects every project admission and project-defined axiom, including in
 private proofs and cached diagnostics. It also requires `src/External/` to
 contain no Lean source files. Both matrix Chernoff tails, arbitrary-law
 bounded-row concentration, and all RandSamp and NumDetect applications are
-fully proved. The RandSamp, off-grid, multiclump sampling and [random-clump MUSIC audit](src/NumDetect/Random/ClumpAudit.lean) require the final results and their dependencies to use only standard Lean axioms.
+fully proved. The RandSamp, off-grid, multiclump sampling,
+[random-clump MUSIC](src/NumDetect/Random/ClumpAudit.lean),
+[MultiTuran](src/MultiTuran/Audit.lean), and
+[MultiTuran multi-clump](src/MultiTuran/MultiClump/Audit.lean) audits require the
+final results and their dependencies to use only standard Lean axioms.
 If the shared
 mathlib checkout is absent, run `python3 .github/ci/setup_mathlib.py` once before these
 commands. See the [CI guide](.github/ci/README.md) for environment setup and
