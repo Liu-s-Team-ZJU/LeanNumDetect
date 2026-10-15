@@ -24,141 +24,16 @@ open LeanNumDetect.NumDetect
 namespace LeanNumDetect.MultiTuran.MultiClump
 noncomputable section
 
-theorem clumpCardinalPolynomial
-    {d n A nStar M : ℕ} {τ η β Δ : ℝ} {x : Fin n → Point d}
-    (C : ClumpSlots (A := A) (nStar := nStar) x) (anchor : Fin n)
-    (hd : 1 ≤ d) (hs : 1 ≤ nStar) (hM : 2 * nStar ≤ M)
-    (hΔ : 0 < Δ) (hβ : 1 / (2 * Real.log 2) < β)
-    (hcube : ∀ j, InAngularCube (x j))
-    (hsame : ∀ i j, C.label i = C.label j → periodicLInfDistance (x i) (x j) ≤ τ)
-    (hcross : ∀ i j, C.label i ≠ C.label j → η < periodicLInfDistance (x i) (x j))
-    (hτ : τ ≤ Real.pi / (2 * d))
-    (hη : 4 * Real.pi * β * d / ((M / nStar : ℕ) + 1) ≤ η)
-    (hmin : ∀ i j, i ≠ j → Δ ≤ periodicL1Distance (x i) (x j))
-    (hscale : Δ ≤ 2 * Real.pi * nStar / M) :
-    ∃ P : SegmentedPolynomial d (M + (M - M / nStar)) 0 (2 * M + 1),
-      (∀ j, P.angularValue (x j) = if anchor = j then 1 else 0) ∧
-      P.mass ≤ (1 / Real.sqrt (2 - Real.exp (1 / (2 * β)))) ^ nStar *
-        (Real.sqrt 2 / (((M : ℝ) / nStar) * (Δ / 2) / Real.pi)) ^ (nStar - 1) := by
-  classical
-  have ha := liFrameConstant_pos hβ
-  have hK : nStar * (M / nStar) ≤ M := by
-    simpa [Nat.mul_comm] using Nat.div_mul_le_self M nStar
-  have hKD : M / nStar < 2 * M + 1 := by
-    have hdiv := Nat.div_le_self M nStar
-    omega
-  have hprodD : nStar * (M / nStar) < 2 * M + 1 := by omega
-  have hframe := BartonCubeFrame.hasFineCubeFrame_of_translatedCube hd hβ hη
-  have hframes (color : Fin nStar) (v : ↥(clumpColorClass C anchor color) → ℂ) :
-      (2 - Real.exp (1 / (2 * β))) * (((M / nStar + 1) ^ d : ℕ) : ℝ) *
-        SegmentedVDM.energy v ≤ SegmentedVDM.energy
-          (fineCubeEvaluation (M / nStar) (fun j : ↥(clumpColorClass C anchor color) => x j) *ᵥ v) := by
-    apply @hframe (↥(clumpColorClass C anchor color)) inferInstance inferInstance
-      (fun j => x j) (fun j => hcube j) _ v
-    intro i j hij
-    exact hcross i j (clumpColorClass_labels_ne C anchor color i j hij)
-  obtain ⟨G₀, hG1, hG0, hGmass⟩ :=
-    localizationPolynomial_of_colorFrames C anchor hKD hprodD ha hframes
-  let G : SegmentedPolynomial d M 0 (2 * M + 1) := G₀.widen hK le_rfl (by omega)
-  have hMR : (0 : ℝ) < M := by exact_mod_cast (show 0 < M by omega)
-  have hlocal : Δ / 2 ≤ Real.pi * nStar / ((M : ℝ) * 1) := by
-    have h := (le_div_iff₀ hMR).mp hscale
-    apply (le_div_iff₀ (by positivity : (0 : ℝ) < (M : ℝ) * 1)).mpr
-    nlinarith
-  obtain ⟨B₀, hBvalue, hBmass⟩ := withinClumpPolynomial C anchor hd hs hM
-    (D := 1) (by omega) (by positivity : 0 < Δ / 2) hcube hsame
-    (by simpa using hτ) (fun i j hij => (by linarith [hmin i j hij])) (by simpa only [Nat.cast_one] using hlocal)
-  have hR : M - M / nStar ≤ M := Nat.sub_le _ _
-  let B : SegmentedPolynomial d (M - M / nStar) 0 (2 * M + 1) :=
-    B₀.coarseToFine (by omega)
-  have hsum : M + (M - M / nStar) < 2 * M + 1 := by omega
-  let P := G.mul B hsum
-  refine ⟨P, ?_, ?_⟩
-  · intro j
-    simp only [P, SegmentedPolynomial.angularValue_mul, B,
-      SegmentedPolynomial.angularValue_coarseToFine, G, SegmentedPolynomial.angularValue_widen]
-    by_cases hj : C.label j = C.label anchor
-    · rw [hBvalue j hj]
-      by_cases haj : anchor = j
-      · subst j
-        simp [hG1]
-      · simp [haj]
-    · rw [hG0 j hj, zero_mul]
-      have haj : anchor ≠ j := fun h => hj (congrArg C.label h.symm)
-      simp [haj]
-  · have hBmass' : B.mass ≤
-        (Real.sqrt 2 / (((M : ℝ) / nStar) * (Δ / 2) / Real.pi)) ^ (nStar - 1) := by
-      simpa [B] using hBmass
-    have hGmass' : G.mass ≤ (1 / Real.sqrt (2 - Real.exp (1 / (2 * β)))) ^ nStar := by
-      simpa [G] using hGmass
-    exact (SegmentedPolynomial.mass_mul_le G B hsum).trans
-      (mul_le_mul hGmass' hBmass' B.mass_nonneg (by positivity))
-
-
 /-- The one-block segmented matrix is exactly the original full cube after
 reindexing its rows. -/
 theorem segmentedVandermonde_oneBlock_singularValue {d n L : ℕ}
     (Y : Fin n → Point d) (i : ℕ) :
     matrixSingularValue (segmentedVandermonde L 0 (L + 1) Y) i =
       matrixSingularValue (fullCubeVandermonde 1 L Y) i := by
-  have hmat : (segmentedVandermonde L 0 (L + 1) Y).submatrix
-      (SegmentedPolynomial.fineCubeIndexEquiv d L).symm (Equiv.refl (Fin n)) =
-      fullCubeVandermonde 1 L Y := by
-    ext k j
-    simp [segmentedVandermonde, NumDetect.generalizedVandermonde, steeringVector,
-      segmentedFrequency, SegmentedPolynomial.fineCubeIndexEquiv,
-      fullCubeVandermonde, exponential, dot]
-  rw [← hmat, matrixSingularValue_submatrix_equiv]
-
-/-- Raw cube lower bound at half bandwidth.  Unlike the public pre-existing
-clump corollary, `Δ` is arbitrary below all pair distances, which permits the
-clipped separation used by the multi-clump note. -/
-theorem fullCube_clump_raw_lower_halfBandwidth
-    {d n A nStar M : ℕ} {τ separation β Δ : ℝ} {Y : Fin n → Point d}
-    (C : ClumpSlots (A := A) (nStar := nStar) Y)
-    (hd : 1 ≤ d) (hn : 0 < n) (hs : 0 < nStar) (hsize : nStar ≤ n)
-    (hcube : ∀ j, InAngularCube (Y j))
-    (hsame : ∀ i j, C.label i = C.label j → periodicLInfDistance (Y i) (Y j) ≤ τ)
-    (hcross : ∀ i j, C.label i ≠ C.label j → separation < periodicLInfDistance (Y i) (Y j))
-    (hM : 4 * n ≤ M) (hβ : 1 / (2 * Real.log 2) < β)
-    (hseparation : 4 * Real.pi * β * d * nStar / M ≤ separation)
-    (hτ : τ ≤ Real.pi / (2 * d)) (hΔ : 0 < Δ)
-    (hmin : ∀ i j, i ≠ j → Δ ≤ periodicL1Distance (Y i) (Y j))
-    (hscale : Δ ≤ 2 * Real.pi * nStar / M) :
-    let H := (1 / Real.sqrt (2 - Real.exp (1 / (2 * β)))) ^ nStar *
-        (Real.sqrt 2 / (((M : ℝ) / nStar) * (Δ / 2) / Real.pi)) ^ (nStar - 1)
-    Real.sqrt (((M / nStar + 1) ^ d : ℕ) : ℝ) / (Real.sqrt n * H) ≤
-      matrixSingularValue (fullCubeVandermonde 1 (2 * M) Y) (n - 1) := by
-  classical
-  dsimp only
-  have hM0 : 0 < M := by omega
-  have hMR : (0 : ℝ) < M := by exact_mod_cast hM0
-  have hβ0 : 0 < β := (by positivity : 0 < 1 / (2 * Real.log 2)).trans hβ
-  have hK : (M : ℝ) ≤ nStar * (((M / nStar : ℕ) : ℝ) + 1) := by
-    exact_mod_cast (Nat.lt_mul_div_succ M hs).le
-  have hseparation' : 4 * Real.pi * β * d / ((M / nStar : ℕ) + 1) ≤ separation := by
-    apply le_trans _ hseparation
-    apply (div_le_div_iff₀ (by positivity) hMR).mpr
-    convert mul_le_mul_of_nonneg_left hK
-      (show 0 ≤ 4 * Real.pi * β * d by positivity) using 1 <;> ring
-  choose P hPv hPm using fun anchor => clumpCardinalPolynomial C anchor hd
-    (by omega : 1 ≤ nStar) (by omega : 2 * nStar ≤ M) hΔ hβ
-    hcube hsame hcross hτ hseparation' hmin hscale
-  let H := (1 / Real.sqrt (2 - Real.exp (1 / (2 * β)))) ^ nStar *
-        (Real.sqrt 2 / (((M : ℝ) / nStar) * (Δ / 2) / Real.pi)) ^ (nStar - 1)
-  have ha := liFrameConstant_pos hβ
-  have hH : 0 < H := by dsimp [H]; positivity
-  have hsum : M + (M - M / nStar) + M / nStar < 2 * M + 1 := by
-    have := Nat.div_le_self M nStar
-    omega
-  have hh := SegmentedPolynomial.singularValue_ge_of_smoothedSegmentedPolynomials
-    hn Y P hPv hsum hH hPm (b := M / nStar) (z := 0)
-  have hbudget : M + (M - M / nStar) + M / nStar = 2 * M := by
-    have := Nat.div_le_self M nStar
-    omega
-  rw [hbudget, segmentedVandermonde_oneBlock_singularValue] at hh
-  simpa only [H, Nat.add_zero, zero_add, zero_mul, one_mul] using hh
-
+  rw [NumDetect.segmentedVandermonde_oneBlock_singularValue]
+  congr 1
+  funext k j
+  simp [RandSamp.cubeFourierRow,fullCubeVandermonde,exponential,NumDetect.dot]
 
 /-- Exact explicit cube coefficient with an arbitrary admissible positive
 spacing lower bound and separate diameter and inter-clump gap. -/
@@ -179,47 +54,9 @@ theorem fullCube_clump_singularValue_lower_halfBandwidth
       (Real.sqrt n * (Real.sqrt 2) ^ (nStar - 1)) *
       (((2 * M : ℕ) : ℝ) * Δ / (4 * Real.pi * nStar)) ^ (nStar - 1) ≤
       matrixSingularValue (fullCubeVandermonde 1 (2 * M) Y) (n - 1) := by
-  let H := (1 / Real.sqrt (2 - Real.exp (1 / (2 * β)))) ^ nStar *
-    (Real.sqrt 2 / (((M : ℝ) / nStar) * (Δ / 2) / Real.pi)) ^ (nStar - 1)
-  have hraw := fullCube_clump_raw_lower_halfBandwidth C hd hn hs hsize
+  have h := liCubeClump_raw_lower_halfBandwidth_of_slots C hd hn hs hsize
     hcube hsame hcross hM hβ hseparation hτ hΔ hmin hscale
-  have ha := liFrameConstant_pos hβ
-  have hM0 : (0 : ℝ) < M := by exact_mod_cast (show 0 < M by omega)
-  have hH : 0 < H := by dsimp [H]; positivity
-  have hpacket : 2 * ((2 * M) / (4 * nStar)) + 1 ≤ M / nStar + 1 := by
-    have hdiv := Nat.div_mul_le_self (2 * M) (4 * nStar)
-    have hmul : (2 * ((2 * M) / (4 * nStar))) * nStar ≤ M := by nlinarith
-    have h := (Nat.le_div_iff_mul_le hs).mpr hmul
-    omega
-  have hpacketRoot :
-      Real.sqrt (((2 * ((2 * M) / (4 * nStar)) + 1) ^ d : ℕ) : ℝ) ≤
-      Real.sqrt (((M / nStar + 1) ^ d : ℕ) : ℝ) := by
-    apply Real.sqrt_le_sqrt
-    exact_mod_cast Nat.pow_le_pow_left hpacket d
-  have hrootpow : (Real.sqrt (2 - Real.exp (1 / (2 * β)))) ^ nStar =
-      (2 - Real.exp (1 / (2 * β))) ^ ((nStar : ℝ) / 2) := by
-    rw [Real.sqrt_eq_rpow, ← Real.rpow_mul_natCast ha.le]
-    congr 1
-    ring
-  have ht : (((M : ℝ) / nStar) * (Δ / 2) / Real.pi) =
-      ((2 * M : ℕ) : ℝ) * Δ / (4 * Real.pi * nStar) := by
-    push_cast
-    ring
-  calc
-    _ = Real.sqrt (((2 * ((2 * M) / (4 * nStar)) + 1) ^ d : ℕ) : ℝ) /
-        (Real.sqrt n * H) := by
-      rw [← hrootpow]
-      dsimp [H]
-      rw [ht]
-      simp only [div_pow, one_pow]
-      field_simp [ne_of_gt (Real.sqrt_pos.mpr ha), ne_of_gt (Real.sqrt_pos.mpr
-        (show (0 : ℝ) < n by exact_mod_cast hn)), Real.pi_ne_zero,
-        ne_of_gt (show (0 : ℝ) < nStar by exact_mod_cast hs),
-        ne_of_gt (show (0 : ℝ) < M by exact_mod_cast (show 0 < M by omega)), hΔ.ne']
-      <;> ring
-    _ ≤ Real.sqrt (((M / nStar + 1) ^ d : ℕ) : ℝ) / (Real.sqrt n * H) :=
-      div_le_div_of_nonneg_right hpacketRoot (by positivity)
-    _ ≤ _ := hraw
+  simpa only [segmentedVandermonde_oneBlock_singularValue] using h
 
 /-- Even-bandwidth form matching the manuscript's original `A_{1,s}`. -/
 theorem fullCube_clump_singularValue_lower

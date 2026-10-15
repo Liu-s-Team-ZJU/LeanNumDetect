@@ -173,7 +173,7 @@ theorem fullApertureCubeSide_large {N n : ℕ} (hn : 0 < n) (hN : 16*n ≤ N) :
 
 theorem fullApertureCubeSide_gap {d nStar : ℕ} (G : SegmentedGrid d)
     (hnStar : 0 < nStar) {separation : ℝ} (hseparation : 0 < separation) (hN : 4 ≤ G.minAperture)
-    (hgap : 16*Real.pi*d*(nStar : ℝ)^2 ≤ separation*G.minThickLength) :
+    (hgap : 16*Real.pi*d*(nStar : ℝ) ≤ separation*G.minThickLength) :
     8*Real.pi*d*nStar/(fullApertureCubeSide G.minAperture : ℝ) ≤ separation := by
   have hL : (G.minThickLength : ℝ) ≤ G.minAperture := by
     exact_mod_cast minThickLength_le_minAperture G
@@ -182,14 +182,10 @@ theorem fullApertureCubeSide_gap {d nStar : ℕ} (G : SegmentedGrid d)
     exact_mod_cast hNs
   have hs : (0 : ℝ) < fullApertureCubeSide G.minAperture := by
     exact_mod_cast (show 0 < fullApertureCubeSide G.minAperture by omega)
-  have hns : (1 : ℝ) ≤ nStar := by exact_mod_cast hnStar
-  have hpow : (nStar : ℝ) ≤ (nStar : ℝ)^2 := le_self_pow₀ hns (by norm_num)
-  have h₁ := mul_le_mul_of_nonneg_left hpow
-    (show 0 ≤ 16*Real.pi*d by positivity)
   have h₂ := mul_le_mul_of_nonneg_left hL hseparation.le
   have h₃ := mul_le_mul_of_nonneg_left hNsR hseparation.le
   apply (div_le_iff₀ hs).mpr
-  nlinarith only [h₁,hgap,h₂,h₃]
+  nlinarith only [hgap,h₂,h₃]
 
 end
 end LeanNumDetect.MultiTuran.MultiClump

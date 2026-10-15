@@ -31,7 +31,7 @@ theorem multiClumpProduct_minimumSingularValue_lower
     (hC_B : 24 ≤ C_B)
     (hsame : ∀ i j, label i = label j → torusLInfDistance (Y i) (Y j) ≤ τ)
     (hcross : ∀ i j, label i ≠ label j →
-      max τ (16*Real.pi*d*(largestClumpSize label : ℝ)^2/G.minThickLength) <
+      max τ (16*Real.pi*d*(largestClumpSize label : ℝ)/G.minThickLength) <
         torusLInfDistance (Y i) (Y j))
     (hN : max (16*n) (32*d^2*largestClumpSize label) ≤ H.minAperture)
     (hblock : multiClumpBlockConstant d C_B * G.rowCount *
@@ -46,7 +46,7 @@ theorem multiClumpProduct_minimumSingularValue_lower
   have hsameC : ∀ i j, C.label i = C.label j → torusLInfDistance (Y i) (Y j) ≤ τ := by
     simpa only [hC] using hsame
   have hcrossC : ∀ i j, C.label i ≠ C.label j →
-      max τ (16*Real.pi*d*(largestClumpSize label : ℝ)^2/G.minThickLength) <
+      max τ (16*Real.pi*d*(largestClumpSize label : ℝ)/G.minThickLength) <
         torusLInfDistance (Y i) (Y j) := by
     simpa only [hC] using hcross
   rw [generalizedVandermonde_rowShift_minimumSingularValue G Y hn0 offset]

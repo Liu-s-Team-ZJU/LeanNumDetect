@@ -1,6 +1,6 @@
 # Multi-clump block sampling with the Riemann condition
 
-This directory formalizes Version I of `MultiTuran/notes/multiclump-block-bound-riemann.tex`. Version II is outside its scope. Import `MultiTuran.MultiClump.Results` for the public results, or `MultiTuran.MultiClump.Audit` to check their kernel dependencies.
+This directory formalizes the supplement `MultiTuran/notes/multiclump-block-bound-riemann.tex`. Import `MultiTuran.MultiClump.Results` for the public results, or `MultiTuran.MultiClump.Audit` to check their kernel dependencies.
 
 All declarations are in `LeanNumDetect.MultiTuran.MultiClump`. The single-clump infrastructure and unconditional Turán theorem are imported from the parent directory; no literature theorem is admitted in this proof.
 
@@ -20,18 +20,18 @@ The parameter $\tau$ bounds each clump's periodic $\ell^\infty$ diameter. The pu
 
 $$
 \|\boldsymbol y-\boldsymbol z\|_{\mathbb T,\infty}\le\tau\quad(\boldsymbol y,\boldsymbol z\in C_a),\qquad
-\|\boldsymbol y-\boldsymbol z\|_{\mathbb T,\infty}>\max\left\{\tau,\frac{16\pi d(n^\star)^2}{L_*}\right\}\quad(\boldsymbol y\in C_a,\boldsymbol z\in C_b,\ a\ne b).
+\|\boldsymbol y-\boldsymbol z\|_{\mathbb T,\infty}>\max\left\{\tau,\frac{16\pi dn^\star}{L_*}\right\}\quad(\boldsymbol y\in C_a,\boldsymbol z\in C_b,\ a\ne b).
 $$
 
 The second inequality applies to every pair of nodes in different clumps, using the periodic coordinatewise maximum distance. It is strict and is vacuous for a single clump. Thus the closed $\tau$-neighborhood of a node contains exactly its own clump. There is no independent gap parameter and no lower bound on $\tau L_*$.
 
-`BlockFeasibility.lean` proves directly from the displayed $B_d$ condition that
+`BlockFeasibility.lean` and `LinearGapParameters.lean` prove directly from the displayed $B_d$ condition that
 
 $$
-B_d(n^\star)^{4d+5}\le L_*,\qquad 16d(n^\star)^2\le L_*,\qquad \frac{16\pi d(n^\star)^2}{L_*}\le\pi.
+B_d(n^\star)^{4d+5}\le L_*,\qquad 16dn^\star\le L_*,\qquad \frac{16\pi dn^\star}{L_*}\le\pi.
 $$
 
-These are consequences of the existing Riemann hypothesis, not additional geometric premises. The proof uses $|\boldsymbol\Lambda|\ge L_*^d$ and the explicit bound $B_d\ge16d$ when $C_{\mathrm B}\ge24$. The internal selector construction uses the explicit threshold $16\pi d(n^\star)^2/L_*$.
+These are consequences of the existing Riemann hypothesis, not additional geometric premises. The proof uses $|\boldsymbol\Lambda|\ge L_*^d$ and the explicit bound $B_d\ge16d$ when $C_{\mathrm B}\ge24$. For $n^\star\ge2$, the same hypothesis gives $L_*\ge80n^\star$. The anchor construction uses $K=2\lfloor3L_*/(16n^\star)\rfloor$ and $W=n^\star K\le3L_*/8$.
 
 ## Exact constants and sampling factors
 
@@ -61,17 +61,24 @@ The scale $8\pi n^\star$ stays inside the minimum. There is no selector-support-
 
 | Manuscript label | Lean modules and principal content |
 | --- | --- |
-| `lem:clump-lifts` | `ClumpLifts`, `ClumpGeometry`, `Lifting`: independent clump cuts, true torus distances, and exact integer-phase invariance |
-| `lem:selector-width` | `BlockFeasibility`, `BlockParameters`: the original $B_d$ condition implies threshold feasibility and the selector width fits every block |
-| `lem:clump-selectors` | `Selectors`: separated frames, cardinal localizers, clump indicators, and their coefficient-mass bound |
-| `lem:block-restoration` | `ShortenedGrid`, `BlockRestoration`: shorten every block, restore the full rectangle energies, and account for null boundary overlaps |
-| `lem:clump-riemann` | `ClumpDerivative`, `ClumpRiemann`: genuine derivatives, coordinate variation, product Nikolskii, and the uniform half-norming inequality |
-| `lem:selector-cancellation` | `Convolution`: finite weighted Cauchy–Schwarz, injective row shifts, and exact extraction of each clump |
-| `prop:uniform-norming` | `ClumpSums`, `BlockParameters`, `NormingConstants`, `Norming`: actual clump cardinalities, the original $B_d$ condition, and exact cancellation of the displayed $\eta_0$ |
-| `lem:clump-fullcube` | `FullCube`: genuine clump interpolation, arbitrary positive pair-distance lower bounds, clipping, and the exact displayed cube coefficient |
-| `lem:aperture-transport` | Parent `FullAperture`: integer cube shifts, integration over disjoint unit cells, and the full-aperture energy bound |
+| `lem:clump-lifts` | `ClumpLifts`, `ClumpGeometry`, `Lifting`: independent clump cuts and integer-phase invariance |
+| `lem:separated-interpolation` | The original `BartonCubeFrame` and `NumDetect.Segmented.ClumpBounds`: minimum-norm interpolation and coefficient mass |
+| `lem:selector-width` | `BlockFeasibility`, `LinearGapParameters`: the original $B_d$ condition implies feasibility and $8W\le3L_*$ |
+| `lem:anchor-localization` | `Selectors`: the original colored anchor construction, now with $\beta=7/5$ and linear bandwidth |
+| `lem:clump-riemann` | `ClumpDerivative`, `ClumpRiemann`, `ClumpSums`: actual local frequencies and the uniform half-norming inequality |
+| `lem:anchor-measurement` | `Convolution`: finite weighted Cauchy–Schwarz and injective shifts inside every original block |
+| `lem:swept-volume` | `ConvexSweep`: a cover by swept upper faces and an exact determinant calculation give volume growth linear in the translation |
+| `lem:block-restoration` | `TranslatedBlockRestoration`: one Turán comparison controls every continuous shift of an already extracted clump |
+| `lem:translation-constant` | `LinearGapConstants`: the stronger frame constant pays the entire translation cost within the original selector budget |
+| `prop:uniform-norming` | `AnchorReconstruction`, `ContinuousCombinations`, `LinearNorming`: prefix telescoping, actual continuous energies, and exact cancellation of the original $\eta_0$ |
+| `lem:clump-fullcube` | Shared public interfaces in `NumDetect.Random.CubeClumpBounds`, then `FullCube`: arbitrary spacing lower bounds, clipping, and the displayed cube coefficient |
+| Main-text `thm:universal-full-aperture` | Parent `FullAperture`: integration over disjoint unit cells and the full-aperture energy bound |
 
-The final proof of `thm:main` combines these eight lemmas and the uniform-norming proposition with the parent `Turan` restriction theorem. `BoundFormula`, `Main`, `GeneralProduct`, `RowShift`, and `ProductResult` assemble the exact coefficient and transfer it to the actual measured product rows and the chosen enclosing box.
+The final proof of `thm:main` combines these lemmas and the uniform-norming proposition with the parent `Turan` restriction theorem. `BoundFormula`, `Main`, `GeneralProduct`, `RowShift`, and `ProductResult` transfer the exact coefficient to the measured product rows and the chosen enclosing box.
+
+The linear-gap argument applies only the low-bandwidth anchors to measured data. Their prefix products act on continuous clump sums; their larger shifts are controlled by the swept convex body. `LinearGapConstants` verifies that the improved frame mass at $\beta=7/5$ absorbs the additional factor $(2n^\star/3)^{n^\star-1}$. Thus $B_d$, $\eta_0$, the final lower bound, and every other geometric hypothesis are unchanged. The former quadratic-gap norming helper is retained for the $n^\star=1$ branch, where the linear and quadratic thresholds coincide.
+
+The full-cube proof reuses the public `NumDetect.liInterpolationPolynomial`, `NumDetect.liCubeClump_raw_ratio_of_slots`, and `NumDetect.liCubeClump_raw_lower_halfBandwidth_of_slots` interfaces in the original cube module. The original normalized cube theorem and this note call the same interpolation-to-singular-value proof. The `MultiClump/FullCube` adapter supplies torus representatives, clips the positive spacing parameter, and simplifies the coefficient; it does not reconstruct the cardinal interpolants or repeat the smoothing argument.
 
 For `lem:clump-riemann`, Lean uses the proved frequency-dependent cubic derivative estimate on the local sum, followed by squared-modulus variation. Its intermediate powers are $2d+3$ and $2d+2$, which are dominated by the note's $4d+5$ and $4d+1$ for $d\ge2$. The resulting sufficient condition is the same displayed $B_d$ condition. The proof does not assume the sharper Bernstein inequality as an extra premise.
 

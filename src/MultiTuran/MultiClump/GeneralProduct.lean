@@ -1,4 +1,4 @@
-import MultiTuran.MultiClump.Norming
+import MultiTuran.MultiClump.LinearNorming
 import MultiTuran.MultiClump.FullCube
 import MultiTuran.MultiClump.Lifting
 import MultiTuran.Turan
@@ -249,7 +249,7 @@ the cube at the independently specified, possibly larger aperture. -/
 theorem fullApertureCubeSide_enclosing_gap {d nStar : ℕ} (G H : SegmentedGrid d)
     (houter : ∀ q, G.aperture q ≤ H.aperture q)
     (hnStar : 0 < nStar) {separation : ℝ} (hseparation : 0 < separation) (hN : 4 ≤ H.minAperture)
-    (hgap : 16*Real.pi*d*(nStar : ℝ)^2 ≤ separation*G.minThickLength) :
+    (hgap : 16*Real.pi*d*(nStar : ℝ) ≤ separation*G.minThickLength) :
     8*Real.pi*d*nStar/(fullApertureCubeSide H.minAperture : ℝ) ≤ separation := by
   have hL : (G.minThickLength : ℝ) ≤ H.minAperture := by
     exact_mod_cast (minThickLength_le_minAperture G).trans
@@ -259,14 +259,10 @@ theorem fullApertureCubeSide_enclosing_gap {d nStar : ℕ} (G H : SegmentedGrid 
     exact_mod_cast hNs
   have hs : (0 : ℝ) < fullApertureCubeSide H.minAperture := by
     exact_mod_cast (show 0 < fullApertureCubeSide H.minAperture by omega)
-  have hns : (1 : ℝ) ≤ nStar := by exact_mod_cast hnStar
-  have hpow : (nStar : ℝ) ≤ (nStar : ℝ)^2 := le_self_pow₀ hns (by norm_num)
-  have h₁ := mul_le_mul_of_nonneg_left hpow
-    (show 0 ≤ 16*Real.pi*d by positivity)
   have h₂ := mul_le_mul_of_nonneg_left hL hseparation.le
   have h₃ := mul_le_mul_of_nonneg_left hNsR hseparation.le
   apply (div_le_iff₀ hs).mpr
-  nlinarith only [h₁,hgap,h₂,h₃]
+  nlinarith only [hgap,h₂,h₃]
 
 @[simp] theorem generalProductArrayLowerBound_liftNodes {d n : ℕ}
     (G H : SegmentedGrid d) (Y : Fin n → Point d)
@@ -289,7 +285,7 @@ theorem generalProductArrayLowerBound_le_minimumSingularValue
     (hsep : 0 < nodeSeparation Y)
     (hsame : ∀ i j, C.label i = C.label j → torusLInfDistance (Y i) (Y j) ≤ τ)
     (hcross : ∀ i j, C.label i ≠ C.label j →
-      max τ (16*Real.pi*d*(nStar : ℝ)^2/G.minThickLength) < torusLInfDistance (Y i) (Y j))
+      max τ (16*Real.pi*d*(nStar : ℝ)/G.minThickLength) < torusLInfDistance (Y i) (Y j))
     (hN : max (16*n) (32*d^2*nStar) ≤ H.minAperture)
     (hblock : multiClumpBlockConstant d C_B * G.rowCount *
       ((nStar : ℝ)^(4*d+5)/(G.minThickLength : ℝ)^(d+1)+
@@ -310,17 +306,17 @@ theorem generalProductArrayLowerBound_le_minimumSingularValue
     intro i j hij
     simpa only [Z,torusLInfDistance_liftNodes] using hsame i j hij
   have hcrossZ : ∀ i j, C'.label i ≠ C'.label j →
-      max τ (16*Real.pi*d*(nStar : ℝ)^2/G.minThickLength) < torusLInfDistance (Z i) (Z j) := by
+      max τ (16*Real.pi*d*(nStar : ℝ)/G.minThickLength) < torusLInfDistance (Z i) (Z j) := by
     intro i j hij
     simpa only [Z,torusLInfDistance_liftNodes] using hcross i j hij
   have hsepZ : 0 < nodeSeparation Z := by
     simpa only [Z,nodeSeparation_liftNodes] using hsep
-  have hnorming := continuousNorming_of_multiclump_blocks G Z C' hd hn0 hnStar
+  have hnorming := continuousNorming_of_linear_multiclump_blocks G Z C' hd hn0 hnStar
     hsurj hC_B hτ.le hrealSame hcrossZ hblock
-  let separation : ℝ := 16*Real.pi*d*(nStar : ℝ)^2/G.minThickLength
+  let separation : ℝ := 16*Real.pi*d*(nStar : ℝ)/G.minThickLength
   have hL : (0 : ℝ) < G.minThickLength := by exact_mod_cast minThickLength_pos G
   have hseparation : 0 < separation := by dsimp [separation]; positivity
-  have hgap : 16*Real.pi*d*(nStar : ℝ)^2 ≤ separation*G.minThickLength := by
+  have hgap : 16*Real.pi*d*(nStar : ℝ) ≤ separation*G.minThickLength := by
     dsimp [separation]
     rw [div_mul_cancel₀ _ (ne_of_gt hL)]
   have hcrossScale : ∀ i j, C'.label i ≠ C'.label j →
@@ -351,7 +347,7 @@ theorem generalProductArray_minimumSingularValue_lower
     (hsep : 0 < nodeSeparation Y)
     (hsame : ∀ i j, label i = label j → torusLInfDistance (Y i) (Y j) ≤ τ)
     (hcross : ∀ i j, label i ≠ label j →
-      max τ (16*Real.pi*d*(nStar : ℝ)^2/G.minThickLength) < torusLInfDistance (Y i) (Y j))
+      max τ (16*Real.pi*d*(nStar : ℝ)/G.minThickLength) < torusLInfDistance (Y i) (Y j))
     (hN : max (16*n) (32*d^2*nStar) ≤ H.minAperture)
     (hblock : multiClumpBlockConstant d C_B * G.rowCount *
       ((nStar : ℝ)^(4*d+5)/(G.minThickLength : ℝ)^(d+1)+
@@ -368,7 +364,7 @@ theorem generalProductArray_minimumSingularValue_lower
   have hsameC : ∀ i j, C.label i = C.label j → torusLInfDistance (Y i) (Y j) ≤ τ := by
     simpa only [hC] using hsame
   have hcrossC : ∀ i j, C.label i ≠ C.label j →
-      max τ (16*Real.pi*d*(nStar : ℝ)^2/G.minThickLength) < torusLInfDistance (Y i) (Y j) := by
+      max τ (16*Real.pi*d*(nStar : ℝ)/G.minThickLength) < torusLInfDistance (Y i) (Y j) := by
     simpa only [hC] using hcross
   exact generalProductArrayLowerBound_le_minimumSingularValue G H Y C houter hd hn hnStar hsize
     hsurjC hτ hτupper hC_B hsep hsameC hcrossC hN hblock

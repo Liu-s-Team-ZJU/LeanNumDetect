@@ -186,7 +186,7 @@ def LiCubeClumpGeometry {d n : ℕ} (μ : AtomicMeasure d n)
     τ ≤ Real.pi / (2 * d) ∧
     periodicMinimumL1Separation μ.node hn ≤ 4 * Real.pi * nStar / L
 
-private theorem liInterpolationPolynomial
+theorem liInterpolationPolynomial
     {d n A nStar M : ℕ} {τ η β Δ : ℝ} {x : Fin n → Point d}
     (C : ClumpSlots (A := A) (nStar := nStar) x) (anchor : Fin n)
     (hd : 1 ≤ d) (hs : 1 ≤ nStar) (hM : 2 * nStar ≤ M)
@@ -257,6 +257,56 @@ private theorem liInterpolationPolynomial
       (mul_le_mul hGmass' hBmass' B.mass_nonneg (by positivity))
 
 
+/-- The original interpolation-to-singular-value argument with explicit clump slots.
+The spacing lower bound is arbitrary, and the inter-clump gap is independent
+of the upper bound on the diameter. -/
+theorem liCubeClump_raw_ratio_of_slots
+    {d n A nStar M : ℕ} {τ η β Δ : ℝ} {Y : Fin n → Point d}
+    (C : ClumpSlots (A := A) (nStar := nStar) Y)
+    (hd : 1 ≤ d) (hn : 0 < n) (hs : 0 < nStar) (hsize : nStar ≤ n)
+    (hcube : ∀ j, InAngularCube (Y j))
+    (hsame : ∀ i j, C.label i = C.label j → periodicLInfDistance (Y i) (Y j) ≤ τ)
+    (hcross : ∀ i j, C.label i ≠ C.label j → η < periodicLInfDistance (Y i) (Y j))
+    (hM : 4 * n ≤ M) (hβ : 1 / (2 * Real.log 2) < β)
+    (hη : 4 * Real.pi * β * d * nStar / M ≤ η)
+    (hτ : τ ≤ Real.pi / (2 * d)) (hΔ : 0 < Δ)
+    (hmin : ∀ i j, i ≠ j → Δ ≤ periodicL1Distance (Y i) (Y j))
+    (hscale : Δ ≤ 2 * Real.pi * nStar / M) :
+    let H := (1 / Real.sqrt (2 - Real.exp (1 / (2 * β)))) ^ nStar *
+        (Real.sqrt 2 / (((M : ℝ) / nStar) * (Δ / 2) / Real.pi)) ^ (nStar - 1)
+    Real.sqrt (((M / nStar + 1) ^ d : ℕ) : ℝ) / (Real.sqrt n * H) ≤
+      matrixSingularValue (segmentedVandermonde (2 * M) 0 (2 * M + 1) Y) (n - 1) := by
+  classical
+  dsimp only
+  have hM0 : 0 < M := by omega
+  have hMR : (0 : ℝ) < M := by exact_mod_cast hM0
+  have hβ0 : 0 < β := (by positivity : 0 < 1 / (2 * Real.log 2)).trans hβ
+  have hK : (M : ℝ) ≤ nStar * (((M / nStar : ℕ) : ℝ) + 1) := by
+    exact_mod_cast (Nat.lt_mul_div_succ M hs).le
+  have hη' : 4 * Real.pi * β * d / ((M / nStar : ℕ) + 1) ≤ η := by
+    apply le_trans _ hη
+    apply (div_le_div_iff₀ (by positivity) hMR).mpr
+    convert mul_le_mul_of_nonneg_left hK
+      (show 0 ≤ 4 * Real.pi * β * d by positivity) using 1 <;> ring
+  choose P hPv hPm using fun anchor => liInterpolationPolynomial C anchor hd
+    (by omega : 1 ≤ nStar) (by omega : 2 * nStar ≤ M) hΔ hβ
+    hcube hsame hcross hτ hη' hmin hscale
+  let H := (1 / Real.sqrt (2 - Real.exp (1 / (2 * β)))) ^ nStar *
+        (Real.sqrt 2 / (((M : ℝ) / nStar) * (Δ / 2) / Real.pi)) ^ (nStar - 1)
+  have ha := liFrameConstant_pos hβ
+  have hH : 0 < H := by dsimp [H]; positivity
+  have hsum : M + (M - M / nStar) + M / nStar < 2 * M + 1 := by
+    have := Nat.div_le_self M nStar
+    omega
+  have hh := SegmentedPolynomial.singularValue_ge_of_smoothedSegmentedPolynomials
+    hn Y P hPv hsum hH hPm (b := M / nStar) (z := 0)
+  have hbudget : M + (M - M / nStar) + M / nStar = 2 * M := by
+    have := Nat.div_le_self M nStar
+    omega
+  rw [hbudget] at hh
+  simpa only [H, Nat.add_zero, zero_add, zero_mul, one_mul] using hh
+
+
 private theorem liClumpSize_le_sourceCount {d n A nStar : ℕ}
     {x : Fin n → Point d} {τ η : ℝ}
     (hclumps : IsAngularClumpStructure x A nStar τ η) : nStar ≤ n := by
@@ -279,47 +329,21 @@ private theorem liCubeClump_raw_ratio
         (Real.sqrt 2 / (((M : ℝ) / nStar) * (Δ / 2) / Real.pi)) ^ (nStar - 1)
     Real.sqrt (((M / nStar + 1) ^ d : ℕ) : ℝ) / (Real.sqrt n * H) ≤
       matrixSingularValue (segmentedVandermonde (2 * M) 0 (2 * M + 1) μ.node) (n - 1) := by
-  classical
-  dsimp only
   have hs : 0 < nStar := by have h := hclumps.1; omega
   have hsize := liClumpSize_le_sourceCount hclumps
-  have hM0 : 0 < M := by omega
-  have hMR : (0 : ℝ) < M := by exact_mod_cast hM0
-  have hβ0 : 0 < β := (by positivity : 0 < 1 / (2 * Real.log 2)).trans hβ
-  have hK : (M : ℝ) ≤ nStar * (((M / nStar : ℕ) : ℝ) + 1) := by
-    exact_mod_cast (Nat.lt_mul_div_succ M hs).le
-  have hη' : 4 * Real.pi * β * d / ((M / nStar : ℕ) + 1) ≤ η := by
-    apply le_trans _ (hη.trans hclumps.2.2.1)
-    apply (div_le_div_iff₀ (by positivity) hMR).mpr
-    convert mul_le_mul_of_nonneg_left hK
-      (show 0 ≤ 4 * Real.pi * β * d by positivity) using 1 <;> ring
   obtain ⟨C, hsame, hcross⟩ := clumpStructure_has_slots hclumps
-  choose P hPv hPm using fun anchor => liInterpolationPolynomial C anchor hd
-    (by omega : 1 ≤ nStar) (by omega : 2 * nStar ≤ M) hΔ hβ
-    hclumps.2.2.2.1 hsame hcross hτ hη' hmin hscale
-  let H := (1 / Real.sqrt (2 - Real.exp (1 / (2 * β)))) ^ nStar *
-        (Real.sqrt 2 / (((M : ℝ) / nStar) * (Δ / 2) / Real.pi)) ^ (nStar - 1)
-  have ha := liFrameConstant_pos hβ
-  have hH : 0 < H := by dsimp [H]; positivity
-  have hsum : M + (M - M / nStar) + M / nStar < 2 * M + 1 := by
-    have := Nat.div_le_self M nStar
-    omega
-  have hh := SegmentedPolynomial.singularValue_ge_of_smoothedSegmentedPolynomials
-    (Nat.zero_lt_of_lt hn) μ.node P hPv hsum hH hPm (b := M / nStar) (z := 0)
-  have hbudget : M + (M - M / nStar) + M / nStar = 2 * M := by
-    have := Nat.div_le_self M nStar
-    omega
-  rw [hbudget] at hh
-  simpa only [H, Nat.add_zero, zero_add, zero_mul, one_mul] using hh
+  exact liCubeClump_raw_ratio_of_slots C hd (Nat.zero_lt_of_lt hn) hs hsize
+    hclumps.2.2.2.1 hsame hcross hM hβ (hη.trans hclumps.2.2.1)
+    hτ hΔ hmin hscale
 
-private theorem liCubeClump_packet_le {M nStar : ℕ} (hs : 0 < nStar) :
+theorem liCubeClump_packet_le {M nStar : ℕ} (hs : 0 < nStar) :
     2 * ((2 * M) / (4 * nStar)) + 1 ≤ M / nStar + 1 := by
   have hdiv := Nat.div_mul_le_self (2 * M) (4 * nStar)
   have hmul : (2 * ((2 * M) / (4 * nStar))) * nStar ≤ M := by nlinarith
   have h := (Nat.le_div_iff_mul_le hs).mpr hmul
   omega
 
-private theorem liCubeClump_ratio_eq {d n nStar M : ℕ} {β Δ : ℝ}
+theorem liCubeClump_ratio_eq {d n nStar M : ℕ} {β Δ : ℝ}
     (hn : 0 < n) (hs : 0 < nStar) (hM : 0 < M)
     (hβ : 1 / (2 * Real.log 2) < β) (hΔ : 0 < Δ) :
     liCubeClumpLower d n nStar (2 * M) β Δ =
@@ -347,7 +371,59 @@ private theorem liCubeClump_ratio_eq {d n nStar M : ℕ} {β Δ : ℝ}
     ne_of_gt (show (0 : ℝ) < M by exact_mod_cast hM), hΔ.ne']
   <;> ring
 
-private theorem segmentedVandermonde_oneBlock_singularValue {d n L : ℕ}
+/-- The exact half-bandwidth coefficient from the shared slots-based
+interpolation argument, before normalization by the number of cube rows. -/
+theorem liCubeClump_raw_lower_halfBandwidth_of_slots
+    {d n A nStar M : ℕ} {τ η β Δ : ℝ} {Y : Fin n → Point d}
+    (C : ClumpSlots (A := A) (nStar := nStar) Y)
+    (hd : 1 ≤ d) (hn : 0 < n) (hs : 0 < nStar) (hsize : nStar ≤ n)
+    (hcube : ∀ j, InAngularCube (Y j))
+    (hsame : ∀ i j, C.label i = C.label j → periodicLInfDistance (Y i) (Y j) ≤ τ)
+    (hcross : ∀ i j, C.label i ≠ C.label j → η < periodicLInfDistance (Y i) (Y j))
+    (hM : 4 * n ≤ M) (hβ : 1 / (2 * Real.log 2) < β)
+    (hη : 4 * Real.pi * β * d * nStar / M ≤ η)
+    (hτ : τ ≤ Real.pi / (2 * d)) (hΔ : 0 < Δ)
+    (hmin : ∀ i j, i ≠ j → Δ ≤ periodicL1Distance (Y i) (Y j))
+    (hscale : Δ ≤ 2 * Real.pi * nStar / M) :
+    (2 - Real.exp (1 / (2 * β))) ^ ((nStar : ℝ) / 2) *
+      Real.sqrt (((2 * ((2 * M) / (4 * nStar)) + 1) ^ d : ℕ) : ℝ) /
+      (Real.sqrt n * (Real.sqrt 2) ^ (nStar - 1)) *
+      (((2 * M : ℕ) : ℝ) * Δ / (4 * Real.pi * nStar)) ^ (nStar - 1) ≤
+      matrixSingularValue (segmentedVandermonde (2 * M) 0 (2 * M + 1) Y) (n - 1) := by
+  let H := (1 / Real.sqrt (2 - Real.exp (1 / (2 * β)))) ^ nStar *
+    (Real.sqrt 2 / (((M : ℝ) / nStar) * (Δ / 2) / Real.pi)) ^ (nStar - 1)
+  have hraw := liCubeClump_raw_ratio_of_slots C hd hn hs hsize
+    hcube hsame hcross hM hβ hη hτ hΔ hmin hscale
+  have ha := liFrameConstant_pos hβ
+  have hM0 : 0 < M := by omega
+  have hrows : 0 < Real.sqrt (((2 * M + 1) ^ d : ℕ) : ℝ) := by positivity
+  have hpacket :
+      Real.sqrt (((2 * ((2 * M) / (4 * nStar)) + 1) ^ d : ℕ) : ℝ) ≤
+      Real.sqrt (((M / nStar + 1) ^ d : ℕ) : ℝ) := by
+    apply Real.sqrt_le_sqrt
+    exact_mod_cast Nat.pow_le_pow_left (liCubeClump_packet_le hs) d
+  have hcoeff :
+      (2 - Real.exp (1 / (2 * β))) ^ ((nStar : ℝ) / 2) *
+        Real.sqrt (((2 * ((2 * M) / (4 * nStar)) + 1) ^ d : ℕ) : ℝ) /
+        (Real.sqrt n * (Real.sqrt 2) ^ (nStar - 1)) *
+        (((2 * M : ℕ) : ℝ) * Δ / (4 * Real.pi * nStar)) ^ (nStar - 1) =
+      liCubeClumpLower d n nStar (2 * M) β Δ *
+        Real.sqrt (((2 * M + 1) ^ d : ℕ) : ℝ) := by
+    unfold liCubeClumpLower
+    field_simp [hrows.ne']
+    <;> ring
+  rw [hcoeff,liCubeClump_ratio_eq hn hs hM0 hβ hΔ]
+  calc
+    _ = Real.sqrt (((2 * ((2 * M) / (4 * nStar)) + 1) ^ d : ℕ) : ℝ) /
+        (Real.sqrt n * H) := by
+      dsimp [H]
+      field_simp [hrows.ne']
+      <;> ring
+    _ ≤ Real.sqrt (((M / nStar + 1) ^ d : ℕ) : ℝ) / (Real.sqrt n * H) :=
+      div_le_div_of_nonneg_right hpacket (by dsimp [H]; positivity)
+    _ ≤ _ := hraw
+
+theorem segmentedVandermonde_oneBlock_singularValue {d n L : ℕ}
     (x : Fin n → Point d) (i : ℕ) :
     matrixSingularValue (segmentedVandermonde L 0 (L + 1) x) i =
       matrixSingularValue (fun k : RandSamp.CubeFrequency d L => RandSamp.cubeFourierRow x k) i := by
@@ -404,22 +480,15 @@ theorem liCubeClumpVandermonde_normalized_lower_halfBandwidth
   let Δ := periodicMinimumL1Separation μ.node hn
   have hΔ : 0 < Δ := periodicMinimumL1Separation_pos μ hn hclumps.2.2.2.1
   have hs : 0 < nStar := by have h := hclumps.1; omega
-  have hM0 : 0 < M := by omega
-  have hraw := liCubeClump_raw_ratio μ hd hn hclumps hM hβ hη hτ hΔ
+  have hsize := liClumpSize_le_sourceCount hclumps
+  obtain ⟨C, hsame, hcross⟩ := clumpStructure_has_slots hclumps
+  have hraw := liCubeClump_raw_lower_halfBandwidth_of_slots C hd (Nat.zero_lt_of_lt hn)
+    hs hsize hclumps.2.2.2.1 hsame hcross hM hβ (hη.trans hclumps.2.2.1) hτ hΔ
     (fun i j hij => periodicMinimumL1Separation_le hn hij) hscale
   have hnorm := cubeNormalized_lower_of_raw (Nat.zero_lt_of_lt hn) μ.node hraw
-  have hpacket : Real.sqrt (((2 * ((2 * M) / (4 * nStar)) + 1) ^ d : ℕ) : ℝ) ≤
-      Real.sqrt (((M / nStar + 1) ^ d : ℕ) : ℝ) := by
-    apply Real.sqrt_le_sqrt
-    exact_mod_cast Nat.pow_le_pow_left (liCubeClump_packet_le hs) d
-  rw [liCubeClump_ratio_eq (Nat.zero_lt_of_lt hn) hs hM0 hβ hΔ]
-  apply le_trans _ hnorm
-  have ha := liFrameConstant_pos hβ
-  have hden : 0 ≤ Real.sqrt (((2 * M + 1) ^ d : ℕ) : ℝ) * Real.sqrt n *
-      ((1 / Real.sqrt (2 - Real.exp (1 / (2 * β)))) ^ nStar *
-        (Real.sqrt 2 / (((M : ℝ) / nStar) * (Δ / 2) / Real.pi)) ^ (nStar - 1)) := by positivity
-  simpa only [div_div, mul_assoc, mul_left_comm, mul_comm] using
-    div_le_div_of_nonneg_right hpacket hden
+  convert hnorm using 1
+  unfold liCubeClumpLower
+  ring
 
 /-- Public even-bandwidth form of the normalized Li cube clump corollary. -/
 theorem liCubeClumpVandermonde_normalized_lower

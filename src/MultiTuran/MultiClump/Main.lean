@@ -1,4 +1,4 @@
-import MultiTuran.MultiClump.Norming
+import MultiTuran.MultiClump.LinearNorming
 import MultiTuran.MultiClump.FullCube
 import MultiTuran.MultiClump.Lifting
 import MultiTuran.Turan
@@ -32,7 +32,7 @@ theorem multiClumpArrayLowerBound_le_minimumSingularValue
     (hsep : 0 < nodeSeparation Y)
     (hsame : ∀ i j, C.label i = C.label j → torusLInfDistance (Y i) (Y j) ≤ τ)
     (hcross : ∀ i j, C.label i ≠ C.label j →
-      max τ (16*Real.pi*d*(nStar : ℝ)^2/G.minThickLength) < torusLInfDistance (Y i) (Y j))
+      max τ (16*Real.pi*d*(nStar : ℝ)/G.minThickLength) < torusLInfDistance (Y i) (Y j))
     (hN : max (16*n) (32*d^2*nStar) ≤ G.minAperture)
     (hblock : multiClumpBlockConstant d C_B * G.rowCount *
       ((nStar : ℝ)^(4*d+5)/(G.minThickLength : ℝ)^(d+1)+
@@ -53,17 +53,17 @@ theorem multiClumpArrayLowerBound_le_minimumSingularValue
     intro i j hij
     simpa only [Z,torusLInfDistance_liftNodes] using hsame i j hij
   have hcrossZ : ∀ i j, C'.label i ≠ C'.label j →
-      max τ (16*Real.pi*d*(nStar : ℝ)^2/G.minThickLength) < torusLInfDistance (Z i) (Z j) := by
+      max τ (16*Real.pi*d*(nStar : ℝ)/G.minThickLength) < torusLInfDistance (Z i) (Z j) := by
     intro i j hij
     simpa only [Z,torusLInfDistance_liftNodes] using hcross i j hij
   have hsepZ : 0 < nodeSeparation Z := by
     simpa only [Z,nodeSeparation_liftNodes] using hsep
-  have hnorming := continuousNorming_of_multiclump_blocks G Z C' hd hn0 hnStar
+  have hnorming := continuousNorming_of_linear_multiclump_blocks G Z C' hd hn0 hnStar
     hsurj hC_B hτ.le hrealSame hcrossZ hblock
-  let separation : ℝ := 16*Real.pi*d*(nStar : ℝ)^2/G.minThickLength
+  let separation : ℝ := 16*Real.pi*d*(nStar : ℝ)/G.minThickLength
   have hL : (0 : ℝ) < G.minThickLength := by exact_mod_cast minThickLength_pos G
   have hseparation : 0 < separation := by dsimp [separation]; positivity
-  have hgap : 16*Real.pi*d*(nStar : ℝ)^2 ≤ separation*G.minThickLength := by
+  have hgap : 16*Real.pi*d*(nStar : ℝ) ≤ separation*G.minThickLength := by
     dsimp [separation]
     rw [div_mul_cancel₀ _ (ne_of_gt hL)]
   have hcrossScale : ∀ i j, C'.label i ≠ C'.label j →
@@ -95,7 +95,7 @@ theorem multiClumpArray_minimumSingularValue_lower
     (hsep : 0 < nodeSeparation Y)
     (hsame : ∀ i j, label i = label j → torusLInfDistance (Y i) (Y j) ≤ τ)
     (hcross : ∀ i j, label i ≠ label j →
-      max τ (16*Real.pi*d*(nStar : ℝ)^2/G.minThickLength) < torusLInfDistance (Y i) (Y j))
+      max τ (16*Real.pi*d*(nStar : ℝ)/G.minThickLength) < torusLInfDistance (Y i) (Y j))
     (hN : max (16*n) (32*d^2*nStar) ≤ G.minAperture)
     (hblock : multiClumpBlockConstant d C_B * G.rowCount *
       ((nStar : ℝ)^(4*d+5)/(G.minThickLength : ℝ)^(d+1)+
@@ -111,7 +111,7 @@ theorem multiClumpArray_minimumSingularValue_lower
   have hsameC : ∀ i j, C.label i = C.label j → torusLInfDistance (Y i) (Y j) ≤ τ := by
     simpa only [hC] using hsame
   have hcrossC : ∀ i j, C.label i ≠ C.label j →
-      max τ (16*Real.pi*d*(nStar : ℝ)^2/G.minThickLength) < torusLInfDistance (Y i) (Y j) := by
+      max τ (16*Real.pi*d*(nStar : ℝ)/G.minThickLength) < torusLInfDistance (Y i) (Y j) := by
     simpa only [hC] using hcross
   exact multiClumpArrayLowerBound_le_minimumSingularValue G Y C hd hn hnStar hsize
     hsurjC hτ hτupper hC_B hsep hsameC hcrossC hN hblock

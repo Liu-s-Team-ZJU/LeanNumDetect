@@ -40,6 +40,70 @@ private theorem frame_constant_pos : 0 < 2 - Real.exp (1 / 2 : ℝ) := by
   rw [Real.exp_log (by norm_num : (0 : ℝ) < 2)] at h
   linarith
 
+/-- Anchor localization with an arbitrary admissible frame parameter. This
+allows the linear-gap proof to spend its improved mass on continuous shifts. -/
+theorem anchor_selector_of_separated_clumps_beta
+    {d n A nStar K D : ℕ} {Y : Fin n → Point d} {β separation : ℝ}
+    (C : ClumpSlots (A := A) (nStar := nStar) Y)
+    (hd : 1 ≤ d) (hnStar : 1 ≤ nStar)
+    (hcube : ∀ j, InAngularCube (Y j))
+    (hβ : 1 / (2 * Real.log 2) < β)
+    (hgap : ∀ i j, C.label i ≠ C.label j →
+      separation < periodicLInfDistance (Y i) (Y j))
+    (hK : 4 * Real.pi * β * d / (K + 1) ≤ separation)
+    (hD : nStar * K < D) (anchor : Fin n) :
+    ∃ P : SegmentedPolynomial d (nStar * K) 0 D,
+      P.angularValue (Y anchor) = 1 ∧
+      (∀ j, C.label j ≠ C.label anchor → P.angularValue (Y j) = 0) ∧
+      P.mass ≤ (1 / Real.sqrt (2 - Real.exp (1 / (2 * β)))) ^ nStar := by
+  have hβpos : 0 < β := (by positivity : 0 < 1 / (2 * Real.log 2)).trans hβ
+  have hexponent : 1 / (2 * β) < Real.log 2 := by
+    have h := (div_lt_iff₀ (by positivity : 0 < 2 * Real.log 2)).mp hβ
+    apply (div_lt_iff₀ (by positivity : 0 < 2 * β)).mpr
+    nlinarith
+  have ha : 0 < 2 - Real.exp (1 / (2 * β)) := by
+    have h := Real.exp_lt_exp.mpr hexponent
+    rw [Real.exp_log (by norm_num : (0 : ℝ) < 2)] at h
+    linarith
+  have hframe := BartonCubeFrame.hasFineCubeFrame_of_translatedCube hd hβ hK
+  have hKD : K < D :=
+    (show K ≤ nStar*K from by simpa using Nat.mul_le_mul_right K hnStar).trans_lt hD
+  apply localizationPolynomial_of_colorFrames C anchor hKD hD ha
+  intro color v
+  exact @hframe (↥(clumpColorClass C anchor color)) inferInstance inferInstance
+    (fun j : ↥(clumpColorClass C anchor color) => Y j) (fun j => hcube j)
+    (fun i j hij => hgap i j (clumpColorClass_labels_ne C anchor color i j hij)) v
+
+/-- The same anchor localizer for arbitrary real representatives. -/
+theorem anchor_selector_of_torus_separated_clumps_beta
+    {d n A nStar K D : ℕ} {Y : Fin n → Point d} {β separation : ℝ}
+    (C : ClumpSlots (A := A) (nStar := nStar) Y)
+    (hd : 1 ≤ d) (hnStar : 1 ≤ nStar)
+    (hβ : 1 / (2 * Real.log 2) < β)
+    (hgap : ∀ i j, C.label i ≠ C.label j →
+      separation < torusLInfDistance (Y i) (Y j))
+    (hK : 4 * Real.pi * β * d / (K + 1) ≤ separation)
+    (hD : nStar * K < D) (anchor : Fin n) :
+    ∃ P : SegmentedPolynomial d (nStar * K) 0 D,
+      P.angularValue (Y anchor) = 1 ∧
+      (∀ j, C.label j ≠ C.label anchor → P.angularValue (Y j) = 0) ∧
+      P.mass ≤ (1 / Real.sqrt (2 - Real.exp (1 / (2 * β)))) ^ nStar := by
+  let Y' := fun j => principalAngularPoint (Y j)
+  let C' : ClumpSlots (A := A) (nStar := nStar) Y' :=
+    { label := C.label, slot := C.slot, injective := C.injective }
+  have hcube : ∀ j, InAngularCube (Y' j) := fun j => principalAngularPoint_mem (Y j)
+  have hgap' : ∀ i j, C'.label i ≠ C'.label j →
+      separation < periodicLInfDistance (Y' i) (Y' j) := by
+    intro i j hij
+    rw [← torusLInfDistance_eq_periodicLInfDistance (hcube i) (hcube j)]
+    simpa only [Y', torusLInfDistance_principalAngularPoint] using hgap i j hij
+  obtain ⟨P, hone, hzero, hmass⟩ :=
+    anchor_selector_of_separated_clumps_beta C' hd hnStar hcube hβ hgap' hK hD anchor
+  refine ⟨P, ?_, ?_, hmass⟩
+  · simpa only [Y', segmentedPolynomial_angularValue_principalAngularPoint] using hone
+  · intro j hj
+    simpa only [Y', segmentedPolynomial_angularValue_principalAngularPoint] using hzero j hj
+
 /-- A cardinal localizer for an anchor: one at the anchor and zero outside its
 clump. Both the construction and its bound follow from the actual geometric
 separation through the proved cube frame theorem. -/
