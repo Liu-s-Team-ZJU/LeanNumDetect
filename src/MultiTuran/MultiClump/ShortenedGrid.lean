@@ -1,5 +1,5 @@
-import MultiTuran.ProductDiscretization
-import MultiTuran.NormingConstants
+import MultiTuran.Norming.ProductDiscretization
+import MultiTuran.Norming.NormingConstants
 
 /-! # Retaining every block while reserving room for a finite selector
 

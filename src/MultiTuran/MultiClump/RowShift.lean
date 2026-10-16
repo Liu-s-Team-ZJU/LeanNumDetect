@@ -1,6 +1,6 @@
-import MultiTuran.FullAperture
-import MultiTuran.Translation
-import MultiTuran.ProductDiscretization
+import MultiTuran.FullAperture.FullAperture
+import MultiTuran.Preliminaries.Translation
+import MultiTuran.Norming.ProductDiscretization
 
 /-! # Arbitrary common translations of the measured row frequencies
 

@@ -1,5 +1,5 @@
 import NumDetect.Random.CubeClumpBounds
-import MultiTuran.FullCube
+import MultiTuran.FullAperture.FullCube
 import MultiTuran.MultiClump.ClumpGeometry
 import MultiTuran.MultiClump.BoundFormula
 

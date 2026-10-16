@@ -1,7 +1,7 @@
 import MultiTuran.MultiClump.LinearNorming
 import MultiTuran.MultiClump.FullCube
 import MultiTuran.MultiClump.Lifting
-import MultiTuran.Turan
+import MultiTuran.Turan.Main
 
 /-! # Multi-clump block sampling with the explicit Riemann condition
 

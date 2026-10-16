@@ -1,5 +1,5 @@
 import NumDetect.Segmented.Polynomial
-import MultiTuran.Geometry
+import MultiTuran.Preliminaries.Geometry
 
 /-!
 Finite polynomial remainders for the continuous clump reconstruction.

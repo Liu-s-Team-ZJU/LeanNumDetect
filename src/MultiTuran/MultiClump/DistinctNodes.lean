@@ -1,4 +1,4 @@
-import MultiTuran.Geometry
+import MultiTuran.Preliminaries.Geometry
 
 /-!
 # Torus distinctness and positive minimum separation

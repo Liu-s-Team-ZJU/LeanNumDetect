@@ -1,6 +1,6 @@
-import MultiTuran.FullAperture
-import MultiTuran.ProductRestriction
-import MultiTuran.ScaledRestrictionConstants
+import MultiTuran.FullAperture.FullAperture
+import MultiTuran.Norming.ProductRestriction
+import MultiTuran.SingleClump.ScaledRestrictionConstants
 
 /-! # The explicit multi-clump coefficient and the spectral transfer
 

@@ -1,7 +1,7 @@
 import MultiTuran.MultiClump.LinearNorming
 import MultiTuran.MultiClump.FullCube
 import MultiTuran.MultiClump.Lifting
-import MultiTuran.Turan
+import MultiTuran.Turan.Main
 
 /-!
 # General product sampling inside an independently specified aperture
@@ -143,14 +143,15 @@ private theorem enclosingFillingRatio_pow_mul_inverse {d : ℕ} (G H : Segmented
   have hratio := (enclosingFillingRatio_pos G H).ne'
   rw [← mul_pow, div_mul_div_cancel₀ hratio, div_self hden, one_pow]
 
-/-- Full-aperture transport in `H`, norming on the measured grid `G`, and the
-original restriction chain between these two different sets. -/
-theorem singularValue_lower_of_enclosing_norming_and_cube {d n s : ℕ}
+/-- Shared restriction and norming transfer from any proved lower bound on
+the actual enclosing-aperture energy. -/
+theorem singularValue_lower_of_enclosing_norming_and_aperture_lower {d n : ℕ}
     (G H : SegmentedGrid d) (Y : Fin n → Point d)
     (houter : ∀ q, G.aperture q ≤ H.aperture q) (hn : 0 < n)
     {η b : ℝ} (hη : 0 ≤ η) (hb : 0 ≤ b)
-    (hnorming : ContinuousNorming G Y η) (hfull : s+1 ≤ H.minAperture)
-    (hcube : b ≤ matrixSingularValue (fullCubeVandermonde 1 s Y) (n-1)) :
+    (hnorming : ContinuousNorming G Y η)
+    (haperture : ∀ c : Fin n → ℂ,
+      b * Real.sqrt (∑ j, ‖c j‖^2) ≤ Real.sqrt (setEnergy Y c H.apertureBox)) :
     Real.sqrt η*(2/(Real.pi*n))^d*enclosingLongBlockFactor G H*
       (enclosingFillingRatio G H/(multidimensionalTuranConstant*d))^(n-1)*b ≤
         matrixSingularValue (generalizedVandermonde G Y) (n-1) := by
@@ -185,12 +186,7 @@ theorem singularValue_lower_of_enclosing_norming_and_cube {d n s : ℕ}
   have hcontinuous : ∀ c : Fin n → ℂ,
       (A*b)*Real.sqrt (∑ j, ‖c j‖^2) ≤ continuousL2Norm G Y c := by
     intro c
-    have hap := fullAperture_L2_lower_full_residue H Y c hn
-      (by norm_num : 0 < (1 : ℕ)) (by simpa only [Nat.mul_one] using hfull)
-    simp only [Nat.cast_one, Real.one_rpow, one_mul] at hap
-    have hlower : b*Real.sqrt (∑ j, ‖c j‖^2) ≤
-        Real.sqrt (setEnergy Y c H.apertureBox) :=
-      (mul_le_mul_of_nonneg_right hcube (Real.sqrt_nonneg _)).trans hap
+    have hlower := haperture c
     have hsup := enclosingAperture_supNorm_turan G H houter hn Y c
     have hupper : Real.sqrt (setEnergy Y c H.apertureBox) ≤ T*continuousL2Norm G Y c := by
       calc
@@ -217,6 +213,24 @@ theorem singularValue_lower_of_enclosing_norming_and_cube {d n s : ℕ}
   convert h using 1
   dsimp [A]
   ring
+
+
+theorem singularValue_lower_of_enclosing_norming_and_cube {d n s : ℕ}
+    (G H : SegmentedGrid d) (Y : Fin n → Point d)
+    (houter : ∀ q, G.aperture q ≤ H.aperture q) (hn : 0 < n)
+    {η b : ℝ} (hη : 0 ≤ η) (hb : 0 ≤ b)
+    (hnorming : ContinuousNorming G Y η) (hfull : s+1 ≤ H.minAperture)
+    (hcube : b ≤ matrixSingularValue (fullCubeVandermonde 1 s Y) (n-1)) :
+    Real.sqrt η*(2/(Real.pi*n))^d*enclosingLongBlockFactor G H*
+      (enclosingFillingRatio G H/(multidimensionalTuranConstant*d))^(n-1)*b ≤
+        matrixSingularValue (generalizedVandermonde G Y) (n-1) := by
+  apply singularValue_lower_of_enclosing_norming_and_aperture_lower
+    G H Y houter hn hη hb hnorming
+  intro c
+  have hap := fullAperture_L2_lower_full_residue H Y c hn
+    (by norm_num : 0 < (1 : ℕ)) (by simpa only [Nat.mul_one] using hfull)
+  simp only [Nat.cast_one, Real.one_rpow, one_mul] at hap
+  exact (mul_le_mul_of_nonneg_right hcube (Real.sqrt_nonneg _)).trans hap
 
 
 theorem generalProductArrayLowerBound_le_of_norming_cube

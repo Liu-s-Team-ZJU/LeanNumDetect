@@ -1,8 +1,21 @@
 # Multi-clump block sampling with the Riemann condition
 
-This directory formalizes the supplement `MultiTuran/notes/multiclump-block-bound-riemann.tex`. Import `MultiTuran.MultiClump.Results` for the public results, or `MultiTuran.MultiClump.Audit` to check their kernel dependencies.
+This directory proves the public multi-clump theorem of the Riemann-condition draft [MultiTuranMultiClump.tex](../../../drafts/MultiTuranMultiClump.tex) and the intermediate results used by that proof. Import `MultiTuran.MultiClump.Results` for the public results, or `MultiTuran.MultiClump.Audit` to check their kernel dependencies. The sibling [ConsecutiveWindow/](../ConsecutiveWindow/README.md) proves all six statements of [MultiTuranMultiClumpV2.tex](../../../drafts/MultiTuranMultiClumpV2.tex), including its own norming coefficient and aperture-scale gap. This directory retains the Riemann $B_d$ condition, Riemann $\eta_0$, and separation scale $L_*$; the [consecutive-window guide](../ConsecutiveWindow/README.md) records the corresponding V2 parameters. The parent [correspondence tables](../README.md) identify the statements of each draft.
 
-All declarations are in `LeanNumDetect.MultiTuran.MultiClump`. The single-clump infrastructure and unconditional Turán theorem are imported from the parent directory; no literature theorem is admitted in this proof.
+All declarations are in `LeanNumDetect.MultiTuran.MultiClump`. The shared
+infrastructure is imported from the sibling `Preliminaries`, `Nikolskii`,
+`Bernstein`, `FullAperture`, `Norming`, and `SingleClump` directories. The
+unconditional Turán comparison is imported from
+[Turan/Main.lean](../Turan/Main.lean); its
+[proof guide](../Turan/README.md) explains how the one-dimensional theorem
+implies the multidimensional bound. No literature theorem is admitted in
+this proof.
+
+This directory retains its own file organization, public entry
+[Results.lean](Results.lean), and independent [Audit.lean](Audit.lean).
+The parent [Main.lean](../Main.lean) continues to export the Turán and
+single-clump results; import `MultiTuran.MultiClump.Results` explicitly for
+the multi-clump results.
 
 ## Public theorem interfaces
 
@@ -72,16 +85,30 @@ The scale $8\pi n^\star$ stays inside the minimum. There is no selector-support-
 | `lem:translation-constant` | `LinearGapConstants`: the stronger frame constant pays the entire translation cost within the original selector budget |
 | `prop:uniform-norming` | `AnchorReconstruction`, `ContinuousCombinations`, `LinearNorming`: prefix telescoping, actual continuous energies, and exact cancellation of the original $\eta_0$ |
 | `lem:clump-fullcube` | Shared public interfaces in `NumDetect.Random.CubeClumpBounds`, then `FullCube`: arbitrary spacing lower bounds, clipping, and the displayed cube coefficient |
-| Main-text `thm:universal-full-aperture` | Parent `FullAperture`: integration over disjoint unit cells and the full-aperture energy bound |
+| Main-text `thm:universal-full-aperture` | [FullAperture/FullAperture](../FullAperture/FullAperture.lean): integration over disjoint unit cells and the full-aperture energy bound |
 
-The final proof of `thm:main` combines these lemmas and the uniform-norming proposition with the parent `Turan` restriction theorem. `BoundFormula`, `Main`, `GeneralProduct`, `RowShift`, and `ProductResult` transfer the exact coefficient to the measured product rows and the chosen enclosing box.
+The final proof of `thm:main` combines these lemmas and the uniform-norming
+proposition with the restriction theorem in
+[Turan/Main](../Turan/Main.lean). The local modules
+[BoundFormula](BoundFormula.lean), [Main](Main.lean),
+[GeneralProduct](GeneralProduct.lean), [RowShift](RowShift.lean), and
+[ProductResult](ProductResult.lean) transfer the exact coefficient to the
+measured product rows and the chosen enclosing box.
 
 The linear-gap argument applies only the low-bandwidth anchors to measured data. Their prefix products act on continuous clump sums; their larger shifts are controlled by the swept convex body. `LinearGapConstants` verifies that the improved frame mass at $\beta=7/5$ absorbs the additional factor $(2n^\star/3)^{n^\star-1}$. Thus $B_d$, $\eta_0$, the final lower bound, and every other geometric hypothesis are unchanged. The former quadratic-gap norming helper is retained for the $n^\star=1$ branch, where the linear and quadratic thresholds coincide.
 
-The full-cube proof reuses the public `NumDetect.liInterpolationPolynomial`, `NumDetect.liCubeClump_raw_ratio_of_slots`, and `NumDetect.liCubeClump_raw_lower_halfBandwidth_of_slots` interfaces in the original cube module. The original normalized cube theorem and this note call the same interpolation-to-singular-value proof. The `MultiClump/FullCube` adapter supplies torus representatives, clips the positive spacing parameter, and simplifies the coefficient; it does not reconstruct the cardinal interpolants or repeat the smoothing argument.
+The full-cube proof reuses the public `NumDetect.liInterpolationPolynomial`, `NumDetect.liCubeClump_raw_ratio_of_slots`, and `NumDetect.liCubeClump_raw_lower_halfBandwidth_of_slots` interfaces in the original cube module. The original normalized cube theorem and this note call the same interpolation-to-singular-value proof. The local [FullCube](FullCube.lean) adapter supplies torus representatives, clips the positive spacing parameter, and simplifies the coefficient; it does not reconstruct the cardinal interpolants or repeat the smoothing argument.
 
 For `lem:clump-riemann`, Lean uses the proved frequency-dependent cubic derivative estimate on the local sum, followed by squared-modulus variation. Its intermediate powers are $2d+3$ and $2d+2$, which are dominated by the note's $4d+5$ and $4d+1$ for $d\ge2$. The resulting sufficient condition is the same displayed $B_d$ condition. The proof does not assume the sharper Bernstein inequality as an extra premise.
 
 ## Verification
 
-Run `lake build` for the entire repository, `lake build +MultiTuran.MultiClump.Audit` for the independent imported-proof audit, and `python3 .github/ci/check.py` for the repository-wide source and private-proof-body audit. The audit rejects project axioms and admissions, and checks that the public theorem dependencies use only `propext`, `Classical.choice`, and `Quot.sound`.
+Run `lake build` for the entire repository,
+`lake build +MultiTuran.MultiClump.Audit` for the independent
+[imported-proof audit](Audit.lean), and `python3 .github/ci/check.py` for the
+repository-wide source and private-proof-body audit. The audit rejects
+project axioms and admissions, and checks that the public theorem
+dependencies use only `propext`, `Classical.choice`, and `Quot.sound`.
+The separate Turán and single-clump audit is
+[Verification/Audit.lean](../Verification/Audit.lean), available through
+`lake build +MultiTuran.Verification.Audit`.

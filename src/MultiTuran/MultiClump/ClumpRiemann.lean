@@ -1,8 +1,8 @@
 import MultiTuran.MultiClump.ClumpDerivative
-import MultiTuran.NormingConstants
-import MultiTuran.ProductDiscretization
-import MultiTuran.ProductRestriction
-import MultiTuran.Translation
+import MultiTuran.Norming.NormingConstants
+import MultiTuran.Norming.ProductDiscretization
+import MultiTuran.Norming.ProductRestriction
+import MultiTuran.Preliminaries.Translation
 
 /-! # Riemann norming for one clump of arbitrary spectral radius
 

@@ -1,0 +1,453 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,bm}
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+\allowdisplaybreaks
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newcommand{\V}{\mathcal V}
+\newcommand{\X}{\mathcal X}
+\newcommand{\T}{\mathbb T}
+\newcommand{\C}{\mathbb C}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\R}{\mathbb R}
+\newcommand{\ii}{\mathrm i}
+\title{Multi-clump bounds for block sampling}
+\author{}
+\date{}
+\begin{document}
+\maketitle
+
+We work in the product row-set setting of the main text and use its notation and preliminary results. Throughout, $d\ge2$ and $n\ge2$.
+
+\begin{theorem}[Multi-clump bound with the $B_d$ condition]\label{thm:main}
+Let $\X=\bigsqcup_{a=1}^r C_a$ be a partition into nonempty clumps, and set $n^\star:=\max_a|C_a|$. Assume
+\begin{equation}\label{eq:geometry}
+0<\tau\le\pi/(2d).
+\end{equation}
+Suppose the partition satisfies the within-clump diameter and cross-clump separation conditions
+\begin{subequations}\label{eq:clump-definition}
+\begin{equation}
+\max_{\bm y_j,\bm y_k\in C_a}\|\bm y_j-\bm y_k\|_{\T,\infty}\le\tau\qquad(1\le a\le r),
+\end{equation}
+\begin{equation}
+\|\bm y_j-\bm y_k\|_{\T,\infty}>\max\left\{\tau,\frac{16\pi dn^\star}{L_*}\right\}\qquad(\bm y_j\in C_a,\ \bm y_k\in C_b,\ a\ne b).
+\end{equation}
+\end{subequations}
+Suppose also that
+\begin{equation}\label{eq:aperture-gap}
+N_{\min}\ge\max\{16n,32d^2n^\star\},
+\end{equation}
+and
+\begin{equation}\label{eq:discretization}
+B_d|\bm\Lambda|\left(\frac{(n^\star)^{4d+5}}{L_*^{d+1}}+\frac{(n^\star)^{4d+1}\tau}{L_*^d}\right)\le1.
+\end{equation}
+Then
+\begin{equation}\label{eq:main}
+\sigma_{\min}(\V_1)\ge\sqrt{\frac{\eta_0}{n\,8^{n^\star}}}\left(\frac{2}{\pi n}\right)^d\rho_L\left(\frac{\rho_{\bm\Lambda}}{C_{\mathrm T}d}\right)^{n-1}\left(\frac{N_{\min}}{6n^\star}\right)^{d/2}\min\left\{1,\frac{N_{\min}\theta_{\min}}{8\pi n^\star}\right\}^{n^\star-1}.
+\end{equation}
+Here $C_{\mathrm T}\ge1$ and $C_{\mathrm B}\ge24$ are the absolute Tur\'an and Bernstein constants of the main text. We take
+\begin{equation}\label{eq:B-choice}
+B_d:=2^{d+2}dC_{\mathrm B}(\sqrt{108}+1)(\pi/2)^{2d}
+\end{equation}
+and
+\begin{equation}\label{eq:eta-choice}
+\eta_0:=\frac{1}{2n^2}\left(\frac{2}{\pi^2(n^\star)^2}\right)^d\left(\frac{1}{2^dC_{\mathrm T}d}\right)^{2(n^\star-1)}\left[1+\left(1+(2-\sqrt{\mathrm e})^{-n^\star/2}\right)^{n^\star}\right]^{-2}.
+\end{equation}
+\end{theorem}
+
+\begin{lemma}[Real representatives of each clump]\label{lem:clump-lifts}
+Assume \eqref{eq:clump-definition} and $0<\tau\le\pi/(2d)$. Each clump admits real representatives whose range in every coordinate has length at most $\tau$. Replacing the nodes by these representatives preserves every integer-frequency matrix entry.
+\end{lemma}
+\begin{proof}
+Choose real representatives separately within each clump. The coordinate differences from a fixed node can be chosen in $[-\tau,\tau]$, so for two such representatives,
+\[
+|y_{j,q}-y_{k,q}|\le2\tau\le\pi/2<\pi\quad\Longrightarrow\quad |y_{j,q}-y_{k,q}|=\min_{m\in\Z}|y_{j,q}-y_{k,q}-2\pi m|\le\tau.
+\]
+Consequently each coordinate range of a clump has length at most $\tau$. Adding $2\pi\Z^d$ to any node preserves every integer-frequency matrix entry.
+\end{proof}
+For the remainder of the proof, fix these representatives and write
+\[
+P_a(\bm t):=\sum_{\bm y_j\in C_a}c_j\mathrm e^{\ii\bm t\cdot\bm y_j},\qquad P_{\bm c,\X}=\sum_{a=1}^rP_a.
+\]
+
+\begin{lemma}[Well-separated interpolation]\label{lem:separated-interpolation}
+Let $K\ge2$ be an even integer, $\beta>1/(2\log2)$, and $\mathcal Z$ a finite torus set such that
+\[
+\frac{\|\bm z-\bm z'\|_{\T,\infty}}{2\pi}\ge\frac{\beta d}{K/2}\qquad(\bm z,\bm z'\in\mathcal Z,\ \bm z\ne\bm z').
+\]
+For interpolation data $\bm w$ with $\|\bm w\|_2=1$, there is a trigonometric polynomial $H$ satisfying
+\begin{equation}\label{eq:separated-interpolation}
+H|_{\mathcal Z}=\bm w,\qquad \operatorname{supp}\widehat H\subset S_K,\qquad \|H\|_\infty\le\|\widehat H\|_1\le\left(2-\mathrm e^{1/(2\beta)}\right)^{-1/2}.
+\end{equation}
+For a singleton $\mathcal Z$, the constant polynomial with the prescribed value has the same properties.
+\end{lemma}
+\begin{proof}
+Adapting Li's well-separated cube estimate \cite[Theorem~2.3]{Li} gives \eqref{eq:separated-interpolation} for $|\mathcal Z|\ge2$. For $|\mathcal Z|=1$, use the constant polynomial with the prescribed value.
+\end{proof}
+
+\begin{lemma}[Choice of bandwidth]\label{lem:selector-width}
+Assume $\tau\ge0$ and \eqref{eq:discretization}, with $B_d$ as in \eqref{eq:B-choice}. Then
+\begin{equation}\label{eq:threshold-feasible}
+L_*\ge16dn^\star,\qquad \frac{16\pi dn^\star}{L_*}\le\pi,\qquad L_*\ge80n^\star\quad(n^\star\ge2).
+\end{equation}
+If $n^\star\ge2$, the even integer $K$ and integer $W$ defined by
+\begin{equation}\label{eq:selector-width}
+K:=2\left\lfloor\frac{3L_*}{16n^\star}\right\rfloor,\qquad W:=n^\star K
+\end{equation}
+satisfy
+\begin{equation}\label{eq:width-bound}
+K\ge\frac{7L_*}{20n^\star}\ge2,\qquad W\le\frac{3L_*}{8}<\frac{L_*}{2}.
+\end{equation}
+\end{lemma}
+\begin{proof}
+Each coordinate row set contains a block of length at least $L_*$, and $\tau\ge0$, so
+\begin{align*}
+|\bm\Lambda|&=\prod_q|\Lambda_q|\ge\prod_qL_{q,\min}\ge L_*^d,\qquad n^\star\ge1,\\
+1&\ge B_d|\bm\Lambda|\frac{(n^\star)^{4d+5}}{L_*^{d+1}}\ge\frac{B_d(n^\star)^{4d+5}}{L_*}.
+\end{align*}
+The explicit constant obeys
+\[
+B_d=2^{d+2}dC_{\mathrm B}(\sqrt{108}+1)(\pi/2)^{2d}\ge16d\ge32.
+\]
+Consequently,
+\begin{align*}
+L_*&\ge B_d(n^\star)^{4d+5}\ge16dn^\star,\\
+\frac{16\pi dn^\star}{L_*}&\le\pi,\\
+L_*&\ge32(n^\star)^{4d+5}\ge32(n^\star)^3\ge128n^\star\ge80n^\star\qquad(n^\star\ge2),\\
+K&\ge\frac{3L_*}{8n^\star}-2\ge\frac{3L_*}{8n^\star}-\frac{L_*}{40n^\star}=\frac{7L_*}{20n^\star}\ge28,\\
+W&=n^\star K\le\frac{3L_*}{8}<\frac{L_*}{2}.
+\end{align*}
+\end{proof}
+
+\begin{lemma}[Clump localization]\label{lem:anchor-localization}
+Assume \eqref{eq:clump-definition}, \eqref{eq:discretization}, $\tau\ge0$, and $n^\star\ge2$. Let $K,W$ be as in Lemma~\ref{lem:selector-width}. For every $\bm y_j\in C_a$, there is a trigonometric polynomial $g_j$ such that
+\begin{equation}\label{eq:anchor-properties}
+g_j(\bm y_j)=1,\qquad g_j|_{\X\setminus C_a}=0,\qquad \operatorname{supp}\widehat g_j\subset S_W,
+\end{equation}
+and
+\begin{equation}\label{eq:anchor-bound}
+\|g_j\|_\infty\le\|\widehat g_j\|_1\le\left(2-\mathrm e^{5/14}\right)^{-n^\star/2}.
+\end{equation}
+\end{lemma}
+\begin{proof}
+Color the nodes in each other clump injectively with colors $1,\ldots,n^\star$, and let $\mathcal Z_\ell$ be color class $\ell$ outside $C_a$. Distinct nodes of $\mathcal Z_\ell\cup\{\bm y_j\}$ belong to different clumps, so
+\[
+\frac{(7/5)d}{K/2}=\frac{14d}{5K}\le\frac{14d}{5}\frac{20n^\star}{7L_*}=\frac{8dn^\star}{L_*}<\frac{\|\bm z-\bm z'\|_{\T,\infty}}{2\pi}.
+\]
+Apply Lemma~\ref{lem:separated-interpolation} with $\beta=7/5$, data $1$ at $\bm y_j$, and data $0$ on $\mathcal Z_\ell$. For an empty class use $H_{j,\ell}=1$. Then
+\[
+H_{j,\ell}(\bm y_j)=1,\quad H_{j,\ell}|_{\mathcal Z_\ell}=0,\quad \operatorname{supp}\widehat H_{j,\ell}\subset S_K,\quad \|\widehat H_{j,\ell}\|_1\le\left(2-\mathrm e^{5/14}\right)^{-1/2}.
+\]
+The product gives
+\begin{align*}
+g_j&:=\prod_{\ell=1}^{n^\star}H_{j,\ell},\qquad g_j(\bm y_j)=1,\qquad g_j|_{\X\setminus C_a}=0,\\
+\operatorname{supp}\widehat g_j&\subset\{\bm u_1+\cdots+\bm u_{n^\star}:\bm u_\ell\in S_K\}=S_{n^\star K}=S_W,\\
+\|g_j\|_\infty&\le\|\widehat g_j\|_1\le\prod_{\ell=1}^{n^\star}\|\widehat H_{j,\ell}\|_1\le\left(2-\mathrm e^{5/14}\right)^{-n^\star/2}.
+\end{align*}
+\end{proof}
+
+\paragraph{Shortened blocks.}
+For any nonnegative integer $W<L_*$, shorten the right end of each block:
+\[
+\Lambda_q^-:=\bigcup_{\nu=1}^{s_q}\{a_{q,\nu},\ldots,b_{q,\nu}-W\},\qquad \bm\Lambda^-:=\prod_q\Lambda_q^-.
+\]
+When $W\le L_*/2$, their thickenings and minimum lengths satisfy
+\[
+E_{\bm\Lambda^-}=\prod_q\bigcup_{\nu=1}^{s_q}[a_{q,\nu},b_{q,\nu}+1-W],\qquad L_{q,\min}^-:=L_{q,\min}-W\ge\tfrac12L_{q,\min}\ge\tfrac12L_*.
+\]
+
+\begin{lemma}[Riemann norming within each clump]\label{lem:clump-riemann}
+Assume \eqref{eq:discretization}, $W\le L_*/2$, and the real representatives from Lemma~\ref{lem:clump-lifts}. Every clump sum satisfies
+\begin{equation}\label{eq:clump-norming}
+\|P_a\|_{L^2(E_{\bm\Lambda^-})}\le\sqrt2\left(\sum_{\bm k\in\bm\Lambda^-}|P_a(\bm k)|^2\right)^{1/2}.
+\end{equation}
+\end{lemma}
+\begin{proof}
+Fix $C_a$, let $v:=|C_a|\le n^\star$, and expand
+\[
+T_a:=|P_a|^2=\sum_{\bm y_j,\bm y_k\in C_a}c_j\overline{c_k}\,\mathrm e^{\ii\bm t\cdot(\bm y_j-\bm y_k)}.
+\]
+There are at most $v^2$ distinct frequencies, and Lemma~\ref{lem:clump-lifts} gives
+\[
+|y_{j,q}-y_{k,q}|\le\tau,\qquad \sum_{\text{distinct frequencies }\bm\xi}\xi_q^2\le v^2\tau^2.
+\]
+Apply the Bernstein estimate on interval unions from the main text to each coordinate slice of $E_{\bm\Lambda^-}$:
+\begin{align}
+\|\partial_qT_a\|_\infty&\le C_{\mathrm B}\left(\frac{108(v^2)^5}{(L_{q,\min}^-)^2}+v^2\tau^2\right)^{1/2}\|T_a\|_\infty\notag\\
+&\le C_{\mathrm B}\left(\frac{\sqrt{108}\,v^5}{L_{q,\min}^-}+v\tau\right)\|T_a\|_\infty\notag\\
+&\le C_{\mathrm B}\left(\frac{2\sqrt{108}\,v^5}{L_*}+v\tau\right)\|T_a\|_\infty.\label{eq:derivative-clump}
+\end{align}
+The product $L^1$ Nikolskii estimate from the main text, with at most $v^2$ terms, gives
+\begin{equation}\label{eq:sup-clump}
+\|T_a\|_\infty\le\left(\frac{\pi v^2}{2}\right)^{2d}\left(\prod_qL_{q,\min}^-\right)^{-1}\|T_a\|_1\le2^d(\pi/2)^{2d}\frac{v^{4d}}{L_*^d}\|T_a\|_1.
+\end{equation}
+All norms here are on $E_{\bm\Lambda^-}$. For $\bm u\in[0,1]^d$, the coordinatewise fundamental theorem of calculus is
+\[
+T_a(\bm k+\bm u)-T_a(\bm k)=\sum_{q=1}^d\int_0^{u_q}\partial_qT_a\left(\bm k+\sum_{p<q}u_p\bm e_p+t\bm e_q\right)\,dt.
+\]
+Every integration point lies in the same unit cell. Thus
+\begin{align}
+\left|\int_{E_{\bm\Lambda^-}}T_a-\sum_{\bm k\in\bm\Lambda^-}T_a(\bm k)\right|&\le\sum_{\bm k\in\bm\Lambda^-}\int_{[0,1]^d}|T_a(\bm k+\bm u)-T_a(\bm k)|\,d\bm u\notag\\
+&\le|\bm\Lambda^-|\sum_{q=1}^d\|\partial_qT_a\|_\infty\notag\\
+&\le dC_{\mathrm B}|\bm\Lambda|\left(\frac{2\sqrt{108}\,v^5}{L_*}+v\tau\right)\|T_a\|_\infty\notag\\
+&\le2^ddC_{\mathrm B}(\pi/2)^{2d}|\bm\Lambda|\left(\frac{2\sqrt{108}\,v^{4d+5}}{L_*^{d+1}}+\frac{v^{4d+1}\tau}{L_*^d}\right)\|T_a\|_1.\label{eq:riemann}
+\end{align}
+The constant \eqref{eq:B-choice} satisfies the two coefficient comparisons
+\[
+2^{d+1}dC_{\mathrm B}\sqrt{108}(\pi/2)^{2d}\le\frac{B_d}{2},\qquad 2^ddC_{\mathrm B}(\pi/2)^{2d}\le\frac{B_d}{2}.
+\]
+Using $v\le n^\star$ and then \eqref{eq:discretization} in \eqref{eq:riemann} therefore gives
+\begin{align}
+\left|\int_{E_{\bm\Lambda^-}}T_a-\sum_{\bm k\in\bm\Lambda^-}T_a(\bm k)\right|&\le\frac{B_d|\bm\Lambda|}{2}\left(\frac{(n^\star)^{4d+5}}{L_*^{d+1}}+\frac{(n^\star)^{4d+1}\tau}{L_*^d}\right)\|T_a\|_1\notag\\
+&\le\frac12\|T_a\|_1.\label{eq:riemann-clump}
+\end{align}
+Since $T_a=|P_a|^2\ge0$,
+\[
+\sum_{\bm k\in\bm\Lambda^-}|P_a(\bm k)|^2\ge\int_{E_{\bm\Lambda^-}}T_a-\frac12\|T_a\|_1=\frac12\|P_a\|_{L^2(E_{\bm\Lambda^-})}^2.
+\]
+Taking square roots gives \eqref{eq:clump-norming}.
+\end{proof}
+
+\begin{lemma}[Measured control of each localized clump]\label{lem:anchor-measurement}
+Assume \eqref{eq:discretization}, $W\le L_*/2$, and the real representatives from Lemma~\ref{lem:clump-lifts}. Let $g_j$ satisfy $g_j(\bm y_j)=1$, $g_j|_{\X\setminus C_a}=0$, and $\operatorname{supp}\widehat g_j\subset S_W$, where $\bm y_j\in C_a$. Set
+\[
+Q_j(\bm t):=\sum_{\bm y_k\in C_a}c_k g_j(\bm y_k)\mathrm e^{\ii\bm t\cdot\bm y_k}.
+\]
+Then
+\begin{equation}\label{eq:anchor-measurement}
+\|Q_j\|_{L^2(E_{\bm\Lambda^-})}\le\sqrt2\|\widehat g_j\|_1\|\V_1\bm c\|_2.
+\end{equation}
+\end{lemma}
+\begin{proof}
+Extend the measured samples by zero and apply the anchor polynomial as a finite convolution:
+\[
+f(\bm k):=\begin{cases}P_{\bm c,\X}(\bm k),&\bm k\in\bm\Lambda,\\0,&\bm k\notin\bm\Lambda,\end{cases}\qquad (T_{g_j}f)(\bm k):=\sum_{\bm u\in S_W}\widehat g_j(\bm u)f(\bm k+\bm u).
+\]
+For $\bm k\in\bm\Lambda^-$ and $\bm u\in S_W$, each coordinate satisfies
+\[
+a_{q,\nu}\le k_q\le b_{q,\nu}-W,\quad 0\le u_q\le W\quad\Longrightarrow\quad a_{q,\nu}\le k_q+u_q\le b_{q,\nu},
+\]
+so $\bm k+\bm u\in\bm\Lambda$. The anchor polynomial identities give the exact chain
+\begin{align}
+(T_{g_j}f)(\bm k)&=\sum_{\bm u\in S_W}\widehat g_j(\bm u)\sum_{i=1}^n c_i\mathrm e^{\ii(\bm k+\bm u)\cdot\bm y_i}\notag\\
+&=\sum_{i=1}^n c_i\mathrm e^{\ii\bm k\cdot\bm y_i}\sum_{\bm u\in S_W}\widehat g_j(\bm u)\mathrm e^{\ii\bm u\cdot\bm y_i}\notag\\
+&=\sum_{i=1}^n c_i\mathrm e^{\ii\bm k\cdot\bm y_i}g_j(\bm y_i)=Q_j(\bm k).\label{eq:anchor-convolution}
+\end{align}
+The finite coefficient sum controls this operator. Weighted Cauchy--Schwarz gives, for every $\bm k$,
+\[
+|(T_{g_j}f)(\bm k)|^2\le\left(\sum_{\bm u\in S_W}|\widehat g_j(\bm u)|\right)\sum_{\bm u\in S_W}|\widehat g_j(\bm u)|\,|f(\bm k+\bm u)|^2.
+\]
+For each fixed $\bm u\in S_W$, the translation $\bm k\mapsto\bm k+\bm u$ is injective on $\bm\Lambda^-$, with image contained in $\bm\Lambda$. Therefore
+\begin{align}
+\sum_{\bm k\in\bm\Lambda^-}|Q_j(\bm k)|^2&=\sum_{\bm k\in\bm\Lambda^-}|(T_{g_j}f)(\bm k)|^2\notag\\
+&\le\|\widehat g_j\|_1\sum_{\bm u\in S_W}|\widehat g_j(\bm u)|\sum_{\bm k\in\bm\Lambda^-}|f(\bm k+\bm u)|^2\notag\\
+&\le\|\widehat g_j\|_1\sum_{\bm u\in S_W}|\widehat g_j(\bm u)|\sum_{\bm m\in\bm\Lambda}|P_{\bm c,\X}(\bm m)|^2\notag\\
+&=\|\widehat g_j\|_1^2\sum_{\bm m\in\bm\Lambda}|P_{\bm c,\X}(\bm m)|^2=\|\widehat g_j\|_1^2\|\V_1\bm c\|_2^2.
+\end{align}
+Lemma~\ref{lem:clump-riemann} applies to $Q_j$ because its frequencies remain inside $C_a$. Hence
+\[
+\|Q_j\|_{L^2(E_{\bm\Lambda^-})}\le\sqrt2\left(\sum_{\bm k\in\bm\Lambda^-}|Q_j(\bm k)|^2\right)^{1/2}\le\sqrt2\|\widehat g_j\|_1\|\V_1\bm c\|_2.
+\]
+\end{proof}
+
+\begin{lemma}[Volume of a swept rectangle]\label{lem:swept-volume}
+Let $R=\prod_q[a_q,a_q+\ell_q]$, where $\ell_q>0$, and let $\bm u\in[0,\infty)^d$. Then
+\begin{equation}\label{eq:swept-volume}
+\left|R+[0,\bm u]\right|\le|R|\left(1+\sum_q\frac{u_q}{\ell_q}\right),\qquad [0,\bm u]:=\{t\bm u:0\le t\le1\}.
+\end{equation}
+\end{lemma}
+\begin{proof}
+Let $F_q$ be the upper face $x_q=a_q+\ell_q$ of $R$. Following a line parallel to $\bm u$ backwards from any point outside $R$ to its first intersection with $R$ gives the cover
+\[
+R+[0,\bm u]\subset R\cup\bigcup_{q=1}^d\bigl(F_q+(0,1]\bm u\bigr).
+\]
+Parameterize the $q$th swept face by its $d-1$ face coordinates and the translation parameter $t$; its absolute Jacobian is $u_q$. Subadditivity of volume therefore gives
+\begin{align*}
+\left|F_q+(0,1]\bm u\right|&=u_q\prod_{p\ne q}\ell_p,\\
+\left|R+[0,\bm u]\right|&\le\prod_q\ell_q+\sum_q u_q\prod_{p\ne q}\ell_p=|R|\left(1+\sum_q\frac{u_q}{\ell_q}\right).
+\end{align*}
+If $u_q=0$, the corresponding swept face has measure zero, consistent with the same formula.
+\end{proof}
+
+\begin{lemma}[Restoration after continuous translations]\label{lem:block-restoration}
+Assume $W\le3L_*/8$. If $Q$ has at most $n^\star$ frequencies and $\bm u\in[0,(n^\star-1)W]^d$, then for $n^\star\ge2$,
+\begin{equation}\label{eq:restore}
+\|Q(\cdot+\bm u)\|_{L^2(E_{\bm\Lambda})}\le2^{d/2}\left(\frac{\pi n^\star}{2}\right)^d(2^dC_{\mathrm T}d)^{n^\star-1}\left(\frac{2n^\star}{3}\right)^{n^\star-1}\|Q\|_{L^2(E_{\bm\Lambda^-})}.
+\end{equation}
+For $n^\star=1$ and $\bm u=0$, the same inequality holds with both factors of exponent $n^\star-1$ equal to $1$.
+\end{lemma}
+\begin{proof}
+Fix a component rectangle $R=\prod_q I_q$ of $E_{\bm\Lambda}$, with side lengths $\ell_q\ge L_*$, and its shortened counterpart $R^-$. The convex body $R+[0,\bm u]$ contains $R^-$ and $R+\bm u$. Lemma~\ref{lem:swept-volume} gives
+\begin{align*}
+\frac{|R|}{|R^-|}&=\prod_q\frac{\ell_q}{\ell_q-W}\le(8/5)^d\le2^d,\\
+\frac{|R+[0,\bm u]|}{|R^-|}&\le\frac{|R|}{|R^-|}\left(1+\sum_q\frac{u_q}{\ell_q}\right)\le(8/5)^d\left(1+\frac{3d(n^\star-1)}8\right).
+\end{align*}
+For $d=2$,
+\[
+(4/5)^2\left(1+\frac{6(n^\star-1)}8\right)=\frac{12n^\star+4}{25}\le\frac{2n^\star}{3}.
+\]
+For $d\ge3$, one has
+\[
+d(4/5)^d\le16/9,\qquad (4/5)^d(1-3d/8)\le0;
+\]
+the first inequality follows directly for $d=3,4$ and then from $\frac{d+1}{d}\frac45\le1$ for $d\ge4$. Consequently,
+\begin{align*}
+(4/5)^d\left(1+\frac{3d(n^\star-1)}8\right)&=(4/5)^d(1-3d/8)+\frac38d(4/5)^d n^\star\\
+&\le\frac38\frac{16}{9}n^\star=\frac{2n^\star}{3}.
+\end{align*}
+Apply the multidimensional Tur\'an inequality on $R+[0,\bm u]$, followed by the product $L^2$ Nikolskii estimate on $R^-$:
+\begin{align*}
+\|Q\|_{L^2(R+\bm u)}&\le|R|^{1/2}\|Q\|_{L^\infty(R+[0,\bm u])}\\
+&\le|R|^{1/2}\left(\frac{C_{\mathrm T}d|R+[0,\bm u]|}{|R^-|}\right)^{n^\star-1}\|Q\|_{L^\infty(R^-)}\\
+&\le\left(\frac{|R|}{|R^-|}\right)^{1/2}\left(\frac{\pi n^\star}{2}\right)^d\left(\frac{C_{\mathrm T}d|R+[0,\bm u]|}{|R^-|}\right)^{n^\star-1}\|Q\|_{L^2(R^-)}\\
+&\le2^{d/2}\left(\frac{\pi n^\star}{2}\right)^d(2^dC_{\mathrm T}d)^{n^\star-1}\left(\frac{2n^\star}{3}\right)^{n^\star-1}\|Q\|_{L^2(R^-)}.
+\end{align*}
+The translated rectangles $R+\bm u$ have disjoint interiors. Squaring, summing over $R$, and taking square roots gives \eqref{eq:restore}. If $n^\star=1$, then $\bm u=0$, the Tur\'an exponent is zero, and the same calculation only uses $|R|/|R^-|\le2^d$.
+\end{proof}
+
+\begin{lemma}[Scalar coefficient bound]\label{lem:translation-constant}
+For every integer $m\ge2$,
+\begin{equation}\label{eq:translation-constant}
+\left(\frac{2m}{3}\right)^{m-1}\left[\left(1+(2-\mathrm e^{5/14})^{-m/2}\right)^m-1\right]\le1+\left(1+(2-\sqrt{\mathrm e})^{-m/2}\right)^m.
+\end{equation}
+\end{lemma}
+\begin{proof}
+The exponential series first gives
+\[
+\sqrt{\mathrm e}=\mathrm e^{1/2}\ge\sum_{k=0}^4\frac{(1/2)^k}{k!}=\frac{211}{128}>\frac{41}{25},\qquad (2-\sqrt{\mathrm e})^{-1/2}\ge\frac53.
+\]
+For $k\ge2$, $k!\ge2\cdot3^{k-2}$; hence for $0\le x<3$,
+\[
+\mathrm e^x=1+x+\sum_{k=2}^{\infty}\frac{x^k}{k!}\le1+x+\frac{x^2}{2}\sum_{k=0}^{\infty}(x/3)^k=1+x+\frac{x^2}{2(1-x/3)}.
+\]
+At $x=5/14$, this yields
+\[
+\mathrm e^{5/14}\le\frac{1481}{1036}<\frac{23}{16},\qquad (2-\mathrm e^{5/14})^{-1/2}\le\frac43.
+\]
+It remains to show
+\begin{equation}\label{eq:rational-translation-constant}
+\left(\frac{2m}{3}\right)^{m-1}\left(1+(4/3)^m\right)^m\le\left(1+(5/3)^m\right)^m.
+\end{equation}
+Set $R_m:=(3^m+5^m)/(3^m+4^m)$. The cases $2\le m\le6$ reduce to the following exact rational inequalities, each verified by clearing the positive denominators:
+\[
+\begin{array}{c|c}
+m&R_m^m\ge(2m/3)^{m-1}\\ \hline
+2&(34/25)^2\ge4/3\\
+3&(152/91)^3\ge4\\
+4&(706/337)^4\ge(8/3)^3\\
+5&(3368/1267)^5\ge(10/3)^4\\
+6&(16354/4825)^6\ge4^5
+\end{array}
+\]
+For $m\ge7$,
+\begin{align*}
+(3/4)^m&\le(3/4)^5=243/1024\le1/4,\\
+R_m&=(5/4)^m\frac{1+(3/5)^m}{1+(3/4)^m}\ge(5/4)^{m-1}.
+\end{align*}
+The induction for $(5/4)^m\ge2m/3$ starts from
+\[
+(5/4)^7-14/3=4999/49152>0.
+\]
+Its step is
+\[
+(5/4)^{m+1}\ge\frac54\frac{2m}{3}=\frac{5m}{6}\ge\frac{2(m+1)}3\qquad(m\ge7).
+\]
+Thus $R_m^m\ge(5/4)^{m(m-1)}\ge(2m/3)^{m-1}$, proving \eqref{eq:rational-translation-constant}. Finally,
+\begin{align*}
+\left(\frac{2m}{3}\right)^{m-1}\left[\left(1+(2-\mathrm e^{5/14})^{-m/2}\right)^m-1\right]&\le\left(\frac{2m}{3}\right)^{m-1}\left(1+(4/3)^m\right)^m\\
+&\le\left(1+(5/3)^m\right)^m\le\left(1+(2-\sqrt{\mathrm e})^{-m/2}\right)^m,
+\end{align*}
+which proves \eqref{eq:translation-constant}.
+\end{proof}
+
+\begin{proposition}[Uniform norming on the measured product blocks]\label{prop:uniform-norming}
+Assume \eqref{eq:clump-definition}, \eqref{eq:geometry}, and \eqref{eq:discretization}. Then $\eta_0$ in \eqref{eq:eta-choice} satisfies
+\begin{equation}\label{eq:norming}
+\|P_{\bm c,\X}\|_{L^2(E_{\bm\Lambda})}\le\eta_0^{-1/2}\|\V_1\bm c\|_2\quad\Longleftrightarrow\quad\sum_{\bm k\in\bm\Lambda}|P_{\bm c,\X}(\bm k)|^2\ge\eta_0\|P_{\bm c,\X}\|_{L^2(E_{\bm\Lambda})}^2.
+\end{equation}
+\end{proposition}
+\begin{proof}
+First suppose $n^\star\ge2$, and use $K,W$ from Lemma~\ref{lem:selector-width}. Fix a clump $C_a=\{\bm y_{j_1},\ldots,\bm y_{j_v}\}$, where $v\le n^\star$. Set
+\[
+b:=\left(2-\mathrm e^{5/14}\right)^{-n^\star/2},\qquad h_\ell:=\prod_{p<\ell}(1-g_{j_p}),\qquad (T_hQ)(\bm t):=\sum_{\bm u}\widehat h(\bm u)Q(\bm t+\bm u).
+\]
+An empty product is $1$. The elementary telescoping identity and the anchor values give
+\begin{align*}
+\sum_{\ell=1}^v g_{j_\ell}h_\ell&=1-\prod_{\ell=1}^v(1-g_{j_\ell}),\\
+\sum_{\ell=1}^v g_{j_\ell}(\bm y_k)h_\ell(\bm y_k)&=1\qquad(\bm y_k\in C_a),\\
+P_a(\bm t)&=\sum_{\ell=1}^v\sum_{\bm y_k\in C_a}c_k g_{j_\ell}(\bm y_k)h_\ell(\bm y_k)\mathrm e^{\ii\bm t\cdot\bm y_k}=\sum_{\ell=1}^v T_{h_\ell}Q_{j_\ell}(\bm t).
+\end{align*}
+The coefficient sums and supports of $h_\ell$ satisfy
+\[
+\|\widehat h_\ell\|_1\le(1+b)^{\ell-1},\qquad \operatorname{supp}\widehat h_\ell\subset S_{(\ell-1)W}\subset S_{(n^\star-1)W}.
+\]
+Apply the triangle inequality, Lemma~\ref{lem:block-restoration}, and then Lemma~\ref{lem:anchor-measurement} with \eqref{eq:anchor-bound}:
+\begin{align*}
+\|P_a\|_{L^2(E_{\bm\Lambda})}&\le\sum_{\ell=1}^v\sum_{\bm u}|\widehat h_\ell(\bm u)|\,\|Q_{j_\ell}(\cdot+\bm u)\|_{L^2(E_{\bm\Lambda})}\\
+&\le2^{d/2}\left(\frac{\pi n^\star}{2}\right)^d(2^dC_{\mathrm T}d)^{n^\star-1}\left(\frac{2n^\star}{3}\right)^{n^\star-1}\sum_{\ell=1}^v(1+b)^{\ell-1}\|Q_{j_\ell}\|_{L^2(E_{\bm\Lambda^-})}\\
+&\le\sqrt2\,2^{d/2}\left(\frac{\pi n^\star}{2}\right)^d(2^dC_{\mathrm T}d)^{n^\star-1}\left(\frac{2n^\star}{3}\right)^{n^\star-1}\bigl[(1+b)^v-1\bigr]\|\V_1\bm c\|_2\\
+&\le\sqrt2\,2^{d/2}\left(\frac{\pi n^\star}{2}\right)^d(2^dC_{\mathrm T}d)^{n^\star-1}\left[1+\left(1+(2-\sqrt{\mathrm e})^{-n^\star/2}\right)^{n^\star}\right]\|\V_1\bm c\|_2.
+\end{align*}
+The third line uses $b\sum_{\ell=1}^v(1+b)^{\ell-1}=(1+b)^v-1$; the last uses $v\le n^\star$ and Lemma~\ref{lem:translation-constant} with $m=n^\star$. Finally,
+\[
+r\le\sum_a|C_a|=n,\qquad \|P_{\bm c,\X}\|_{L^2(E_{\bm\Lambda})}\le\sum_a\|P_a\|_{L^2(E_{\bm\Lambda})},
+\]
+and the constants combine exactly as
+\begin{equation}\label{eq:eta-inverse}
+\eta_0^{-1}=2n^2\left(\frac{\pi^2(n^\star)^2}{2}\right)^d(2^dC_{\mathrm T}d)^{2(n^\star-1)}\left[1+\left(1+(2-\sqrt{\mathrm e})^{-n^\star/2}\right)^{n^\star}\right]^2.
+\end{equation}
+This proves \eqref{eq:norming} for $n^\star\ge2$.
+
+If $n^\star=1$, every clump is a singleton. Set
+\[
+K:=2\left\lceil L_*/8\right\rceil,\qquad W:=K\le L_*/4+2\le5L_*/16<3L_*/8.
+\]
+Here $L_*\ge16d\ge32$ by Lemma~\ref{lem:selector-width}. All nodes are separated, and
+\[
+\frac{\|\bm y_j-\bm y_k\|_{\T,\infty}}{2\pi}>\frac{8d}{L_*}\ge\frac{d}{K/2}.
+\]
+Lemma~\ref{lem:separated-interpolation} with $\beta=1$ gives $g_j(\bm y_k)=\delta_{jk}$, support in $S_W$, and $\|\widehat g_j\|_1\le(2-\sqrt{\mathrm e})^{-1/2}$. Lemma~\ref{lem:anchor-measurement}, and the $n^\star=1$ part of Lemma~\ref{lem:block-restoration} yield
+\begin{align*}
+\|P_a\|_{L^2(E_{\bm\Lambda})}&\le2^{d/2}(\pi/2)^d\|P_a\|_{L^2(E_{\bm\Lambda^-})}\\
+&\le\sqrt2\,2^{d/2}(\pi/2)^d(2-\sqrt{\mathrm e})^{-1/2}\|\V_1\bm c\|_2\\
+&\le\sqrt2\,2^{d/2}(\pi/2)^d\bigl[2+(2-\sqrt{\mathrm e})^{-1/2}\bigr]\|\V_1\bm c\|_2.
+\end{align*}
+Summing over $r=n$ singleton clumps gives \eqref{eq:norming} with precisely \eqref{eq:eta-choice} at $n^\star=1$.
+\end{proof}
+
+\begin{lemma}[Full-cube bound from the clump separation]\label{lem:clump-fullcube}
+Assume \eqref{eq:clump-definition} and \eqref{eq:aperture-gap}, and choose
+\[
+M=1,\qquad s:=2\left\lfloor\frac{N_{\min}-1}{2}\right\rfloor.
+\]
+Then $s+1\le N_{\min}$ and
+\begin{equation}\label{eq:cube-bound}
+\sigma_{\min}(A_{1,s}(\X))\ge\frac{1}{\sqrt{n\,8^{n^\star}}}\left(\frac{N_{\min}}{6n^\star}\right)^{d/2}\min\left\{1,\frac{N_{\min}\theta_{\min}}{8\pi n^\star}\right\}^{n^\star-1}.
+\end{equation}
+\end{lemma}
+\begin{proof}
+The aperture assumptions give
+\[
+s+1\le N_{\min},\qquad s\ge N_{\min}/2\ge\max\{8n,16d^2n^\star\}.
+\]
+Since $L_*\le N_{\min}$, the cross-clump separation implies
+\[
+\frac{8\pi dn^\star}{s}\le\frac{16\pi dn^\star}{N_{\min}}\le\frac{16\pi dn^\star}{L_*},\qquad \max_j\#\left\{k:\|\bm y_j-\bm y_k\|_{\T,\infty}\le\frac{8\pi dn^\star}{s}\right\}\le n^\star.
+\]
+Adapting Li's clump estimate \cite[Theorem~3.10]{Li} gives \eqref{eq:cube-bound}.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:main}]
+Proposition~\ref{prop:uniform-norming} supplies the norming constant $\eta_0$. Choose $M=1$ and $s=2\lfloor(N_{\min}-1)/2\rfloor$ as in Lemma~\ref{lem:clump-fullcube}, so that $(M,s)$ is admissible and $h_{1,s}=1$. The product-row corollary of the discrete singular-value theorem in the main text gives
+\begin{equation}\label{eq:product-bound}
+\sigma_{\min}(\V_1)\ge\sqrt{\eta_0}\left(\frac2{\pi n}\right)^d\rho_L\left(\frac{\rho_{\bm\Lambda}}{C_{\mathrm T}d}\right)^{n-1}\sigma_{\min}(A_{1,s}(\X)).
+\end{equation}
+Substituting \eqref{eq:cube-bound} proves \eqref{eq:main}.
+\end{proof}
+
+\begin{thebibliography}{9}
+\bibitem{Li} W. Li, \emph{Nonharmonic multivariate Fourier transforms and matrices: condition numbers and hyperplane geometry}, Applied and Computational Harmonic Analysis 79 (2025), 101791, Theorems~2.3 and~3.10. \href{https://arxiv.org/html/2407.10313v2}{arXiv:2407.10313v2}; \href{https://doi.org/10.1016/j.acha.2025.101791}{doi:10.1016/j.acha.2025.101791}.
+\end{thebibliography}
+\end{document}

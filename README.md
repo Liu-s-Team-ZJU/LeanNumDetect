@@ -12,15 +12,18 @@ nonuniform Fourier--Vandermonde estimate, fixed-support and uniform random
 sampling, and off-grid relative Gram results of the RandSamp manuscript.
 Import `MultiTuran.Main` for the convex-body Turán theorem and single-clump
 block-sampling bound, and `MultiTuran.MultiClump.Results` for the multi-clump
-product-row theorem with the Riemann block condition.
+product-row theorem with the Riemann block condition. Import
+`MultiTuran.ConsecutiveWindow.Results` for consecutive-window norming and
+multi-clump bounds with aperture-scale separation and unrestricted clump diameters.
 
 ## Main theoretical results
 
 | Main result | Exact Lean location |
 | --- | --- |
-| Convex-body Turán comparison (`lem:multidim-turan`), including essential $L^\infty$ norms | [Turan.lean](src/MultiTuran/Turan.lean): `exponentialSum_convexBody_supNorm_le`, `exponentialSum_convexBody_eLpNorm_top_le` |
-| Single-clump block-sampling singular-value bound (`lem:sv-md-array`) | [SegmentedArray.lean](src/MultiTuran/SegmentedArray.lean): `segmentedArray_minimumSingularValue_lower` |
+| Convex-body Turán comparison (`lem:multidim-turan`), including essential $L^\infty$ norms | [Turan/Main.lean](src/MultiTuran/Turan/Main.lean): `exponentialSum_convexBody_supNorm_le`, `exponentialSum_convexBody_eLpNorm_top_le` |
+| Single-clump block-sampling singular-value bound (`lem:sv-md-array`) | [SingleClump/SegmentedArray.lean](src/MultiTuran/SingleClump/SegmentedArray.lean): `segmentedArray_minimumSingularValue_lower` |
 | Multi-clump block-sampling bound for arbitrary product rows and enclosing apertures | [MultiClump/ProductResult.lean](src/MultiTuran/MultiClump/ProductResult.lean): `multiClumpProduct_minimumSingularValue_lower`, with actual largest-clump size and the original Riemann block condition |
+| Consecutive-window multi-clump bound with aperture-scale separation | [ConsecutiveWindow/Main.lean](src/MultiTuran/ConsecutiveWindow/Main.lean): `consecutiveWindowArray_minimumSingularValue_lower`, `consecutiveWindowProductArray_minimumSingularValue_lower`, and `consecutiveWindowRawProduct_minimumSingularValue_lower` |
 | Contiguous-grid VDM minimum-singular-value estimate (`lem:uniform-Vandermonde`) | [Uniform/Vandermonde.lean](src/NumDetect/Uniform/Vandermonde.lean): theorem `uniformVandermonde_minimumSingularValue` |
 | Multidimensional number-detection resolution (`thm:li-resolution`) | [Uniform/NumberDetection.lean](src/NumDetect/Uniform/NumberDetection.lean): theorem `noAdmissibleMeasureWithFewerSupports` |
 | Number-detection CRL upper bound (`eq:crl-number-upper`) | [CRL/Bounds.lean](src/NumDetect/CRL/Bounds.lean): theorem `numberDetectionCRL_le_numberDetectionSeparationThreshold` |
@@ -72,10 +75,24 @@ route as well as the trust boundary of the retained alternatives.
 | --- | --- |
 | [src/NumDetect](src/NumDetect/README.md) | Manuscript results in MUSIC, Segmented, Random, Uniform, Preliminaries, Retained, and CRL; active interface `NumDetect.Main`, earlier results `NumDetect.Retained.Main` |
 | [src/RandSamp](src/RandSamp/README.md) | Nonuniform Fourier--Vandermonde scaling, fixed-support and uniform random Fourier sampling, and off-grid relative Gram estimates |
-| [src/MultiTuran](src/MultiTuran/README.md) | Fully proved scalar and multidimensional Turán estimates, product Nikolskii and norming bounds, and exact single-clump and [multi-clump](src/MultiTuran/MultiClump/README.md) block-sampling results |
+| [src/MultiTuran](src/MultiTuran/README.md) | Preliminaries, Nikolskii, Bernstein, FullAperture, Norming, [Turan](src/MultiTuran/Turan/README.md), SingleClump, [MultiClump](src/MultiTuran/MultiClump/README.md), [ConsecutiveWindow](src/MultiTuran/ConsecutiveWindow/README.md), and Verification; public interfaces `MultiTuran.Main`, `MultiTuran.MultiClump.Results`, and `MultiTuran.ConsecutiveWindow.Results` |
 | [src/SegmentedVDM](src/SegmentedVDM/README.md) | Independent one-dimensional segmented Vandermonde construction and singular-value theorem |
 | [src/General](src/General/README.md) | Reusable finite, Fourier, matrix-analysis, and spectral-perturbation results |
 | [src/External](src/External/README.md) | Source-attribution registry only; no Lean source files |
+
+As in `src/NumDetect`, the only files at the root of `src/MultiTuran` are
+`Main.lean` and `README.md`. The [Turán guide](src/MultiTuran/Turan/README.md)
+traces the one-dimensional measurable-set proof and its geometric extension
+to multidimensional convex bodies.
+
+The multi-clump drafts are [MultiTuranMultiClump.tex](drafts/MultiTuranMultiClump.tex)
+(Riemann block condition) and
+[MultiTuranMultiClumpV2.tex](drafts/MultiTuranMultiClumpV2.tex)
+(consecutive-window version). Both have complete public theorem interfaces;
+the [Riemann guide](src/MultiTuran/MultiClump/README.md) and
+[consecutive-window guide](src/MultiTuran/ConsecutiveWindow/README.md) give their
+conditions, constants, and proof routes. The
+[MultiTuran correspondence tables](src/MultiTuran/README.md) record each statement.
 
 ## Build and verify
 
@@ -96,8 +113,9 @@ contain no Lean source files. Both matrix Chernoff tails, arbitrary-law
 bounded-row concentration, and all RandSamp and NumDetect applications are
 fully proved. The RandSamp, off-grid, multiclump sampling,
 [random-clump MUSIC](src/NumDetect/Random/ClumpAudit.lean),
-[MultiTuran](src/MultiTuran/Audit.lean), and
-[MultiTuran multi-clump](src/MultiTuran/MultiClump/Audit.lean) audits require the
+[MultiTuran](src/MultiTuran/Verification/Audit.lean), and
+[MultiTuran multi-clump](src/MultiTuran/MultiClump/Audit.lean), and
+[consecutive-window](src/MultiTuran/ConsecutiveWindow/Audit.lean) audits require the
 final results and their dependencies to use only standard Lean axioms.
 If the shared
 mathlib checkout is absent, run `python3 .github/ci/setup_mathlib.py` once before these

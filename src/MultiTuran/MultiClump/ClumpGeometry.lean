@@ -1,4 +1,4 @@
-import MultiTuran.Geometry
+import MultiTuran.Preliminaries.Geometry
 import NumDetect.Segmented.ClumpBasics
 import General.Finite.PeriodicClumpLift
 import General.Fourier.PhaseEstimates

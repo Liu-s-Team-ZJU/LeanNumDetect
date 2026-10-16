@@ -1,6 +1,6 @@
-import MultiTuran.Bernstein
-import MultiTuran.BernsteinVariation
-import MultiTuran.ProductNikolskii
+import MultiTuran.Bernstein.Bernstein
+import MultiTuran.Bernstein.BernsteinVariation
+import MultiTuran.Nikolskii.ProductNikolskii
 
 /-! # Frequency-dependent derivatives used within one source clump
 

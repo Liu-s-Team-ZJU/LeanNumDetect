@@ -257,6 +257,27 @@ theorem liInterpolationPolynomial
       (mul_le_mul hGmass' hBmass' B.mass_nonneg (by positivity))
 
 
+/-- The common interpolation-to-singular-value engine, independent of how
+its cardinal polynomials were constructed. -/
+theorem liCubeClump_raw_ratio_of_interpolation
+    {d n nStar M : ℕ} (Y : Fin n → Point d) (hn : 0 < n)
+    {H : ℝ} (hH : 0 < H)
+    (P : Fin n → SegmentedPolynomial d (M + (M - M / nStar)) 0 (2 * M + 1))
+    (hPv : ∀ anchor j, (P anchor).angularValue (Y j) = if anchor = j then 1 else 0)
+    (hPm : ∀ anchor, (P anchor).mass ≤ H) :
+    Real.sqrt (((M / nStar + 1) ^ d : ℕ) : ℝ) / (Real.sqrt n * H) ≤
+      matrixSingularValue (segmentedVandermonde (2 * M) 0 (2 * M + 1) Y) (n - 1) := by
+  have hsum : M + (M - M / nStar) + M / nStar < 2 * M + 1 := by
+    have := Nat.div_le_self M nStar
+    omega
+  have hh := SegmentedPolynomial.singularValue_ge_of_smoothedSegmentedPolynomials
+    hn Y P hPv hsum hH hPm (b := M / nStar) (z := 0)
+  have hbudget : M + (M - M / nStar) + M / nStar = 2 * M := by
+    have := Nat.div_le_self M nStar
+    omega
+  rw [hbudget] at hh
+  simpa only [Nat.add_zero, zero_add, zero_mul, one_mul] using hh
+
 /-- The original interpolation-to-singular-value argument with explicit clump slots.
 The spacing lower bound is arbitrary, and the inter-clump gap is independent
 of the upper bound on the diameter. -/
@@ -295,16 +316,9 @@ theorem liCubeClump_raw_ratio_of_slots
         (Real.sqrt 2 / (((M : ℝ) / nStar) * (Δ / 2) / Real.pi)) ^ (nStar - 1)
   have ha := liFrameConstant_pos hβ
   have hH : 0 < H := by dsimp [H]; positivity
-  have hsum : M + (M - M / nStar) + M / nStar < 2 * M + 1 := by
-    have := Nat.div_le_self M nStar
-    omega
-  have hh := SegmentedPolynomial.singularValue_ge_of_smoothedSegmentedPolynomials
-    hn Y P hPv hsum hH hPm (b := M / nStar) (z := 0)
-  have hbudget : M + (M - M / nStar) + M / nStar = 2 * M := by
-    have := Nat.div_le_self M nStar
-    omega
-  rw [hbudget] at hh
-  simpa only [H, Nat.add_zero, zero_add, zero_mul, one_mul] using hh
+  simpa only [H] using
+    liCubeClump_raw_ratio_of_interpolation Y hn hH P hPv hPm
+
 
 
 private theorem liClumpSize_le_sourceCount {d n A nStar : ℕ}
@@ -371,31 +385,22 @@ theorem liCubeClump_ratio_eq {d n nStar M : ℕ} {β Δ : ℝ}
     ne_of_gt (show (0 : ℝ) < M by exact_mod_cast hM), hΔ.ne']
   <;> ring
 
-/-- The exact half-bandwidth coefficient from the shared slots-based
-interpolation argument, before normalization by the number of cube rows. -/
-theorem liCubeClump_raw_lower_halfBandwidth_of_slots
-    {d n A nStar M : ℕ} {τ η β Δ : ℝ} {Y : Fin n → Point d}
-    (C : ClumpSlots (A := A) (nStar := nStar) Y)
-    (hd : 1 ≤ d) (hn : 0 < n) (hs : 0 < nStar) (hsize : nStar ≤ n)
-    (hcube : ∀ j, InAngularCube (Y j))
-    (hsame : ∀ i j, C.label i = C.label j → periodicLInfDistance (Y i) (Y j) ≤ τ)
-    (hcross : ∀ i j, C.label i ≠ C.label j → η < periodicLInfDistance (Y i) (Y j))
-    (hM : 4 * n ≤ M) (hβ : 1 / (2 * Real.log 2) < β)
-    (hη : 4 * Real.pi * β * d * nStar / M ≤ η)
-    (hτ : τ ≤ Real.pi / (2 * d)) (hΔ : 0 < Δ)
-    (hmin : ∀ i j, i ≠ j → Δ ≤ periodicL1Distance (Y i) (Y j))
-    (hscale : Δ ≤ 2 * Real.pi * nStar / M) :
+/-- The explicit raw cube coefficient follows from the shared ratio bound,
+regardless of the construction of the cardinal polynomials. -/
+theorem liCubeClump_raw_coefficient_le_of_ratio
+    {d n nStar M : ℕ} {β Δ σ : ℝ}
+    (hn : 0 < n) (hs : 0 < nStar) (hM0 : 0 < M)
+    (hβ : 1 / (2 * Real.log 2) < β) (hΔ : 0 < Δ)
+    (hraw : let H := (1 / Real.sqrt (2 - Real.exp (1 / (2 * β)))) ^ nStar *
+        (Real.sqrt 2 / (((M : ℝ) / nStar) * (Δ / 2) / Real.pi)) ^ (nStar - 1)
+      Real.sqrt (((M / nStar + 1) ^ d : ℕ) : ℝ) / (Real.sqrt n * H) ≤ σ) :
     (2 - Real.exp (1 / (2 * β))) ^ ((nStar : ℝ) / 2) *
       Real.sqrt (((2 * ((2 * M) / (4 * nStar)) + 1) ^ d : ℕ) : ℝ) /
       (Real.sqrt n * (Real.sqrt 2) ^ (nStar - 1)) *
-      (((2 * M : ℕ) : ℝ) * Δ / (4 * Real.pi * nStar)) ^ (nStar - 1) ≤
-      matrixSingularValue (segmentedVandermonde (2 * M) 0 (2 * M + 1) Y) (n - 1) := by
+      (((2 * M : ℕ) : ℝ) * Δ / (4 * Real.pi * nStar)) ^ (nStar - 1) ≤ σ := by
   let H := (1 / Real.sqrt (2 - Real.exp (1 / (2 * β)))) ^ nStar *
     (Real.sqrt 2 / (((M : ℝ) / nStar) * (Δ / 2) / Real.pi)) ^ (nStar - 1)
-  have hraw := liCubeClump_raw_ratio_of_slots C hd hn hs hsize
-    hcube hsame hcross hM hβ hη hτ hΔ hmin hscale
   have ha := liFrameConstant_pos hβ
-  have hM0 : 0 < M := by omega
   have hrows : 0 < Real.sqrt (((2 * M + 1) ^ d : ℕ) : ℝ) := by positivity
   have hpacket :
       Real.sqrt (((2 * ((2 * M) / (4 * nStar)) + 1) ^ d : ℕ) : ℝ) ≤
@@ -422,6 +427,27 @@ theorem liCubeClump_raw_lower_halfBandwidth_of_slots
     _ ≤ Real.sqrt (((M / nStar + 1) ^ d : ℕ) : ℝ) / (Real.sqrt n * H) :=
       div_le_div_of_nonneg_right hpacket (by dsimp [H]; positivity)
     _ ≤ _ := hraw
+
+theorem liCubeClump_raw_lower_halfBandwidth_of_slots
+    {d n A nStar M : ℕ} {τ η β Δ : ℝ} {Y : Fin n → Point d}
+    (C : ClumpSlots (A := A) (nStar := nStar) Y)
+    (hd : 1 ≤ d) (hn : 0 < n) (hs : 0 < nStar) (hsize : nStar ≤ n)
+    (hcube : ∀ j, InAngularCube (Y j))
+    (hsame : ∀ i j, C.label i = C.label j → periodicLInfDistance (Y i) (Y j) ≤ τ)
+    (hcross : ∀ i j, C.label i ≠ C.label j → η < periodicLInfDistance (Y i) (Y j))
+    (hM : 4 * n ≤ M) (hβ : 1 / (2 * Real.log 2) < β)
+    (hη : 4 * Real.pi * β * d * nStar / M ≤ η)
+    (hτ : τ ≤ Real.pi / (2 * d)) (hΔ : 0 < Δ)
+    (hmin : ∀ i j, i ≠ j → Δ ≤ periodicL1Distance (Y i) (Y j))
+    (hscale : Δ ≤ 2 * Real.pi * nStar / M) :
+    (2 - Real.exp (1 / (2 * β))) ^ ((nStar : ℝ) / 2) *
+      Real.sqrt (((2 * ((2 * M) / (4 * nStar)) + 1) ^ d : ℕ) : ℝ) /
+      (Real.sqrt n * (Real.sqrt 2) ^ (nStar - 1)) *
+      (((2 * M : ℕ) : ℝ) * Δ / (4 * Real.pi * nStar)) ^ (nStar - 1) ≤
+      matrixSingularValue (segmentedVandermonde (2 * M) 0 (2 * M + 1) Y) (n - 1) := by
+  have hraw := liCubeClump_raw_ratio_of_slots C hd hn hs hsize
+    hcube hsame hcross hM hβ hη hτ hΔ hmin hscale
+  exact liCubeClump_raw_coefficient_le_of_ratio hn hs (by omega : 0 < M) hβ hΔ hraw
 
 theorem segmentedVandermonde_oneBlock_singularValue {d n L : ℕ}
     (x : Fin n → Point d) (i : ℕ) :

@@ -1,4 +1,4 @@
-import MultiTuran.Energy
+import MultiTuran.Preliminaries.Energy
 import MultiTuran.MultiClump.ShortenedGrid
 import NumDetect.Segmented.Polynomial
 

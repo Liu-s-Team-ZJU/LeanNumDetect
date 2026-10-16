@@ -1,4 +1,4 @@
-import MultiTuran.Geometry
+import MultiTuran.Preliminaries.Geometry
 
 /-! # Simultaneous real lifts of all short clumps
 

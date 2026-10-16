@@ -1,0 +1,247 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,bm}
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+\allowdisplaybreaks
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newcommand{\V}{\mathcal V}
+\newcommand{\X}{\mathcal X}
+\newcommand{\T}{\mathbb T}
+\newcommand{\C}{\mathbb C}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\R}{\mathbb R}
+\newcommand{\ii}{\mathrm i}
+\title{Multi-clump bounds by consecutive-window interpolation}
+\author{}
+\date{}
+\begin{document}
+\maketitle
+
+We work in the product row-set setting of the main text and use its notation and preliminary results. Throughout, $d\ge2$ and $n\ge2$.
+
+\begin{theorem}[Multi-clump bound for product blocks]\label{thm:main}
+Let $\X=\bigsqcup_{a=1}^r C_a$ be a partition into nonempty clumps, and set $n^\star:=\max_a|C_a|$. Assume
+\begin{equation}\label{eq:main-hyp}
+L_{q,\min}\ge n\quad(q=1,\ldots,d),\qquad N_{\min}\ge\max\{16n,32d^2n^\star\},
+\end{equation}
+and
+\begin{equation}\label{eq:clump-gap}
+\|\bm y_j-\bm y_k\|_{\T,\infty}>\frac{16\pi dn^\star}{N_{\min}}\qquad(\bm y_j\in C_a,\ \bm y_k\in C_b,\ a\ne b).
+\end{equation}
+Then
+\begin{equation}\label{eq:main}
+\sigma_{\min}(\V_1)\ge\sqrt{\frac{\eta_0}{n\,8^{n^\star}}}\left(\frac{2}{\pi n}\right)^d\rho_L\left(\frac{\rho_{\bm\Lambda}}{C_{\mathrm T}d}\right)^{n-1}\left(\frac{N_{\min}}{6n^\star}\right)^{d/2}\min\left\{1,\frac{N_{\min}\theta_{\min}}{8\pi n^\star}\right\}^{n^\star-1},
+\end{equation}
+where $C_{\mathrm T}\ge1$ is the absolute Tur\'an constant of the main text and
+\begin{equation}\label{eq:eta-choice}
+\eta_0:=\bigl[18n(3n)^{2n}\bigr]^{-d}.
+\end{equation}
+\end{theorem}
+
+\begin{proposition}[Norming with $n$ consecutive samples per block]\label{prop:norming}
+Suppose $L_{q,\min}\ge n$ for every coordinate. After a common torus translation, choose real representatives satisfying
+\begin{equation}\label{eq:chart}
+|y_{j,q}|\le\pi-\pi/n\qquad(1\le j\le n,\ 1\le q\le d).
+\end{equation}
+Such a choice exists for every $n$-point set. For these representatives and every coefficient vector,
+\begin{equation}\label{eq:norming}
+\sum_{\bm k\in\bm\Lambda}|P_{\bm c,\X}(\bm k)|^2\ge\eta_0\|P_{\bm c,\X}\|_{L^2(E_{\bm\Lambda})}^2.
+\end{equation}
+\end{proposition}
+\begin{proof}
+In coordinate $q$, let $g_q$ be the length of a largest empty circular gap. Cutting at its midpoint and centering the complementary arc gives
+\[
+\#\{\text{distinct coordinate values}\}\le n,\qquad g_q\ge\frac{2\pi}{n},\qquad \max_j|y_{j,q}|\le\frac{2\pi-g_q}{2}\le\pi-\frac\pi n.
+\]
+A common translation $\bm v$ and individual changes of representatives preserve the integer-frequency singular values:
+\[
+\V_{\bm\Lambda}(\X+\bm v)=\operatorname{diag}_{\bm k\in\bm\Lambda}(\mathrm e^{\ii\bm k\cdot\bm v})\V_{\bm\Lambda}(\X),\qquad \mathrm e^{\ii\bm k\cdot(\bm y_j+2\pi\bm m_j)}=\mathrm e^{\ii\bm k\cdot\bm y_j}\quad(\bm m_j\in\Z^d).
+\]
+
+Fix one coordinate, write $z_j:=\mathrm e^{\ii y_j}$, and let $0\le t\le n$. Let $\Gamma$ be the positively oriented boundary of
+\[
+\left\{z\in\C:\tfrac12<|z|<\tfrac32,\quad |\arg z|<\pi-\tfrac\pi{4n}\right\}.
+\]
+On the circular parts, the reverse triangle inequality gives
+\[
+|\zeta-z_j|\ge\bigl||\zeta|-|z_j|\bigr|=\tfrac12\ge\tfrac1n.
+\]
+The two circular arcs and two radial segments give
+\[
+\operatorname{length}(\Gamma)=2\left(\tfrac12+\tfrac32\right)\left(\pi-\tfrac\pi{4n}\right)+2=4\pi-\frac\pi n+2<6\pi.
+\]
+For a radial boundary point $\zeta=re^{\ii\phi}$, where $\phi=\pm(\pi-\pi/(4n))$, put $\delta:=\min_{m\in\Z}|\phi-y_j-2\pi m|$. Condition \eqref{eq:chart} gives
+\[
+\frac{3\pi}{4n}\le|\phi-y_j|\le2\pi-\frac{5\pi}{4n},\qquad \frac{3\pi}{4n}\le\delta=\min\{|\phi-y_j|,2\pi-|\phi-y_j|\}\le\pi.
+\]
+Hence
+\[
+|\mathrm e^{\ii\phi}-z_j|=2\sin(\delta/2)\ge\frac2\pi\delta\ge\frac3{2n}.
+\]
+Using $r\ge1/2$ and $|z_j|=1$, we obtain
+\begin{align*}
+|\zeta-z_j|^2&=(r-1)^2+r|\mathrm e^{\ii\phi}-z_j|^2\\
+&\ge(r-1)^2+\frac{9r}{4n^2}\ge\frac9{8n^2}\ge\frac1{n^2}.
+\end{align*}
+Consequently,
+\begin{equation}\label{eq:contour-bounds}
+\min_{\zeta\in\Gamma,\,j}|\zeta-z_j|\ge\frac1n,\qquad |\zeta^t|=|\zeta|^t\le(3/2)^n\quad(\zeta\in\Gamma).
+\end{equation}
+The principal branch of $z^t$ is analytic on a neighborhood of the closed sector. Its Newton interpolation polynomial is
+\[
+f_t(z):=\sum_{j=1}^n[z_1,\ldots,z_j](z^t)\prod_{\ell<j}(z-z_\ell)=\sum_{k=0}^{n-1}\widehat f_t(k)z^k.
+\]
+Cauchy's interpolation formulas give, for $z$ in the sector,
+\[
+[z_1,\ldots,z_j](z^t)=\frac1{2\pi\ii}\int_\Gamma\frac{\zeta^t}{\prod_{\ell=1}^j(\zeta-z_\ell)}\,d\zeta,
+\]
+\[
+z^t-f_t(z)=\frac{\prod_{j=1}^n(z-z_j)}{2\pi\ii}\int_\Gamma\frac{\zeta^t}{(\zeta-z)\prod_{j=1}^n(\zeta-z_j)}\,d\zeta.
+\]
+These formulas also define the confluent interpolant when coordinate values repeat. The remainder vanishes at every $z_j$, so $f_t(z_j)=z_j^t$. By \eqref{eq:contour-bounds},
+\begin{align*}
+\bigl|[z_1,\ldots,z_j](z^t)\bigr|&\le\frac1{2\pi}\int_\Gamma\frac{|\zeta^t|}{\prod_{\ell=1}^j|\zeta-z_\ell|}\,|d\zeta|\le\frac{\operatorname{length}(\Gamma)}{2\pi}(3/2)^n n^j\le3(3/2)^n n^j,\\
+\left\|\widehat{\prod_{\ell<j}(z-z_\ell)}\right\|_1&\le\prod_{\ell<j}(1+|z_\ell|)=2^{j-1}.
+\end{align*}
+Therefore
+\begin{align}
+\sum_{k=0}^{n-1}|\widehat f_t(k)|&\le\sum_{j=1}^n\bigl|[z_1,\ldots,z_j](z^t)\bigr|\left\|\widehat{\prod_{\ell<j}(z-z_\ell)}\right\|_1\notag\\
+&\le3(3/2)^n\sum_{j=1}^n n^j2^{j-1}=3(3/2)^n n\frac{(2n)^n-1}{2n-1}\notag\\
+&\le3(3/2)^n(2n)^n=3(3n)^n.\label{eq:interpolation-coefficients}
+\end{align}
+For $P(t)=\sum_jc_j\mathrm e^{\ii ty_j}$, the interpolation identities yield
+\begin{equation}\label{eq:local-interpolation}
+P(t)=\sum_jc_jz_j^t=\sum_jc_jf_t(z_j)=\sum_{k=0}^{n-1}\widehat f_t(k)P(k)\qquad(0\le t\le n).
+\end{equation}
+
+Fix a block $\{a,\ldots,b\}$ with $b-a+1\ge n$. For $a\le k\le b$, set $a_k:=\min\{k,b-n+1\}$. Then
+\[
+a\le a_k\le b-n+1,\qquad 0\le k-a_k\le n-1,\qquad 0\le k+u-a_k\le n\quad(0\le u\le1).
+\]
+Translation changes only the coefficients of $P$, so \eqref{eq:local-interpolation} gives
+\[
+P(k+u)=\sum_{\ell=0}^{n-1}\widehat f_{k+u-a_k}(\ell)P(a_k+\ell).
+\]
+Cauchy--Schwarz and \eqref{eq:interpolation-coefficients} imply
+\begin{align*}
+|P(k+u)|^2&\le\left(\sum_{\ell=0}^{n-1}|\widehat f_{k+u-a_k}(\ell)|^2\right)\left(\sum_{\ell=0}^{n-1}|P(a_k+\ell)|^2\right)\\
+&\le\left(\sum_{\ell=0}^{n-1}|\widehat f_{k+u-a_k}(\ell)|\right)^2\sum_{m=a_k}^{a_k+n-1}|P(m)|^2\le9(3n)^{2n}\sum_{m=a_k}^{a_k+n-1}|P(m)|^2.
+\end{align*}
+For $a\le m\le b$, the two ranges $k\le b-n+1$ and $k>b-n+1$ give
+\begin{align*}
+\#\{k:a\le k\le b,\ a_k\le m\le a_k+n-1\}&\le\#\bigl(\{a,\ldots,b-n+1\}\cap\{m-n+1,\ldots,m\}\bigr)\\
+&\quad+\#\{b-n+2,\ldots,b\}\le n+(n-1)=2n-1.
+\end{align*}
+Integrating over the unit cells and rearranging the finite sums gives
+\begin{align}
+\int_a^{b+1}|P(t)|^2\,dt&=\sum_{k=a}^b\int_0^1|P(k+u)|^2\,du\notag\\
+&\le9(3n)^{2n}\sum_{k=a}^b\sum_{m=a_k}^{a_k+n-1}|P(m)|^2\notag\\
+&=9(3n)^{2n}\sum_{m=a}^b\#\{k:a\le k\le b,\ a_k\le m\le a_k+n-1\}|P(m)|^2\notag\\
+&\le9(3n)^{2n}(2n-1)\sum_{m=a}^b|P(m)|^2\le18n(3n)^{2n}\sum_{m=a}^b|P(m)|^2.\label{eq:block-norming}
+\end{align}
+Return to $P=P_{\bm c,\X}$. Summing \eqref{eq:block-norming} over all blocks in coordinate $q$, with all other coordinates fixed, gives
+\[
+\int_{E_q}|P(\ldots,u,\ldots)|^2\,du\le18n(3n)^{2n}\sum_{k_q\in\Lambda_q}|P(\ldots,k_q,\ldots)|^2.
+\]
+Use counting measure on each $\Lambda_q$ and Lebesgue measure on each $E_q$. Integrating the slice estimate over the remaining coordinates and summing over the preceding discrete coordinates yields, for $1\le q\le d$,
+\[
+\|P\|_{L^2(\prod_{p<q}\Lambda_p\times\prod_{p\ge q}E_p)}^2\le18n(3n)^{2n}\|P\|_{L^2(\prod_{p\le q}\Lambda_p\times\prod_{p>q}E_p)}^2.
+\]
+Iterating these $d$ inequalities gives
+\[
+\|P_{\bm c,\X}\|_{L^2(E_{\bm\Lambda})}^2\le\bigl[18n(3n)^{2n}\bigr]^d\|P_{\bm c,\X}\|_{L^2(\bm\Lambda)}^2=\eta_0^{-1}\sum_{\bm k\in\bm\Lambda}|P_{\bm c,\X}(\bm k)|^2,
+\]
+which proves \eqref{eq:norming}.
+\end{proof}
+
+\begin{lemma}[Product-row restriction bound]\label{lem:restriction}
+Suppose \eqref{eq:norming} holds and $(M,s)$ is full-aperture admissible. Then
+\begin{equation}\label{eq:restriction-bound}
+\sigma_{\min}(\V_1)\ge\sqrt{\eta_0}\,h_{M,s}^{d/2}\left(\frac2{\pi n}\right)^d\rho_L\left(\frac{\rho_{\bm\Lambda}}{C_{\mathrm T}d}\right)^{n-1}\sigma_{\min}(A_{M,s}(\X)).
+\end{equation}
+\end{lemma}
+\begin{proof}
+Apply the product-row corollary of the discrete singular-value theorem in the main text with norming constant $\eta_0$.
+\end{proof}
+
+\begin{lemma}[Elementary full-cube bound]\label{lem:elementary}
+For integers $M\ge1$ and $s\ge n-1$,
+\begin{equation}\label{eq:elementary}
+\sigma_{\min}(A_{M,s}(\X))\ge\frac1{\sqrt n}\left(\frac{\theta_{M,\infty}}\pi\right)^{n-1}.
+\end{equation}
+If $MD_\X\le\pi$, then $\theta_{M,\infty}=M\theta_{\min}$.
+\end{lemma}
+\begin{proof}
+The elementary full-cube theorem and the no-wrap lemma of the main text give the two assertions.
+\end{proof}
+
+\begin{corollary}[Single-clump bound for product blocks]\label{cor:single-clump}
+For the distributed array of the main text, assume $l_{q,m}\ge n-1$, $N_{\min}\ge2n$, $n\ge4$, and, after a common translation, $\X\subset Q^d_{2\pi/\Omega}(0)$. Then
+\begin{equation}\label{eq:single-clump}
+\sigma_{\min}(\V_1)\ge\frac{\sqrt{\eta_0}}{\sqrt n}\left(\frac2{\pi n}\right)^d\rho_L\left(\frac{\rho_{\bm\Lambda}}{C_{\mathrm T}d}\right)^{n-1}\left(\frac{N_{\min}}{2n}\right)^{d/2}\left(\frac{N_{\min}\theta_{\min}}{2\pi n}\right)^{n-1}.
+\end{equation}
+\end{corollary}
+\begin{proof}
+The block and localization assumptions give
+\[
+L_{q,\min}\ge\min_m(l_{q,m}+1)\ge n,\qquad D_\X\le\frac{4\pi}{\Omega}.
+\]
+Apply Proposition~\ref{prop:norming}, and choose
+\[
+M_0:=\left\lfloor\frac{N_{\min}}n\right\rfloor,\qquad s:=n-1.
+\]
+The floor estimates and $N_{\min}\ge2n$ imply
+\begin{align*}
+\frac{N_{\min}}{2n}&\le\frac{N_{\min}}n-1\le M_0\le\frac{N_{\min}}n,\qquad M_0\ge1,\\
+sM_0&=(n-1)M_0<nM_0\le N_{\min},\qquad N_{\min}-sM_0\ge M_0,\qquad h_{M_0,s}=M_0,\\
+M_0D_\X&\le\frac{N_{\min}}n\frac{4\pi}{\Omega}\le\frac{4\pi}{n}\le\pi.
+\end{align*}
+Lemma~\ref{lem:elementary} therefore gives
+\[
+\sigma_{\min}(A_{M_0,s}(\X))\ge\frac1{\sqrt n}\left(\frac{M_0\theta_{\min}}\pi\right)^{n-1}.
+\]
+Insert this estimate into Lemma~\ref{lem:restriction}:
+\begin{align*}
+\sigma_{\min}(\V_1)&\ge\frac{\sqrt{\eta_0}}{\sqrt n}\left(\frac2{\pi n}\right)^d\rho_L\left(\frac{\rho_{\bm\Lambda}}{C_{\mathrm T}d}\right)^{n-1}M_0^{d/2}\left(\frac{M_0\theta_{\min}}\pi\right)^{n-1}\\
+&\ge\frac{\sqrt{\eta_0}}{\sqrt n}\left(\frac2{\pi n}\right)^d\rho_L\left(\frac{\rho_{\bm\Lambda}}{C_{\mathrm T}d}\right)^{n-1}\left(\frac{N_{\min}}{2n}\right)^{d/2}\left(\frac{N_{\min}\theta_{\min}}{2\pi n}\right)^{n-1}.
+\end{align*}
+This is \eqref{eq:single-clump}.
+\end{proof}
+
+\begin{lemma}[Multi-clump full-cube bound]\label{lem:aperture}
+Under the aperture and clump-gap assumptions of Theorem~\ref{thm:main}, choose
+\[
+M=1,\qquad s:=2\left\lfloor\frac{N_{\min}-1}{2}\right\rfloor.
+\]
+Then $(M,s)$ is full-aperture admissible, $h_{1,s}=1$, and
+\begin{equation}\label{eq:aperture}
+\sigma_{\min}(A_{1,s}(\X))\ge\frac{1}{\sqrt{n\,8^{n^\star}}}\left(\frac{N_{\min}}{6n^\star}\right)^{d/2}\min\left\{1,\frac{N_{\min}\theta_{\min}}{8\pi n^\star}\right\}^{n^\star-1}.
+\end{equation}
+\end{lemma}
+\begin{proof}
+The even integer $s$ satisfies
+\[
+N_{\min}-2\le s\le N_{\min}-1,\qquad s+1\le N_{\min},\qquad h_{1,s}=1,\qquad s\ge N_{\min}/2\ge\max\{8n,16d^2n^\star\}.
+\]
+The cross-clump separation and $s\ge N_{\min}/2$ give
+\[
+\frac{8\pi dn^\star}{s}\le\frac{16\pi dn^\star}{N_{\min}},\qquad \max_j\#\left\{k:\|\bm y_j-\bm y_k\|_{\T,\infty}\le\frac{8\pi dn^\star}{s}\right\}\le n^\star.
+\]
+Adapting Li's clump estimate \cite[Theorem~3.10]{Li} gives \eqref{eq:aperture}.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:main}]
+Choose the translated representatives in Proposition~\ref{prop:norming}. Integer-frequency singular values and torus distances are preserved. For the admissible pair in Lemma~\ref{lem:aperture}, Lemma~\ref{lem:restriction} gives
+\begin{equation}\label{eq:product-bound}
+\sigma_{\min}(\V_1)\ge\sqrt{\eta_0}\left(\frac2{\pi n}\right)^d\rho_L\left(\frac{\rho_{\bm\Lambda}}{C_{\mathrm T}d}\right)^{n-1}\sigma_{\min}(A_{1,s}(\X)).
+\end{equation}
+Substituting \eqref{eq:aperture} proves \eqref{eq:main}.
+\end{proof}
+
+\begin{thebibliography}{9}
+\bibitem{Li} W. Li, \emph{Nonharmonic multivariate Fourier transforms and matrices: condition numbers and hyperplane geometry}, Applied and Computational Harmonic Analysis 79 (2025), 101791. \href{https://arxiv.org/html/2407.10313v2\#S3}{Theorem~3.10}; \href{https://doi.org/10.1016/j.acha.2025.101791}{doi:10.1016/j.acha.2025.101791}.
+\end{thebibliography}
+\end{document}

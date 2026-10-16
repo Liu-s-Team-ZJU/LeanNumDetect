@@ -1,6 +1,6 @@
 import MultiTuran.MultiClump.ShortenedGrid
-import MultiTuran.ProductRestriction
-import MultiTuran.Turan
+import MultiTuran.Norming.ProductRestriction
+import MultiTuran.Turan.Main
 
 /-!
 Returning each shortened sampling block to its full length. Both energies
