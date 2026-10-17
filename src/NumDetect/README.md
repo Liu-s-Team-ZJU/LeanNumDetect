@@ -93,14 +93,13 @@ lower bound by a direct finite-difference construction.
 
 [Random/ClumpModel.lean](Random/ClumpModel.lean) identifies the manuscript's
 periodic metrics and preserves its exact nonempty clump partition and sizes.
-[Random/CubeClumpBounds.lean](Random/CubeClumpBounds.lean) proves the deterministic
-full-cube interpolation bound rather than importing it as an axiom. Its
-`LiCubeClumpGeometry` uses precisely
+[Random/CubeClumpBounds.lean](Random/CubeClumpBounds.lean) specializes the proved
+deterministic full-cube interpolation bound to the fixed numerical frame
+constant. Its `CubeClumpGeometry` uses precisely
 
 $$
 L\text{ even},\quad L\ge8n,\quad
-\beta>\frac1{2\log2},\quad
-\frac{8\pi\beta d n^\star}{L}\le\tau\le\eta,\quad
+\frac{8\pi d n^\star}{L}\le\tau\le\eta,\quad
 \tau\le\frac\pi{2d},\quad
 \Delta_1\le\frac{4\pi n^\star}{L},
 $$
@@ -110,7 +109,10 @@ The inequality $\tau\le\eta$ is a field of that predicate. The parameter
 $\tau$ is a selectable diameter
 upper bound. Li's published cube corollary is stated for $d\ge2$; the
 formalization also proves the interval case in $d=1$ from the same
-localization and interpolation constructions.
+localization and interpolation constructions. The general frame-parameter
+proof remains in [CubeClumpBounds.lean](../General/Fourier/CubeClumpBounds.lean)
+for other callers; the manuscript interfaces expose no auxiliary parameter
+or admissibility hypothesis.
 
 The Appendix C interfaces in [Random/NormalizedRows.lean](Random/NormalizedRows.lean)
 and [Random/LogDetMean.lean](Random/LogDetMean.lean) use the manuscript's definitions
@@ -132,8 +134,8 @@ sampling distribution nor either algorithm is modified. The exact public
 coefficient is
 
 $$
-C(d,n,n^\star,\beta)=\sqrt{\delta(d,n)/2}\,
-\frac{(2-e^{1/(2\beta)})^{n^\star/2}}
+C(d,n,n^\star)=\sqrt{\delta(d,n)/2}\,
+\frac{(2-e^{1/2})^{n^\star/2}}
 {\sqrt n(\sqrt2)^{n^\star-1}(\sqrt{3n^\star})^d
 (4\pi n^\star)^{n^\star-1}}.
 $$
@@ -152,7 +154,7 @@ result in [Random/ClumpVandermonde.lean](Random/ClumpVandermonde.lean) proves
 
 $$
 \sigma_{\min}(\mathcal V_{\mathcal W}(\mathcal X))
-\ge\sqrt{m(1-\rho)}\,C(d,n,n^\star,\beta)(L\Delta_1)^{n^\star-1}
+\ge\sqrt{m(1-\rho)}\,C(d,n,n^\star)(L\Delta_1)^{n^\star-1}
 $$
 
 with probability at least $1-\epsilon$, under
@@ -194,7 +196,7 @@ proved by `positiveCubeClumpGHM_signalSingularValue_lower_highProbability` in
 
 $$
 \sigma_n(\mathbf{GH}_0)\ge
-m_{\min}\sqrt{M_1M_2}(1-\rho)C(d,n,n^\star,\beta)^2
+m_{\min}\sqrt{M_1M_2}(1-\rho)C(d,n,n^\star)^2
 (L\Delta_1)^{2n^\star-2}.
 $$
 
@@ -203,7 +205,7 @@ strict row count internally. The measurement assumptions are $2L\le\Omega$
 and $|W(\boldsymbol\omega)|<\sigma$ throughout the frequency band. When
 
 $$
-2\sigma<m_{\min}(1-\rho)C(d,n,n^\star,\beta)^2
+2\sigma<m_{\min}(1-\rho)C(d,n,n^\star)^2
 (L\Delta_1)^{2n^\star-2},
 $$
 
@@ -227,7 +229,7 @@ $1-\epsilon$:
 
 $$
 \|R_\sigma-R\|_\infty\le
-\frac{2\sigma}{m_{\min}(1-\rho)C(d,n,n^\star,\beta)^2
+\frac{2\sigma}{m_{\min}(1-\rho)C(d,n,n^\star)^2
 (L\Delta_1)^{2n^\star-2}}.
 $$
 

@@ -20,7 +20,7 @@ original absolute constant `3072`.
 
 The separate manuscript lower-only multiclump interface uses
 `3 n ρ⁻² log(n/ε)` and a bandwidth-independent coefficient
-`C(d,n,nStar,β)`. `CubeWeakLowerSampling` proves the uniform lower sampling
+`C(d,n,nStar)`. `CubeWeakLowerSampling` proves the uniform lower sampling
 step; the Li geometric estimate and model conversions are assembled in
 `NumDetect.Random.ClumpVandermonde` and audited with the algorithms in
 `NumDetect.Random.ClumpAudit`.

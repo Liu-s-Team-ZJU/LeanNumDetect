@@ -23,7 +23,7 @@ open Lean Elab Command
 #print axioms LeanNumDetect.CubeFrameLogDet.cubeFrameRow_entropyMean_spectral_six_fifths
 #print axioms LeanNumDetect.FiniteMatrixSampling.smoothFramePotential_inverse_quadratic_lower_of_entropy
 #print axioms LeanNumDetect.RandSamp.cubeFixedSupport_weak_minSingularValue_probability
-#print axioms LeanNumDetect.NumDetect.liCubeClumpVandermonde_normalized_uniform_lower
+#print axioms LeanNumDetect.NumDetect.cubeClumpVandermonde_normalized_uniform_lower
 #print axioms LeanNumDetect.NumDetect.positiveCubeClumpVandermonde_lower_highProbability
 #print axioms LeanNumDetect.NumDetect.positiveCubeClumpMUSIC_correlation_stability_highProbability
 #print axioms LeanNumDetect.NumDetect.positiveCubeClumpGHM_signalSingularValue_lower_highProbability
@@ -67,8 +67,8 @@ run_cmd do
       ``LeanNumDetect.FiniteMatrixSampling.smooth_normalized_row_bound,
       ``LeanNumDetect.FiniteMatrixSampling.sampleMean_logarithmic_frame_lower_bound_probability,
       ``LeanNumDetect.RandSamp.cubeFixedSupport_weak_minSingularValue_probability,
-      ``LeanNumDetect.NumDetect.liCubeClumpVandermonde_normalized_lower,
-      ``LeanNumDetect.NumDetect.liCubeClumpVandermonde_normalized_uniform_lower,
+      ``LeanNumDetect.NumDetect.cubeClumpUniformCoefficient_pos,
+      ``LeanNumDetect.NumDetect.cubeClumpVandermonde_normalized_uniform_lower,
       ``LeanNumDetect.NumDetect.positiveCubeClumpVandermonde_normalized_lower_probability,
       ``LeanNumDetect.NumDetect.positiveCubeClumpVandermonde_lower_highProbability,
       ``LeanNumDetect.NumDetect.positiveCubeClumpFactorPair_lower_probability,
@@ -150,7 +150,8 @@ run_cmd do
       ``LeanNumDetect.FiniteMatrixSampling.smoothFramePotential_minimizer_stationary,
       ``LeanNumDetect.FiniteMatrixSampling.smoothFramePotential_inverse_quadratic_lower_of_entropy,
       ``LeanNumDetect.FiniteMatrixSampling.smooth_normalized_row_bound,
-      ``LeanNumDetect.FiniteMatrixSampling.sampleMean_logarithmic_frame_lower_bound_probability] do
+      ``LeanNumDetect.FiniteMatrixSampling.sampleMean_logarithmic_frame_lower_bound_probability,
+      ``LeanNumDetect.NumDetect.cubeClumpVandermonde_normalized_uniform_lower] do
     unless seen.contains required do
       throwError "Missing direct construction in public cube sampling proof: {required}"
   -- The metric Cauchy--Schwarz helper remains legitimate for proving that
@@ -173,4 +174,4 @@ run_cmd do
           capPending := capPending ++ info.type.getUsedConstants
           if let some value := info.value? true then
             capPending := capPending ++ value.getUsedConstants
-  logInfo "Random-clump audit passed: Li geometry, direct Fourier logarithmic determinant average, smooth potential minimum and stationary weights, direct eigenvalue and rank-one bounds, unchanged n-based sample counts and uniform sampling, unnormalized VDM, GHM noise, MUSIC correlation and number detection, together with retained standalone capped-weight and thickness alternatives, use no admissions or project axioms."
+  logInfo "Random-clump audit passed: fixed cube geometry without an auxiliary frame parameter, direct Fourier logarithmic determinant average, smooth potential minimum and stationary weights, direct eigenvalue and rank-one bounds, unchanged n-based sample counts and uniform sampling, unnormalized VDM, GHM noise, MUSIC correlation and number detection, together with retained standalone capped-weight and thickness alternatives, use no admissions or project axioms."

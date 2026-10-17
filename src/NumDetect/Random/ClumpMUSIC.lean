@@ -54,9 +54,9 @@ theorem positiveCubeClump_sampleCount_gt
 probability is `ε`, while the clump separation remains the manuscript's `η`. -/
 theorem positiveCubeClumpFactorPair_lower_probability
     {d n nStar L A M₁ M₂ : ℕ} (hd : 1 ≤ d) (hn : 2 ≤ n)
-    (μ : AtomicMeasure d n) {τ η β ρ ε : ℝ}
+    (μ : AtomicMeasure d n) {τ η ρ ε : ℝ}
     (hclumps : IsAngularClumpStructure μ.node A nStar τ η)
-    (hgeom : LiCubeClumpGeometry μ A nStar L τ η β hn)
+    (hgeom : CubeClumpGeometry μ A nStar L τ η hn)
     (hM₁ : n ≤ M₁) (hM₂ : n ≤ M₂)
     (hM₁N : M₁ ≤ (L + 1) ^ d) (hM₂N : M₂ ≤ (L + 1) ^ d)
     (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (hε0 : 0 < ε) (hε1 : ε < 1)
@@ -68,10 +68,10 @@ theorem positiveCubeClumpFactorPair_lower_probability
         Real.log (2 * (n : ℝ) / ε) ≤ (M₂ : ℝ)) :
     1 - ε ≤ probability (fun pair :
         FiniteSample (CubeFrequency d L) M₁ × FiniteSample (CubeFrequency d L) M₂ =>
-      (Real.sqrt (1 - ρ) * positiveCubeClumpLower d n nStar L β
+      (Real.sqrt (1 - ρ) * positiveCubeClumpLower d n nStar L
           (periodicMinimumL1Separation μ.node hn) ≤
         matrixSingularValue (cubeSampledVandermonde M₁ μ.node pair.1.val) (n - 1)) ∧
-      (Real.sqrt (1 - ρ) * positiveCubeClumpLower d n nStar L β
+      (Real.sqrt (1 - ρ) * positiveCubeClumpLower d n nStar L
           (periodicMinimumL1Separation μ.node hn) ≤
         matrixSingularValue (cubeSampledVandermonde M₂ μ.node pair.2.val) (n - 1))) := by
   classical
@@ -89,11 +89,11 @@ theorem positiveCubeClumpFactorPair_lower_probability
         Real.log ((n : ℝ) / (ε / 2)) ≤ (M₂ : ℝ) := by
     rw [hlog]; exact hsample₂
   let RowGood : FiniteSample (CubeFrequency d L) M₁ → Prop := fun W =>
-    Real.sqrt (1 - ρ) * positiveCubeClumpLower d n nStar L β
+    Real.sqrt (1 - ρ) * positiveCubeClumpLower d n nStar L
       (periodicMinimumL1Separation μ.node hn) ≤
       matrixSingularValue (cubeSampledVandermonde M₁ μ.node W.val) (n - 1)
   let ColumnGood : FiniteSample (CubeFrequency d L) M₂ → Prop := fun Z =>
-    Real.sqrt (1 - ρ) * positiveCubeClumpLower d n nStar L β
+    Real.sqrt (1 - ρ) * positiveCubeClumpLower d n nStar L
       (periodicMinimumL1Separation μ.node hn) ≤
       matrixSingularValue (cubeSampledVandermonde M₂ μ.node Z.val) (n - 1)
   have hp₁ : 1 - ε / 2 ≤ probability RowGood := by
@@ -111,9 +111,9 @@ theorem positiveCubeClumpFactorPair_lower_probability
 /-- The noiseless random GHM lower bound on the common factor event. -/
 theorem positiveCubeClumpGHM_signalSingularValue_lower_highProbability
     {d n nStar L A M₁ M₂ : ℕ} (hd : 1 ≤ d) (hn : 2 ≤ n)
-    (μ : AtomicMeasure d n) {τ η β ρ ε : ℝ}
+    (μ : AtomicMeasure d n) {τ η ρ ε : ℝ}
     (hclumps : IsAngularClumpStructure μ.node A nStar τ η)
-    (hgeom : LiCubeClumpGeometry μ A nStar L τ η β hn)
+    (hgeom : CubeClumpGeometry μ A nStar L τ η hn)
     (hM₁ : n ≤ M₁) (hM₂ : n ≤ M₂)
     (hM₁N : M₁ ≤ (L + 1) ^ d) (hM₂N : M₂ ≤ (L + 1) ^ d)
     (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (hε0 : 0 < ε) (hε1 : ε < 1)
@@ -126,7 +126,7 @@ theorem positiveCubeClumpGHM_signalSingularValue_lower_highProbability
     1 - ε ≤ probability (fun pair :
         FiniteSample (CubeFrequency d L) M₁ × FiniteSample (CubeFrequency d L) M₂ =>
       minAmplitude μ (Nat.zero_lt_of_lt hn) * Real.sqrt (M₁ * M₂) *
-          ((1 - ρ) * (positiveCubeClumpCoefficient d n nStar β) ^ 2 *
+          ((1 - ρ) * (positiveCubeClumpCoefficient d n nStar) ^ 2 *
             ((L : ℝ) * periodicMinimumL1Separation μ.node hn) ^ (2 * nStar - 2)) ≤
         matrixSingularValue (generalizedHankel (positiveCubeFrequency pair.1)
           (positiveCubeFrequency pair.2) (fourier μ)) (n - 1)) := by
@@ -138,8 +138,8 @@ theorem positiveCubeClumpGHM_signalSingularValue_lower_highProbability
   have hStar : 0 < nStar := by have h := hclumps.1; omega
   let Δ := periodicMinimumL1Separation μ.node hn
   have hΔ : 0 < Δ := periodicMinimumL1Separation_pos μ hn hclumps.2.2.2.1
-  let b₀ := positiveCubeClumpLower d n nStar L β Δ
-  have hb₀ : 0 < b₀ := positiveCubeClumpLower_pos hd hn0 hStar hL0 hgeom.2.2.2.1 hΔ
+  let b₀ := positiveCubeClumpLower d n nStar L Δ
+  have hb₀ : 0 < b₀ := positiveCubeClumpLower_pos hd hn0 hStar hL0 hΔ
   let a := b₀ ^ 2
   have ha : 0 < a := pow_pos hb₀ _
   have hab : 0 < (1 - ρ) * a := mul_pos (sub_pos.mpr hρ1) ha
@@ -198,12 +198,11 @@ theorem positiveCubeClumpGHM_signalSingularValue_lower_highProbability
     mul_assoc] using hsignal
 
 /-- The exact correlation-only conclusion of the manuscript corollary. -/
-def PositiveCubeClumpMUSICConclusion (d n nStar : ℕ) (hn : 2 ≤ n)
-    (β : ℝ) : Prop :=
+def PositiveCubeClumpMUSICConclusion (d n nStar : ℕ) (hn : 2 ≤ n) : Prop :=
   ∀ (L A M₁ M₂ : ℕ) (μ : AtomicMeasure d n) (measurement : Point d → ℂ)
     (τ η Ω σ ρ ε : ℝ)
     (_hclumps : IsAngularClumpStructure μ.node A nStar τ η),
-    LiCubeClumpGeometry μ A nStar L τ η β hn →
+    CubeClumpGeometry μ A nStar L τ η hn →
     n ≤ M₁ → n ≤ M₂ → M₁ ≤ (L + 1) ^ d → M₂ ≤ (L + 1) ^ d →
     (2 * L : ℝ) ≤ Ω → IsBandMeasurement μ Ω σ measurement →
     0 < ρ → ρ < 1 → 0 < ε → ε < 1 →
@@ -214,7 +213,7 @@ def PositiveCubeClumpMUSICConclusion (d n nStar : ℕ) (hn : 2 ≤ n)
       (n : ℝ) *
         Real.log (2 * (n : ℝ) / ε) ≤ (M₂ : ℝ) →
     2 * σ < minAmplitude μ (Nat.zero_lt_of_lt hn) * ((1 - ρ) *
-      (positiveCubeClumpCoefficient d n nStar β) ^ 2 *
+      (positiveCubeClumpCoefficient d n nStar) ^ 2 *
         ((L : ℝ) * periodicMinimumL1Separation μ.node hn) ^ (2 * nStar - 2)) →
     1 - ε ≤ probability (fun pair :
         FiniteSample (CubeFrequency d L) M₁ × FiniteSample (CubeFrequency d L) M₂ =>
@@ -226,17 +225,16 @@ def PositiveCubeClumpMUSICConclusion (d n nStar : ℕ) (hn : 2 ≤ n)
           (generalizedHankel (positiveCubeFrequency pair.1)
             (positiveCubeFrequency pair.2) (fourier μ)) n) ≤
         2 * σ / (minAmplitude μ (Nat.zero_lt_of_lt hn) * ((1 - ρ) *
-          (positiveCubeClumpCoefficient d n nStar β) ^ 2 *
+          (positiveCubeClumpCoefficient d n nStar) ^ 2 *
             ((L : ℝ) * periodicMinimumL1Separation μ.node hn) ^ (2 * nStar - 2))))
 
 /-- The singular-value and algorithm-count conclusion in the manuscript's
 number-detection consequence; Lean indices begin at zero. -/
-def PositiveCubeClumpNumberDetectionConclusion (d n nStar : ℕ) (hn : 2 ≤ n)
-    (β : ℝ) : Prop :=
+def PositiveCubeClumpNumberDetectionConclusion (d n nStar : ℕ) (hn : 2 ≤ n) : Prop :=
   ∀ (L A M₁ M₂ : ℕ) (μ : AtomicMeasure d n) (measurement : Point d → ℂ)
     (τ η Ω σ ρ ε : ℝ)
     (_hclumps : IsAngularClumpStructure μ.node A nStar τ η),
-    LiCubeClumpGeometry μ A nStar L τ η β hn →
+    CubeClumpGeometry μ A nStar L τ η hn →
     n ≤ M₁ → n ≤ M₂ → M₁ ≤ (L + 1) ^ d → M₂ ≤ (L + 1) ^ d →
     (2 * L : ℝ) ≤ Ω → IsBandMeasurement μ Ω σ measurement →
     0 < ρ → ρ < 1 → 0 < ε → ε < 1 →
@@ -247,7 +245,7 @@ def PositiveCubeClumpNumberDetectionConclusion (d n nStar : ℕ) (hn : 2 ≤ n)
       (n : ℝ) *
         Real.log (2 * (n : ℝ) / ε) ≤ (M₂ : ℝ) →
     2 * σ < minAmplitude μ (Nat.zero_lt_of_lt hn) * ((1 - ρ) *
-      (positiveCubeClumpCoefficient d n nStar β) ^ 2 *
+      (positiveCubeClumpCoefficient d n nStar) ^ 2 *
         ((L : ℝ) * periodicMinimumL1Separation μ.node hn) ^ (2 * nStar - 2)) →
     1 - ε ≤ probability (fun pair :
         FiniteSample (CubeFrequency d L) M₁ × FiniteSample (CubeFrequency d L) M₂ =>
@@ -266,9 +264,9 @@ def PositiveCubeClumpNumberDetectionConclusion (d n nStar : ℕ) (hn : 2 ≤ n)
 lower sampling event. No leverage hypothesis is exposed to the application. -/
 theorem positiveCubeClumpMUSIC_and_numberDetection_highProbability
     (d : ℕ) (hd : 1 ≤ d) (n nStar : ℕ) (hStar : 2 ≤ nStar)
-    (hsize : nStar ≤ n) (β : ℝ) :
-    PositiveCubeClumpMUSICConclusion d n nStar (by omega) β ∧
-      PositiveCubeClumpNumberDetectionConclusion d n nStar (by omega) β := by
+    (hsize : nStar ≤ n) :
+    PositiveCubeClumpMUSICConclusion d n nStar (by omega) ∧
+      PositiveCubeClumpNumberDetectionConclusion d n nStar (by omega) := by
   classical
   constructor
   ·
@@ -283,8 +281,8 @@ theorem positiveCubeClumpMUSIC_and_numberDetection_highProbability
       omega
     let Δ := periodicMinimumL1Separation μ.node hn
     have hΔ : 0 < Δ := periodicMinimumL1Separation_pos μ hn hclumps.2.2.2.1
-    let b := positiveCubeClumpLower d n nStar L β Δ
-    have hb : 0 < b := positiveCubeClumpLower_pos (nStar := nStar) hd hn0 (by omega) hL0 hgeom.2.2.2.1 hΔ
+    let b := positiveCubeClumpLower d n nStar L Δ
+    have hb : 0 < b := positiveCubeClumpLower_pos (nStar := nStar) hd hn0 (by omega) hL0 hΔ
     let a := b ^ 2
     have ha : 0 < a := pow_pos hb _
     have hsmall' : 2 * σ < minAmplitude μ hn0 * ((1 - ρ) * a) := by
@@ -342,8 +340,8 @@ theorem positiveCubeClumpMUSIC_and_numberDetection_highProbability
       omega
     let Δ := periodicMinimumL1Separation μ.node hn
     have hΔ : 0 < Δ := periodicMinimumL1Separation_pos μ hn hclumps.2.2.2.1
-    let b := positiveCubeClumpLower d n nStar L β Δ
-    have hb : 0 < b := positiveCubeClumpLower_pos (nStar := nStar) hd hn0 (by omega) hL0 hgeom.2.2.2.1 hΔ
+    let b := positiveCubeClumpLower d n nStar L Δ
+    have hb : 0 < b := positiveCubeClumpLower_pos (nStar := nStar) hd hn0 (by omega) hL0 hΔ
     let a := b ^ 2
     have ha : 0 < a := pow_pos hb _
     have hsmall' : 2 * σ < minAmplitude μ hn0 * ((1 - ρ) * a) := by
@@ -368,17 +366,17 @@ theorem positiveCubeClumpMUSIC_and_numberDetection_highProbability
 /-- Fixed-source multiclump random-GHM MUSIC correlation stability. -/
 theorem positiveCubeClumpMUSIC_correlation_stability_highProbability
     (d : ℕ) (hd : 1 ≤ d) (n nStar : ℕ) (hStar : 2 ≤ nStar)
-    (hsize : nStar ≤ n) (β : ℝ) :
-    PositiveCubeClumpMUSICConclusion d n nStar (by omega) β :=
-  (positiveCubeClumpMUSIC_and_numberDetection_highProbability d hd n nStar hStar hsize β).1
+    (hsize : nStar ≤ n) :
+    PositiveCubeClumpMUSICConclusion d n nStar (by omega) :=
+  (positiveCubeClumpMUSIC_and_numberDetection_highProbability d hd n nStar hStar hsize).1
 
 /-- Fixed-source multiclump random-GHM number detection with the exact
 singular-value threshold and count from the manuscript algorithm. -/
 theorem positiveCubeClumpGHM_numberDetection_highProbability
     (d : ℕ) (hd : 1 ≤ d) (n nStar : ℕ) (hStar : 2 ≤ nStar)
-    (hsize : nStar ≤ n) (β : ℝ) :
-    PositiveCubeClumpNumberDetectionConclusion d n nStar (by omega) β :=
-  (positiveCubeClumpMUSIC_and_numberDetection_highProbability d hd n nStar hStar hsize β).2
+    (hsize : nStar ≤ n) :
+    PositiveCubeClumpNumberDetectionConclusion d n nStar (by omega) :=
+  (positiveCubeClumpMUSIC_and_numberDetection_highProbability d hd n nStar hStar hsize).2
 
 end
 end LeanNumDetect.NumDetect

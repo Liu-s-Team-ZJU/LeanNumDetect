@@ -19,34 +19,33 @@ open scoped BigOperators
 namespace LeanNumDetect.NumDetect
 noncomputable section
 
-/-- Exact manuscript coefficient; its only dependencies are d, n, nStar, β. -/
-def positiveCubeClumpCoefficient (d n nStar : ℕ) (β : ℝ) : ℝ :=
-  cubeWeakSamplingCoefficient d n * liCubeClumpUniformCoefficient d n nStar β
+/-- Exact manuscript coefficient; its only dependencies are d, n, nStar. -/
+def positiveCubeClumpCoefficient (d n nStar : ℕ) : ℝ :=
+  cubeWeakSamplingCoefficient d n * cubeClumpUniformCoefficient d n nStar
 
 /-- Bandwidth and spacing occur only in the final displayed power. -/
-def positiveCubeClumpLower (d n nStar L : ℕ) (β Δ : ℝ) : ℝ :=
-  positiveCubeClumpCoefficient d n nStar β * ((L : ℝ) * Δ) ^ (nStar - 1)
+def positiveCubeClumpLower (d n nStar L : ℕ) (Δ : ℝ) : ℝ :=
+  positiveCubeClumpCoefficient d n nStar * ((L : ℝ) * Δ) ^ (nStar - 1)
 
-theorem positiveCubeClumpCoefficient_pos {d n nStar : ℕ} {β : ℝ}
-    (_hd : 1 ≤ d) (hn : 0 < n) (hStar : 0 < nStar)
-    (hβ : 1 / (2 * Real.log 2) < β) :
-    0 < positiveCubeClumpCoefficient d n nStar β := by
+theorem positiveCubeClumpCoefficient_pos {d n nStar : ℕ}
+    (_hd : 1 ≤ d) (hn : 0 < n) (hStar : 0 < nStar) :
+    0 < positiveCubeClumpCoefficient d n nStar := by
   unfold positiveCubeClumpCoefficient
   exact mul_pos (cubeWeakSamplingCoefficient_pos d n)
-    (liCubeClumpUniformCoefficient_pos hn hStar hβ)
+    (cubeClumpUniformCoefficient_pos hn hStar)
 
 theorem positiveCubeClumpLower_pos {d n nStar L : ℕ}
     (hd : 1 ≤ d) (hn : 0 < n) (hStar : 0 < nStar) (hL : 0 < L)
-    {β Δ : ℝ} (hβ : 1 / (2 * Real.log 2) < β) (hΔ : 0 < Δ) :
-    0 < positiveCubeClumpLower d n nStar L β Δ := by
-  exact mul_pos (positiveCubeClumpCoefficient_pos hd hn hStar hβ)
+    {Δ : ℝ} (hΔ : 0 < Δ) :
+    0 < positiveCubeClumpLower d n nStar L Δ := by
+  exact mul_pos (positiveCubeClumpCoefficient_pos hd hn hStar)
     (pow_pos (mul_pos (Nat.cast_pos.mpr hL) hΔ) _)
 
 /-- Squaring preserves precisely the manuscript's noise-condition exponent. -/
 theorem positiveCubeClumpLower_sq {d n nStar L : ℕ}
-    (hStar : 1 ≤ nStar) (β Δ : ℝ) :
-    (positiveCubeClumpLower d n nStar L β Δ) ^ 2 =
-      (positiveCubeClumpCoefficient d n nStar β) ^ 2 *
+    (hStar : 1 ≤ nStar) (Δ : ℝ) :
+    (positiveCubeClumpLower d n nStar L Δ) ^ 2 =
+      (positiveCubeClumpCoefficient d n nStar) ^ 2 *
         ((L : ℝ) * Δ) ^ (2 * nStar - 2) := by
   have hexponent : (nStar - 1) * 2 = 2 * nStar - 2 := by omega
   simp only [positiveCubeClumpLower, mul_pow, ← pow_mul, hexponent]
@@ -55,16 +54,16 @@ theorem positiveCubeClumpLower_sq {d n nStar L : ℕ}
 simple cube parameters. Every sampling prerequisite is derived in the proof. -/
 theorem positiveCubeClumpVandermonde_normalized_lower_probability
     {d n nStar L A m : ℕ} (hd : 1 ≤ d) (hn : 2 ≤ n)
-    (μ : AtomicMeasure d n) {τ η β ρ ε : ℝ}
+    (μ : AtomicMeasure d n) {τ η ρ ε : ℝ}
     (hclumps : IsAngularClumpStructure μ.node A nStar τ η)
-    (hgeom : LiCubeClumpGeometry μ A nStar L τ η β hn)
+    (hgeom : CubeClumpGeometry μ A nStar L τ η hn)
     (hm : 1 ≤ m) (hmN : m ≤ (L + 1) ^ d)
     (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (hε0 : 0 < ε) (_hε1 : ε < 1)
     (hsample : (3 : ℝ) / ρ ^ 2 *
       (n : ℝ) *
         Real.log ((n : ℝ) / ε) ≤ (m : ℝ)) :
     1 - ε ≤ probability (fun W : FiniteSample (CubeFrequency d L) m =>
-      Real.sqrt (1 - ρ) * positiveCubeClumpLower d n nStar L β
+      Real.sqrt (1 - ρ) * positiveCubeClumpLower d n nStar L
         (periodicMinimumL1Separation μ.node hn) ≤
       matrixSingularValue (cubeSampledVandermonde m μ.node W.val) (n - 1)) := by
   have hL : 8 * n ≤ L := hgeom.2.1
@@ -76,13 +75,13 @@ theorem positiveCubeClumpVandermonde_normalized_lower_probability
   have hp := cubeFixedSupport_weak_minSingularValue_probability
     (d := d) (n := n) (m := m) (by omega) (by omega) hL hm hmN μ.node hG
     hρ0 hρ1 hε0 hs
-  have hfull := liCubeClumpVandermonde_normalized_uniform_lower μ hd hn hgeom
+  have hfull := cubeClumpVandermonde_normalized_uniform_lower μ hd hn hgeom
   apply hp.trans
   apply probability_mono
   intro W hW
   have h := mul_le_mul_of_nonneg_left hfull
     (mul_nonneg (Real.sqrt_nonneg (1 - ρ)) (cubeWeakSamplingCoefficient_pos d n).le)
-  have hl : Real.sqrt (1 - ρ) * positiveCubeClumpLower d n nStar L β
+  have hl : Real.sqrt (1 - ρ) * positiveCubeClumpLower d n nStar L
       (periodicMinimumL1Separation μ.node hn) ≤
       Real.sqrt (1 - ρ) * cubeWeakSamplingCoefficient d n *
         matrixSingularValue (cubeFullVandermonde L μ.node) (n - 1) := by
@@ -92,23 +91,23 @@ theorem positiveCubeClumpVandermonde_normalized_lower_probability
 /-- Unnormalized manuscript statement: sqrt(m) occurs only on the right. -/
 theorem positiveCubeClumpVandermonde_unnormalized_lower_probability
     {d n nStar L A m : ℕ} (hd : 1 ≤ d) (hn : 2 ≤ n)
-    (μ : AtomicMeasure d n) {τ η β ρ ε : ℝ}
+    (μ : AtomicMeasure d n) {τ η ρ ε : ℝ}
     (hclumps : IsAngularClumpStructure μ.node A nStar τ η)
-    (hgeom : LiCubeClumpGeometry μ A nStar L τ η β hn)
+    (hgeom : CubeClumpGeometry μ A nStar L τ η hn)
     (hm : 1 ≤ m) (hmN : m ≤ (L + 1) ^ d)
     (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (hε0 : 0 < ε) (hε1 : ε < 1)
     (hsample : (3 : ℝ) / ρ ^ 2 *
       (n : ℝ) *
         Real.log ((n : ℝ) / ε) ≤ (m : ℝ)) :
     1 - ε ≤ probability (fun W : FiniteSample (CubeFrequency d L) m =>
-      Real.sqrt ((m : ℝ) * (1 - ρ)) * positiveCubeClumpCoefficient d n nStar β *
+      Real.sqrt ((m : ℝ) * (1 - ρ)) * positiveCubeClumpCoefficient d n nStar *
         ((L : ℝ) * periodicMinimumL1Separation μ.node hn) ^ (nStar - 1) ≤
       matrixSingularValue (generalizedVandermonde (positiveCubeFrequency W) μ.node) (n - 1)) := by
   have hL0 : 0 < L := by have h := hgeom.2.1; omega
   have hΔ := periodicMinimumL1Separation_pos μ hn hclumps.2.2.2.1
   have hStar : 0 < nStar := by have h := hclumps.1; omega
   have hb := positiveCubeClumpLower_pos hd (by omega : 0 < n) hStar hL0
-    hgeom.2.2.2.1 hΔ
+    hΔ
   have hp := positiveCubeClumpVandermonde_normalized_lower_probability hd hn μ
     hclumps hgeom hm hmN hρ0 hρ1 hε0 hε1 hsample
   apply hp.trans
@@ -122,11 +121,10 @@ theorem positiveCubeClumpVandermonde_unnormalized_lower_probability
 hypotheses. Unit amplitudes are internal witnesses, not assumptions. -/
 theorem positiveCubeClumpVandermonde_lower_highProbability
     {d n nStar L A m : ℕ} (hd : 1 ≤ d) (hn : 2 ≤ n)
-    (x : Fin n → Point d) (hx : Function.Injective x) {τ η β ρ ε : ℝ}
+    (x : Fin n → Point d) (hx : Function.Injective x) {τ η ρ ε : ℝ}
     (hclumps : IsAngularClumpStructure x A nStar τ η)
     (hEven : Even L) (hL : 8 * n ≤ L)
-    (hβ : 1 / (2 * Real.log 2) < β)
-    (hτlower : 8 * Real.pi * β * d * nStar / L ≤ τ)
+    (hτlower : 8 * Real.pi * d * nStar / L ≤ τ)
     (hτupper : τ ≤ Real.pi / (2 * d))
     (hscale : periodicMinimumL1Separation x hn ≤ 4 * Real.pi * nStar / L)
     (hm : 1 ≤ m) (hmN : m ≤ (L + 1) ^ d)
@@ -135,7 +133,7 @@ theorem positiveCubeClumpVandermonde_lower_highProbability
       (n : ℝ) *
         Real.log ((n : ℝ) / ε) ≤ (m : ℝ)) :
     1 - ε ≤ probability (fun W : FiniteSample (CubeFrequency d L) m =>
-      Real.sqrt ((m : ℝ) * (1 - ρ)) * positiveCubeClumpCoefficient d n nStar β *
+      Real.sqrt ((m : ℝ) * (1 - ρ)) * positiveCubeClumpCoefficient d n nStar *
         ((L : ℝ) * periodicMinimumL1Separation x hn) ^ (nStar - 1) ≤
       matrixSingularValue (generalizedVandermonde (positiveCubeFrequency W) x) (n - 1)) := by
   let μ : AtomicMeasure d n := {
@@ -143,8 +141,8 @@ theorem positiveCubeClumpVandermonde_lower_highProbability
     node := x
     amplitude_ne_zero := fun _ => one_ne_zero
     node_injective := hx }
-  have hgeom : LiCubeClumpGeometry μ A nStar L τ η β hn :=
-    ⟨hEven, hL, hclumps, hβ, hτlower, hτupper, hscale⟩
+  have hgeom : CubeClumpGeometry μ A nStar L τ η hn :=
+    ⟨hEven, hL, hclumps, hτlower, hτupper, hscale⟩
   exact positiveCubeClumpVandermonde_unnormalized_lower_probability hd hn μ
     hclumps hgeom hm hmN hρ0 hρ1 hε0 hε1 hsample
 

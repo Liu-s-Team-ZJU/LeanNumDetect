@@ -36,6 +36,7 @@ argument at the critical separation.
 | Centered-to-one-sided cube conversion infrastructure | [FineCubeFrame.lean](FineCubeFrame.lean) |
 | One-dimensional periodic-Hilbert reduction | [OneDimensionalFineCubeFrame.lean](OneDimensionalFineCubeFrame.lean) |
 | Vaaler--Selberg translated-cube lower frame | [TranslatedCubeFourier.lean](TranslatedCubeFourier.lean) |
+| General frame-parameter cube-clump interpolation and deterministic lower bounds | [CubeClumpBounds.lean](CubeClumpBounds.lean); existing `LeanNumDetect.NumDetect` declaration names are retained for downstream callers |
 | Translated centered-cube conversion | [BartonCubeFrame.lean](BartonCubeFrame.lean) |
 | Open-endpoint Selberg lattice minorants and tensor correction | [LatticeSelbergMinorant.lean](LatticeSelbergMinorant.lean) |
 | Integer phase periodicity and exact Lipschitz bounds | [PhaseEstimates.lean](PhaseEstimates.lean) |
