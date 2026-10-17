@@ -133,12 +133,12 @@ and its coefficient mass, after shifting only the source coefficients. -/
 theorem scalar_cell_energy_le_of_interpolation {L n : ℕ} (hn : 0 < n) (hnL : n ≤ L)
     (Y : Fin n → ℝ) (c : Fin n → ℂ)
     (hinterp : ∀ t : ℝ, 0 ≤ t → t ≤ n → ∃ α : Fin n → ℂ,
-      (∑ j, ‖α j‖) ≤ 3 * (3 * (n : ℝ)) ^ n ∧
+      (∑ j, ‖α j‖) ≤ 2 * (2 * (n : ℝ) + 2) ^ n ∧
       ∀ j, Complex.exp (Complex.I * ((t * Y j : ℝ) : ℂ)) =
         ∑ k, α k * Complex.exp (Complex.I * (((k.val : ℝ) * Y j : ℝ) : ℂ)))
     (a : ℝ) (k : Fin L) {t : ℝ} (ht : t ∈ Icc (a + k.val) (a + k.val + 1)) :
     ‖ExponentialSumEstimates.exponentialSum Y c t‖ ^ 2 ≤
-      9 * (3 * (n : ℝ)) ^ (2 * n) *
+      4 * (2 * (n : ℝ) + 2) ^ (2 * n) *
         ∑ j : Fin n, ‖ExponentialSumEstimates.exponentialSum Y c
           (a + (windowIndex hn hnL k j).val)‖ ^ 2 := by
   let b : ℝ := a + windowStart L n k.val
@@ -156,9 +156,9 @@ theorem scalar_cell_energy_le_of_interpolation {L n : ℕ} (hn : 0 < n) (hnL : n
   simp_rw [htranslate] at hsum
   have hsquare := norm_combination_sq_le α
     (fun j => ExponentialSumEstimates.exponentialSum Y c (b + j.val))
-    (by positivity : 0 ≤ 3 * (3 * (n : ℝ)) ^ n) hα
+    (by positivity : 0 ≤ 2 * (2 * (n : ℝ) + 2) ^ n) hα
   rw [← hsum] at hsquare
-  have hconstant : (3 * (3 * (n : ℝ)) ^ n) ^ 2 = 9 * (3 * (n : ℝ)) ^ (2*n) := by
+  have hconstant : (2 * (2 * (n : ℝ) + 2) ^ n) ^ 2 = 4 * (2 * (n : ℝ) + 2) ^ (2*n) := by
     rw [mul_pow, ← pow_mul, Nat.mul_comm n 2]
     norm_num
   rw [hconstant] at hsquare
@@ -173,19 +173,19 @@ This transfer is used below with the proved analytic interpolation theorem. -/
 theorem scalar_block_energy_le_of_interpolation {L n : ℕ} (hn : 0 < n) (hnL : n ≤ L)
     (Y : Fin n → ℝ) (c : Fin n → ℂ)
     (hinterp : ∀ t : ℝ, 0 ≤ t → t ≤ n → ∃ α : Fin n → ℂ,
-      (∑ j, ‖α j‖) ≤ 3 * (3 * (n : ℝ)) ^ n ∧
+      (∑ j, ‖α j‖) ≤ 2 * (2 * (n : ℝ) + 2) ^ n ∧
       ∀ j, Complex.exp (Complex.I * ((t * Y j : ℝ) : ℂ)) =
         ∑ k, α k * Complex.exp (Complex.I * (((k.val : ℝ) * Y j : ℝ) : ℂ)))
     (a : ℕ) :
     (∫ t in Icc (a : ℝ) ((a + L : ℕ) : ℝ),
       ‖ExponentialSumEstimates.exponentialSum Y c t‖ ^ 2) ≤
-      (18 * (n : ℝ) * (3 * (n : ℝ)) ^ (2*n)) *
+      (8 * (n : ℝ) * (2 * (n : ℝ) + 2) ^ (2*n)) *
         ∑ k ∈ Finset.Icc a (a + (L-1)),
           ‖ExponentialSumEstimates.exponentialSum Y c k‖ ^ 2 := by
   have hblock := block_integral_le_of_cell_bound hn hnL (a : ℝ)
     (fun t => ‖ExponentialSumEstimates.exponentialSum Y c t‖ ^ 2)
     ((ExponentialSumEstimates.continuous_exponentialSum Y c).norm.pow 2)
-    (fun _ => sq_nonneg _) (by positivity : 0 ≤ 9 * (3 * (n : ℝ)) ^ (2*n))
+    (fun _ => sq_nonneg _) (by positivity : 0 ≤ 4 * (2 * (n : ℝ) + 2) ^ (2*n))
     (fun k t ht => scalar_cell_energy_le_of_interpolation hn hnL Y c hinterp a k ht)
   have hsum : (∑ k : Fin L, ‖ExponentialSumEstimates.exponentialSum Y c ((a : ℝ) + k.val)‖ ^ 2) =
       ∑ k ∈ Finset.Icc a (a + (L-1)), ‖ExponentialSumEstimates.exponentialSum Y c k‖ ^ 2 := by
@@ -195,9 +195,9 @@ theorem scalar_block_energy_le_of_interpolation {L n : ℕ} (hn : 0 < n) (hnL : 
   have hsumpos : 0 ≤ ∑ k ∈ Finset.Icc a (a + (L-1)),
       ‖ExponentialSumEstimates.exponentialSum Y c k‖ ^ 2 :=
     Finset.sum_nonneg fun _ _ => sq_nonneg _
-  have hconstant : 9 * (3 * (n : ℝ)) ^ (2*n) * (2 * (n : ℝ) - 1) ≤
-      18 * (n : ℝ) * (3 * (n : ℝ)) ^ (2*n) := by
-    nlinarith [pow_nonneg (show 0 ≤ 3*(n : ℝ) by positivity) (2*n)]
+  have hconstant : 4 * (2 * (n : ℝ) + 2) ^ (2*n) * (2 * (n : ℝ) - 1) ≤
+      8 * (n : ℝ) * (2 * (n : ℝ) + 2) ^ (2*n) := by
+    nlinarith [pow_nonneg (show 0 ≤ 2*(n : ℝ)+2 by positivity) (2*n)]
   simpa only [Nat.cast_add] using hblock.trans
     (mul_le_mul_of_nonneg_right hconstant hsumpos)
 
@@ -258,13 +258,13 @@ theorem coordinate_integral_le_of_block_bound {d : ℕ} (G : SegmentedGrid d)
 theorem scalar_grid_block_energy_le_of_interpolation {d n : ℕ} (G : SegmentedGrid d)
     (hn : 0 < n) (Y : Fin n → ℝ) (c : Fin n → ℂ)
     (hinterp : ∀ t : ℝ, 0 ≤ t → t ≤ n → ∃ α : Fin n → ℂ,
-      (∑ j, ‖α j‖) ≤ 3 * (3 * (n : ℝ)) ^ n ∧
+      (∑ j, ‖α j‖) ≤ 2 * (2 * (n : ℝ) + 2) ^ n ∧
       ∀ j, Complex.exp (Complex.I * ((t * Y j : ℝ) : ℂ)) =
         ∑ k, α k * Complex.exp (Complex.I * (((k.val : ℝ) * Y j : ℝ) : ℂ)))
     (q : Fin d) (m : G.Block q) (hnL : n ≤ G.thickLength q m) :
     (∫ t in Icc (G.start q m : ℝ) ((G.start q m + G.thickLength q m : ℕ) : ℝ),
       ‖ExponentialSumEstimates.exponentialSum Y c t‖ ^ 2) ≤
-        (18 * (n : ℝ) * (3 * (n : ℝ)) ^ (2*n)) *
+        (8 * (n : ℝ) * (2 * (n : ℝ) + 2) ^ (2*n)) *
           ∑ k ∈ G.blockRows q m, ‖ExponentialSumEstimates.exponentialSum Y c k‖ ^ 2 := by
   simpa only [SegmentedGrid.blockRows, SegmentedGrid.thickLength, Nat.add_sub_cancel] using
     scalar_block_energy_le_of_interpolation hn hnL Y c hinterp (G.start q m)
@@ -274,12 +274,12 @@ thickened intervals. -/
 theorem scalar_coordinate_energy_le_of_interpolation {d n : ℕ} (G : SegmentedGrid d)
     (hn : 0 < n) (Y : Fin n → ℝ) (c : Fin n → ℂ)
     (hinterp : ∀ t : ℝ, 0 ≤ t → t ≤ n → ∃ α : Fin n → ℂ,
-      (∑ j, ‖α j‖) ≤ 3 * (3 * (n : ℝ)) ^ n ∧
+      (∑ j, ‖α j‖) ≤ 2 * (2 * (n : ℝ) + 2) ^ n ∧
       ∀ j, Complex.exp (Complex.I * ((t * Y j : ℝ) : ℂ)) =
         ∑ k, α k * Complex.exp (Complex.I * (((k.val : ℝ) * Y j : ℝ) : ℂ)))
     (q : Fin d) (hblocks : ∀ m : G.Block q, n ≤ G.thickLength q m) :
     (∫ t in G.coordinateThickening q, ‖ExponentialSumEstimates.exponentialSum Y c t‖ ^ 2) ≤
-      (18 * (n : ℝ) * (3 * (n : ℝ)) ^ (2*n)) *
+      (8 * (n : ℝ) * (2 * (n : ℝ) + 2) ^ (2*n)) *
         ∑ k : {k : ℕ // k ∈ G.coordinateRows q},
           ‖ExponentialSumEstimates.exponentialSum Y c k.val‖ ^ 2 := by
   apply coordinate_integral_le_of_block_bound G q
@@ -295,7 +295,7 @@ theorem scalar_block_energy_le {L n : ℕ} (hn : 2 ≤ n) (hnL : n ≤ L)
     (hY : ∀ j, |Y j| ≤ Real.pi-Real.pi/(n : ℝ)) (a : ℕ) :
     (∫ t in Icc (a : ℝ) ((a + L : ℕ) : ℝ),
       ‖ExponentialSumEstimates.exponentialSum Y c t‖ ^ 2) ≤
-      (18 * (n : ℝ) * (3 * (n : ℝ)) ^ (2*n)) *
+      (8 * (n : ℝ) * (2 * (n : ℝ) + 2) ^ (2*n)) *
         ∑ k ∈ Finset.Icc a (a + (L-1)),
           ‖ExponentialSumEstimates.exponentialSum Y c k‖ ^ 2 := by
   exact scalar_block_energy_le_of_interpolation (by omega) hnL Y c
@@ -308,7 +308,7 @@ theorem scalar_grid_block_energy_le {d n : ℕ} (G : SegmentedGrid d)
     (q : Fin d) (m : G.Block q) (hnL : n ≤ G.thickLength q m) :
     (∫ t in Icc (G.start q m : ℝ) ((G.start q m + G.thickLength q m : ℕ) : ℝ),
       ‖ExponentialSumEstimates.exponentialSum Y c t‖ ^ 2) ≤
-        (18 * (n : ℝ) * (3 * (n : ℝ)) ^ (2*n)) *
+        (8 * (n : ℝ) * (2 * (n : ℝ) + 2) ^ (2*n)) *
           ∑ k ∈ G.blockRows q m, ‖ExponentialSumEstimates.exponentialSum Y c k‖ ^ 2 := by
   exact scalar_grid_block_energy_le_of_interpolation G (by omega) Y c
     (fun _ ht0 htn => exists_window_interpolation_coefficients hn Y hY ht0 htn) q m hnL
@@ -319,7 +319,7 @@ theorem scalar_coordinate_energy_le {d n : ℕ} (G : SegmentedGrid d)
     (hY : ∀ j, |Y j| ≤ Real.pi-Real.pi/(n : ℝ))
     (q : Fin d) (hblocks : ∀ m : G.Block q, n ≤ G.thickLength q m) :
     (∫ t in G.coordinateThickening q, ‖ExponentialSumEstimates.exponentialSum Y c t‖ ^ 2) ≤
-      (18 * (n : ℝ) * (3 * (n : ℝ)) ^ (2*n)) *
+      (8 * (n : ℝ) * (2 * (n : ℝ) + 2) ^ (2*n)) *
         ∑ k : {k : ℕ // k ∈ G.coordinateRows q},
           ‖ExponentialSumEstimates.exponentialSum Y c k.val‖ ^ 2 := by
   exact scalar_coordinate_energy_le_of_interpolation G (by omega) Y c

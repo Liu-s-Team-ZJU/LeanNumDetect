@@ -38,6 +38,8 @@ run_cmd do
       ``LeanNumDetect.MultiTuran.ConsecutiveWindow.fullCube_elementary_bound,
       ``LeanNumDetect.MultiTuran.ConsecutiveWindow.fullCube_no_wrap_separation,
       ``LeanNumDetect.MultiTuran.ConsecutiveWindow.fullCube_elementary_no_wrap_bound,
+      ``LeanNumDetect.MultiTuran.ConsecutiveWindow.windowCube_prefactor_lower,
+      ``LeanNumDetect.MultiTuran.ConsecutiveWindow.windowCube_packetCount_lower,
       ``LeanNumDetect.MultiTuran.ConsecutiveWindow.fullAperture_clump_minimumSingularValue_lower,
       ``LeanNumDetect.MultiTuran.ConsecutiveWindow.singleClump_minimumSingularValue_lower,
       ``LeanNumDetect.MultiTuran.ConsecutiveWindow.consecutiveWindowArray_minimumSingularValue_lower,

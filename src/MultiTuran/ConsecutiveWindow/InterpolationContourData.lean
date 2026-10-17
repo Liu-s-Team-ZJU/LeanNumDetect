@@ -12,20 +12,23 @@ open Set Complex MeasureTheory
 namespace LeanNumDetect.MultiTuran.ConsecutiveWindow
 noncomputable section
 
-def windowContourLower (n : ℕ) : ℂ := ⟨Real.log (1/2 : ℝ),-windowContourAngle n⟩
-def windowContourUpper (n : ℕ) : ℂ := ⟨Real.log (3/2 : ℝ),windowContourAngle n⟩
+def windowContourLower (n : ℕ) : ℂ := ⟨Real.log (1-1/(n : ℝ)),-windowContourAngle n⟩
+def windowContourUpper (n : ℕ) : ℂ := ⟨Real.log (1+1/(n : ℝ)),windowContourAngle n⟩
 
 def WindowBoundary (n : ℕ) (w : ℂ) : Prop :=
-  Real.log (1/2 : ℝ) ≤ w.re ∧ w.re ≤ Real.log (3/2 : ℝ) ∧
+  Real.log (1-1/(n : ℝ)) ≤ w.re ∧ w.re ≤ Real.log (1+1/(n : ℝ)) ∧
   -windowContourAngle n ≤ w.im ∧ w.im ≤ windowContourAngle n ∧
-  (w.re=Real.log (1/2 : ℝ) ∨ w.re=Real.log (3/2 : ℝ) ∨
+  (w.re=Real.log (1-1/(n : ℝ)) ∨ w.re=Real.log (1+1/(n : ℝ)) ∨
     w.im= -windowContourAngle n ∨ w.im=windowContourAngle n)
 
-theorem windowContour_real_order : Real.log (1/2 : ℝ) < Real.log (3/2 : ℝ) :=
-  Real.log_lt_log (by norm_num) (by norm_num)
+theorem windowContour_real_order {n : ℕ} (hn : 2 ≤ n) :
+    Real.log (1-1/(n : ℝ)) < Real.log (1+1/(n : ℝ)) := by
+  have hr := windowContourRadii_bounds hn
+  apply Real.log_lt_log (by linarith [hr.1])
+  linarith [hr.2.1,hr.2.2.1]
 
 theorem windowBoundary_bottom {n : ℕ} (hn : 2 ≤ n) {x : ℝ}
-    (hx : x ∈ Icc (Real.log (1/2 : ℝ)) (Real.log (3/2 : ℝ))) :
+    (hx : x ∈ Icc (Real.log (1-1/(n : ℝ))) (Real.log (1+1/(n : ℝ)))) :
     WindowBoundary n (x+(-windowContourAngle n)*I) := by
   have hA := windowContourAngle_bounds hn
   simp only [WindowBoundary, Complex.add_re, Complex.add_im, Complex.mul_I_re,
@@ -34,43 +37,42 @@ theorem windowBoundary_bottom {n : ℕ} (hn : 2 ≤ n) {x : ℝ}
   exact ⟨hx.1, hx.2, le_rfl, by linarith, Or.inr (Or.inr (Or.inl True.intro))⟩
 
 theorem windowBoundary_top {n : ℕ} (hn : 2 ≤ n) {x : ℝ}
-    (hx : x ∈ Icc (Real.log (1/2 : ℝ)) (Real.log (3/2 : ℝ))) :
+    (hx : x ∈ Icc (Real.log (1-1/(n : ℝ))) (Real.log (1+1/(n : ℝ)))) :
     WindowBoundary n (x+windowContourAngle n*I) := by
   have hA := windowContourAngle_bounds hn
   simp only [WindowBoundary, Complex.add_re, Complex.add_im, Complex.mul_I_re,
     Complex.mul_I_im, Complex.ofReal_re, Complex.ofReal_im, neg_zero, add_zero, zero_add]
   exact ⟨hx.1, hx.2, by linarith, le_rfl, Or.inr (Or.inr (Or.inr True.intro))⟩
 
-theorem windowBoundary_right {n : ℕ} {y : ℝ}
+theorem windowBoundary_right {n : ℕ} (hn : 2 ≤ n) {y : ℝ}
     (hy : y ∈ Icc (-windowContourAngle n) (windowContourAngle n)) :
-    WindowBoundary n (Real.log (3/2 : ℝ)+y*I) := by
+    WindowBoundary n (Real.log (1+1/(n : ℝ))+y*I) := by
   simp only [WindowBoundary, Complex.add_re, Complex.add_im, Complex.mul_I_re,
     Complex.mul_I_im, Complex.ofReal_re, Complex.ofReal_im, neg_zero, add_zero, zero_add]
-  exact ⟨windowContour_real_order.le, le_rfl, hy.1, hy.2, Or.inr (Or.inl True.intro)⟩
+  exact ⟨(windowContour_real_order hn).le, le_rfl, hy.1, hy.2, Or.inr (Or.inl True.intro)⟩
 
-theorem windowBoundary_left {n : ℕ} {y : ℝ}
+theorem windowBoundary_left {n : ℕ} (hn : 2 ≤ n) {y : ℝ}
     (hy : y ∈ Icc (-windowContourAngle n) (windowContourAngle n)) :
-    WindowBoundary n (Real.log (1/2 : ℝ)+y*I) := by
+    WindowBoundary n (Real.log (1-1/(n : ℝ))+y*I) := by
   simp only [WindowBoundary, Complex.add_re, Complex.add_im, Complex.mul_I_re,
     Complex.mul_I_im, Complex.ofReal_re, Complex.ofReal_im, neg_zero, add_zero, zero_add]
-  exact ⟨le_rfl, windowContour_real_order.le, hy.1, hy.2, Or.inl True.intro⟩
+  exact ⟨le_rfl, (windowContour_real_order hn).le, hy.1, hy.2, Or.inl True.intro⟩
 
 theorem windowBoundary_distance_lower {n : ℕ} (hn : 2 ≤ n) {y : ℝ}
     (hy : |y| ≤ Real.pi-Real.pi/(n : ℝ)) {w : ℂ} (hw : WindowBoundary n w) :
     1/(n : ℝ) ≤ ‖Complex.exp w-angularPhase y‖ := by
-  have hnR : (2 : ℝ) ≤ n := by exact_mod_cast hn
-  have hinv : 1/(n : ℝ) ≤ (1/2 : ℝ) := by
-    apply (div_le_iff₀ (by positivity : (0 : ℝ) < n)).mpr
-    linarith
+  have hr := windowContourRadii_bounds hn
+  have hr0 : 0 < 1-1/(n : ℝ) := by linarith [hr.1]
+  have hR0 : 0 < 1+1/(n : ℝ) := by linarith [hr.2.2.1]
   rcases hw.2.2.2.2 with hleft | hright | hbottom | htop
-  · have hnorm : ‖Complex.exp w‖=1/2 := by rw [Complex.norm_exp,hleft,Real.exp_log (by norm_num)]
+  · have hnorm : ‖Complex.exp w‖=1-1/(n : ℝ) := by rw [Complex.norm_exp,hleft,Real.exp_log hr0]
     have h := norm_sub_norm_le (angularPhase y) (Complex.exp w)
     rw [angularPhase_norm,hnorm,norm_sub_rev] at h
-    exact hinv.trans (by linarith)
-  · have hnorm : ‖Complex.exp w‖=3/2 := by rw [Complex.norm_exp,hright,Real.exp_log (by norm_num)]
+    linarith
+  · have hnorm : ‖Complex.exp w‖=1+1/(n : ℝ) := by rw [Complex.norm_exp,hright,Real.exp_log hR0]
     have h := norm_sub_norm_le (Complex.exp w) (angularPhase y)
     rw [angularPhase_norm,hnorm] at h
-    exact hinv.trans (by linarith)
+    linarith
   · exact window_log_radial_distance_lower hn hy hw.1 (Or.inr hbottom)
   · exact window_log_radial_distance_lower hn hy hw.1 (Or.inl htop)
 
@@ -119,10 +121,10 @@ theorem windowNewtonKernel_boundaryIntegrable {n : ℕ} (hn : 2 ≤ n)
   constructor
   · change IntervalIntegrable (fun x : ℝ => windowNewtonKernel frequency t k
       ((x : ℂ) + ((-windowContourAngle n : ℝ) : ℂ)*I)) volume
-        (Real.log (1/2 : ℝ)) (Real.log (3/2 : ℝ))
+        (Real.log (1-1/(n : ℝ))) (Real.log (1+1/(n : ℝ)))
     apply ContinuousOn.intervalIntegrable
     intro x hx
-    rw [uIcc_of_le windowContour_real_order.le] at hx
+    rw [uIcc_of_le (windowContour_real_order hn).le] at hx
     have hc : ContinuousAt (windowNewtonKernel frequency t k)
         ((x : ℂ)+((-windowContourAngle n : ℝ) : ℂ)*I) := by
       simpa only [Complex.ofReal_neg] using
@@ -134,10 +136,10 @@ theorem windowNewtonKernel_boundaryIntegrable {n : ℕ} (hn : 2 ≤ n)
   constructor
   · change IntervalIntegrable (fun x : ℝ => windowNewtonKernel frequency t k
       ((x : ℂ) + (windowContourAngle n : ℂ)*I)) volume
-        (Real.log (1/2 : ℝ)) (Real.log (3/2 : ℝ))
+        (Real.log (1-1/(n : ℝ))) (Real.log (1+1/(n : ℝ)))
     apply ContinuousOn.intervalIntegrable
     intro x hx
-    rw [uIcc_of_le windowContour_real_order.le] at hx
+    rw [uIcc_of_le (windowContour_real_order hn).le] at hx
     exact ((windowNewtonKernel_continuousWithinAt hn frequency hfrequency t hk
       (windowBoundary_top hn hx)).comp
         (f := fun x : ℝ => (x : ℂ)+(windowContourAngle n : ℂ)*I) (x := x)
@@ -145,42 +147,44 @@ theorem windowNewtonKernel_boundaryIntegrable {n : ℕ} (hn : 2 ≤ n)
         (fun x : ℝ => (x : ℂ)+(windowContourAngle n : ℂ)*I) x)).continuousWithinAt
   constructor
   · change IntervalIntegrable (fun y : ℝ => windowNewtonKernel frequency t k
-      ((Real.log (3/2 : ℝ) : ℂ)+(y : ℂ)*I)) volume (-windowContourAngle n) (windowContourAngle n)
+      ((Real.log (1+1/(n : ℝ)) : ℂ)+(y : ℂ)*I)) volume (-windowContourAngle n) (windowContourAngle n)
     apply ContinuousOn.intervalIntegrable
     intro y hy
     rw [uIcc_of_le (by linarith : -windowContourAngle n ≤ windowContourAngle n)] at hy
     exact ((windowNewtonKernel_continuousWithinAt hn frequency hfrequency t hk
-      (windowBoundary_right hy)).comp
-        (f := fun y : ℝ => (Real.log (3/2 : ℝ) : ℂ)+(y : ℂ)*I) (x := y)
+      (windowBoundary_right hn hy)).comp
+        (f := fun y : ℝ => (Real.log (1+1/(n : ℝ)) : ℂ)+(y : ℂ)*I) (x := y)
         (by fun_prop : ContinuousAt
-        (fun y : ℝ => (Real.log (3/2 : ℝ) : ℂ)+(y : ℂ)*I) y)).continuousWithinAt
+        (fun y : ℝ => (Real.log (1+1/(n : ℝ)) : ℂ)+(y : ℂ)*I) y)).continuousWithinAt
   · change IntervalIntegrable (fun y : ℝ => windowNewtonKernel frequency t k
-      ((Real.log (1/2 : ℝ) : ℂ)+(y : ℂ)*I)) volume (-windowContourAngle n) (windowContourAngle n)
+      ((Real.log (1-1/(n : ℝ)) : ℂ)+(y : ℂ)*I)) volume (-windowContourAngle n) (windowContourAngle n)
     apply ContinuousOn.intervalIntegrable
     intro y hy
     rw [uIcc_of_le (by linarith : -windowContourAngle n ≤ windowContourAngle n)] at hy
     exact ((windowNewtonKernel_continuousWithinAt hn frequency hfrequency t hk
-      (windowBoundary_left hy)).comp
-        (f := fun y : ℝ => (Real.log (1/2 : ℝ) : ℂ)+(y : ℂ)*I) (x := y)
+      (windowBoundary_left hn hy)).comp
+        (f := fun y : ℝ => (Real.log (1-1/(n : ℝ)) : ℂ)+(y : ℂ)*I) (x := y)
         (by fun_prop : ContinuousAt
-        (fun y : ℝ => (Real.log (1/2 : ℝ) : ℂ)+(y : ℂ)*I) y)).continuousWithinAt
+        (fun y : ℝ => (Real.log (1-1/(n : ℝ)) : ℂ)+(y : ℂ)*I) y)).continuousWithinAt
 
 theorem windowNewtonKernel_norm_le {n : ℕ} (hn : 2 ≤ n)
     (frequency : Fin n → ℝ) (hfrequency : ∀ j, |frequency j| ≤ Real.pi-Real.pi/(n : ℝ))
     {t : ℝ} (ht0 : 0 ≤ t) (htn : t≤n) {k : ℕ} (hk : k<n)
     {w : ℂ} (hw : WindowBoundary n w) :
     ‖windowNewtonKernel frequency t k w‖ ≤
-      (3/2 : ℝ)^n*Real.exp w.re*(n : ℝ)^(k+1) := by
+      (1+1/(n : ℝ))^n*Real.exp w.re*(n : ℝ)^(k+1) := by
   have hnR : (0 : ℝ) < n := by exact_mod_cast (show 0 < n by omega)
-  have hlog : 0 ≤ Real.log (3/2 : ℝ) := (Real.log_pos (by norm_num : (1 : ℝ) < 3/2)).le
-  have hnum : ‖Complex.exp ((t : ℂ)*w)‖ ≤ (3/2 : ℝ)^n := by
+  have hr := windowContourRadii_bounds hn
+  have hR0 : 0 < 1+1/(n : ℝ) := by linarith [hr.2.2.1]
+  have hlog : 0 ≤ Real.log (1+1/(n : ℝ)) := (Real.log_pos hr.2.2.1).le
+  have hnum : ‖Complex.exp ((t : ℂ)*w)‖ ≤ (1+1/(n : ℝ))^n := by
     rw [Complex.norm_exp]
     simp only [Complex.mul_re,Complex.ofReal_re,Complex.ofReal_im,zero_mul,sub_zero]
     calc
-      _ ≤ Real.exp ((n : ℝ)*Real.log (3/2 : ℝ)) :=
+      _ ≤ Real.exp ((n : ℝ)*Real.log (1+1/(n : ℝ))) :=
         Real.exp_le_exp.mpr ((mul_le_mul_of_nonneg_left hw.2.1 ht0).trans
           (mul_le_mul_of_nonneg_right htn hlog))
-      _ = _ := by rw [Real.exp_nat_mul,Real.exp_log (by norm_num)]
+      _ = _ := by rw [Real.exp_nat_mul,Real.exp_log hR0]
   have hprod : (1/(n : ℝ))^(k+1) ≤
       ‖∏ i ∈ Finset.range (k+1), (Complex.exp w-windowNodes frequency i)‖ := by
     rw [norm_prod]
@@ -199,7 +203,7 @@ theorem windowNewtonKernel_norm_le {n : ℕ} (hn : 2 ≤ n)
   calc
     _ = ‖Complex.exp ((t : ℂ)*w)‖*Real.exp w.re *
         (1/‖∏ i ∈ Finset.range (k+1), (Complex.exp w-windowNodes frequency i)‖) := by ring
-    _ ≤ ((3/2 : ℝ)^n*Real.exp w.re)*(n : ℝ)^(k+1) :=
+    _ ≤ ((1+1/(n : ℝ))^n*Real.exp w.re)*(n : ℝ)^(k+1) :=
       mul_le_mul (mul_le_mul_of_nonneg_right hnum (Real.exp_pos _).le) hinv
         (by positivity) (by positivity)
     _ = _ := rfl

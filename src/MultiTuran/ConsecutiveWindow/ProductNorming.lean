@@ -17,7 +17,7 @@ namespace LeanNumDetect.MultiTuran.ConsecutiveWindow
 noncomputable section
 
 def windowNormingLoss (d n : ℕ) : ℝ :=
-  (18 * (n : ℝ) * (3 * (n : ℝ)) ^ (2 * n)) ^ d
+  (8 * (n : ℝ) * (2 * (n : ℝ) + 2) ^ (2 * n)) ^ d
 
 def windowNormingConstant (d n : ℕ) : ℝ := (windowNormingLoss d n)⁻¹
 
@@ -192,13 +192,13 @@ theorem continuousEnergy_le_windowNormingLoss {d n : ℕ}
     (c : Fin n → ℂ) :
     continuousEnergy G Y c ≤ windowNormingLoss d n * discreteEnergy G Y c := by
   apply continuousEnergy_le_of_coordinate_norming G Y
-    (by positivity : 0 ≤ 18*(n : ℝ)*(3*(n : ℝ))^(2*n))
+    (by positivity : 0 ≤ 8*(n : ℝ)*(2*(n : ℝ)+2)^(2*n))
   intro q z
   exact scalar_coordinate_energy_le G hn (fun j => Y j q) z
     (fun j => hchart j q) q (hblocks q)
 
 /-- Literal `prop:norming`: the coefficient-uniform actual continuous
-norming constant is `[18*n*(3*n)^(2*n)]^(-d)`. -/
+norming constant is `[8*n*(2*n+2)^(2*n)]^(-d)`. -/
 theorem continuousNorming_of_long_consecutive_blocks {d n : ℕ}
     (G : SegmentedGrid d) (hn : 2 ≤ n) (Y : Fin n → Point d)
     (hchart : ∀ j q, |Y j q| ≤ Real.pi-Real.pi/(n : ℝ))

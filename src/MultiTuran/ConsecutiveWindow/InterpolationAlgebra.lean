@@ -129,29 +129,37 @@ theorem newtonPolynomial_mass_le {n : ℕ} (nodes : ℕ → ℂ)
 
 theorem newtonPolynomial_mass_le_window_constant {n : ℕ} (hn : 2 ≤ n)
     (nodes : ℕ → ℂ) (hnodes : ∀ i, ‖nodes i‖ ≤ 1) (c : Fin n → ℂ)
-    (hc : ∀ j, ‖c j‖ ≤ 3*(3/2 : ℝ)^n*(n : ℝ)^(j.val+1)) :
-    polynomialMass (newtonPolynomial n nodes c) ≤ 3*(3*(n : ℝ))^n := by
-  have hnR : (1 : ℝ) ≤ n := by exact_mod_cast (show 1 ≤ n by omega)
-  have hgeom (m : ℕ) : (n : ℝ)*(∑ j ∈ Finset.range m, (2*(n : ℝ))^j) ≤ (2*(n : ℝ))^m := by
+    (hc : ∀ j, ‖c j‖ ≤ 3*(1+1/(n : ℝ))^n*(n : ℝ)^(j.val+1)) :
+    polynomialMass (newtonPolynomial n nodes c) ≤ 2*(2*(n : ℝ)+2)^n := by
+  have hnR : (2 : ℝ) ≤ n := by exact_mod_cast hn
+  have hn0 : (n : ℝ) ≠ 0 := by positivity
+  have hgeom (m : ℕ) : (n : ℝ)*(∑ j ∈ Finset.range m, (2*(n : ℝ))^j) ≤
+      (2/3 : ℝ)*(2*(n : ℝ))^m := by
     induction m with
-    | zero => simp
+    | zero => norm_num
     | succ m ih =>
-      rw [Finset.sum_range_succ,mul_add,pow_succ]
+      rw [Finset.sum_range_succ, mul_add, pow_succ]
       have hp : 0 ≤ (2*(n : ℝ))^m := by positivity
+      have hnp : 0 ≤ ((n : ℝ)-2)*(2*(n : ℝ))^m :=
+        mul_nonneg (by linarith) hp
       nlinarith
+  have hbase : (1+1/(n : ℝ))*(2*(n : ℝ)) = 2*(n : ℝ)+2 := by
+    field_simp
+    <;> ring
   calc
-    _ ≤ ∑ j : Fin n, (3*(3/2 : ℝ)^n*(n : ℝ)^(j.val+1))*(2 : ℝ)^j.val :=
+    _ ≤ ∑ j : Fin n, (3*(1+1/(n : ℝ))^n*(n : ℝ)^(j.val+1))*(2 : ℝ)^j.val :=
       (newtonPolynomial_mass_le nodes hnodes c).trans
         (Finset.sum_le_sum fun j _ => mul_le_mul_of_nonneg_right (hc j) (by positivity))
-    _ = (3*(3/2 : ℝ)^n)*((n : ℝ)*(∑ j ∈ Finset.range n, (2*(n : ℝ))^j)) := by
+    _ = (3*(1+1/(n : ℝ))^n)*((n : ℝ)*(∑ j ∈ Finset.range n, (2*(n : ℝ))^j)) := by
       rw [← Fin.sum_univ_eq_sum_range]
-      simp only [Finset.mul_sum,pow_succ,mul_pow]
+      simp only [Finset.mul_sum, pow_succ, mul_pow]
       apply Finset.sum_congr rfl
       intro j _
       ring
-    _ ≤ (3*(3/2 : ℝ)^n)*(2*(n : ℝ))^n :=
+    _ ≤ (3*(1+1/(n : ℝ))^n)*((2/3 : ℝ)*(2*(n : ℝ))^n) :=
       mul_le_mul_of_nonneg_left (hgeom n) (by positivity)
-    _ = _ := by rw [mul_assoc,← mul_pow]; congr 1; congr 1; ring
+    _ = 2*((1+1/(n : ℝ))*(2*(n : ℝ)))^n := by simp only [mul_pow]; ring
+    _ = _ := by rw [hbase]
 
 theorem polynomialMass_eq_fin_sum {n : ℕ} (hn : 0 < n) (p : ℂ[X])
     (hp : p.natDegree ≤ n-1) : polynomialMass p = ∑ k : Fin n, ‖p.coeff k.val‖ := by
@@ -178,10 +186,10 @@ theorem unitCircle_pow_eq_exponential (y : ℝ) (k : ℕ) :
 interpolation interface and its coefficient-mass constant. -/
 theorem exists_window_coefficients_of_polynomial {n : ℕ} (hn : 0 < n)
     (frequency : Fin n → ℝ) (t : ℝ) (p : ℂ[X])
-    (hp : p.natDegree ≤ n-1) (hmass : polynomialMass p ≤ 3*(3*(n : ℝ))^n)
+    (hp : p.natDegree ≤ n-1) (hmass : polynomialMass p ≤ 2*(2*(n : ℝ)+2)^n)
     (hvalue : ∀ j, p.eval (Complex.exp (Complex.I * (frequency j : ℂ))) =
       Complex.exp (Complex.I * ((t * frequency j : ℝ) : ℂ))) :
-    ∃ a : Fin n → ℂ, (∑ k, ‖a k‖) ≤ 3*(3*(n : ℝ))^n ∧
+    ∃ a : Fin n → ℂ, (∑ k, ‖a k‖) ≤ 2*(2*(n : ℝ)+2)^n ∧
       ∀ j, Complex.exp (Complex.I * ((t * frequency j : ℝ) : ℂ)) =
         ∑ k, a k * Complex.exp (Complex.I * (((k.val : ℝ)*frequency j : ℝ) : ℂ)) := by
   refine ⟨fun k => p.coeff k.val, ?_, ?_⟩

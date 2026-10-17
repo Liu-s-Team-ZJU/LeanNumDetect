@@ -18,11 +18,11 @@ noncomputable section
 
 def consecutiveWindowProductArrayLowerBound {d n : ℕ} (G H : SegmentedGrid d)
     (Y : Fin n → Point d) (nStar : ℕ) : ℝ :=
-  Real.sqrt (windowNormingConstant d n/((n : ℝ)*8^nStar)) *
+  Real.sqrt (windowNormingConstant d n/((n : ℝ)*6^nStar)) *
     (2/(Real.pi*n))^d * enclosingLongBlockFactor G H *
     (enclosingFillingRatio G H/(multidimensionalTuranConstant*d))^(n-1) *
-    ((H.minAperture : ℝ)/(6*nStar))^((d : ℝ)/2) *
-    min 1 ((H.minAperture : ℝ)*nodeSeparation Y/(8*Real.pi*nStar))^(nStar-1)
+    ((H.minAperture : ℝ)/(3*nStar))^((d : ℝ)/2) *
+    min 1 ((H.minAperture : ℝ)*nodeSeparation Y/(5*Real.pi*nStar))^(nStar-1)
 
 @[simp] theorem consecutiveWindowProductArrayLowerBound_chartNodes {d n : ℕ}
     (G H : SegmentedGrid d) (Y : Fin n → Point d) (center : Point d)
@@ -36,18 +36,23 @@ theorem consecutiveWindowProductArrayLowerBound_le_of_norming_cube
     (houter : ∀ q, G.aperture q ≤ H.aperture q) (hn : 0 < n)
     (hnorming : ContinuousNorming G Y (windowNormingConstant d n))
     (hfull : s+1 ≤ H.minAperture)
-    (hcube : multiClumpCubeLowerBound H n nStar (nodeSeparation Y) ≤
+    (hcube : 1/Real.sqrt ((n : ℝ)*6^nStar) *
+      ((H.minAperture : ℝ)/(3*nStar))^((d : ℝ)/2) *
+      min 1 ((H.minAperture : ℝ)*nodeSeparation Y/(5*Real.pi*nStar))^(nStar-1) ≤
       matrixSingularValue (fullCubeVandermonde 1 s Y) (n-1)) :
     consecutiveWindowProductArrayLowerBound G H Y nStar ≤
       matrixSingularValue (generalizedVandermonde G Y) (n-1) := by
   have hη := (windowNormingConstant_pos (d := d) hn).le
   have h := singularValue_lower_of_enclosing_norming_and_cube G H Y houter hn hη
-    (multiClumpCubeLowerBound_nonneg H n nStar (nodeSeparation_nonneg Y))
+    (show 0 ≤ 1/Real.sqrt ((n : ℝ)*6^nStar) *
+      ((H.minAperture : ℝ)/(3*nStar))^((d : ℝ)/2) *
+      min 1 ((H.minAperture : ℝ)*nodeSeparation Y/(5*Real.pi*nStar))^(nStar-1) by
+        have hθ := nodeSeparation_nonneg Y
+        positivity)
     hnorming hfull hcube
   unfold consecutiveWindowProductArrayLowerBound
   rw [Real.sqrt_div hη]
   convert h using 1
-  unfold multiClumpCubeLowerBound
   ring
 
 end

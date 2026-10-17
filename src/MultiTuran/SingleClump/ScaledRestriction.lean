@@ -88,7 +88,7 @@ theorem segmentedArrayLowerBound_le_of_supNorm_comparison {d n : ℕ}
     have hap := fullAperture_elementary_no_wrap_L2_lower G Y c hn0 hadm
       (show n-1≤s by rfl) hshort
     rw [fullApertureWidth_eq_dilation G hfull] at hap
-    have hscaled := aperture_scaled_factors_lower d G.minAperture n hn0 hN hθ
+    have hscaled := aperture_scaled_factors_lower d G.minAperture n hn0 (by omega) hθ
     have hlower : ((1/Real.sqrt (n : ℝ))*B)*Real.sqrt (∑ j, ‖c j‖^2) ≤
         Real.sqrt (setEnergy Y c G.apertureBox) := by
       calc

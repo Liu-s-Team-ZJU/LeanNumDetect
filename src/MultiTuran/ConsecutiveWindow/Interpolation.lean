@@ -24,34 +24,34 @@ theorem window_rectangleIntegral_congr {n : ℕ} (hn : 2 ≤ n) (f g : ℂ → �
     rectangleIntegral f (windowContourLower n) (windowContourUpper n) =
       rectangleIntegral g (windowContourLower n) (windowContourUpper n) := by
   have hA := windowContourAngle_bounds hn
-  have hb : (∫ x : ℝ in Real.log (1/2 : ℝ)..Real.log (3/2 : ℝ),
+  have hb : (∫ x : ℝ in Real.log (1-1/(n : ℝ))..Real.log (1+1/(n : ℝ)),
       f (x+(-windowContourAngle n)*I)) =
-    ∫ x : ℝ in Real.log (1/2 : ℝ)..Real.log (3/2 : ℝ), g (x+(-windowContourAngle n)*I) := by
+    ∫ x : ℝ in Real.log (1-1/(n : ℝ))..Real.log (1+1/(n : ℝ)), g (x+(-windowContourAngle n)*I) := by
     apply intervalIntegral.integral_congr
     intro x hx
-    rw [uIcc_of_le windowContour_real_order.le] at hx
+    rw [uIcc_of_le (windowContour_real_order hn).le] at hx
     exact hfg _ (windowBoundary_bottom hn hx)
-  have ht : (∫ x : ℝ in Real.log (1/2 : ℝ)..Real.log (3/2 : ℝ),
+  have ht : (∫ x : ℝ in Real.log (1-1/(n : ℝ))..Real.log (1+1/(n : ℝ)),
       f (x+windowContourAngle n*I)) =
-    ∫ x : ℝ in Real.log (1/2 : ℝ)..Real.log (3/2 : ℝ), g (x+windowContourAngle n*I) := by
+    ∫ x : ℝ in Real.log (1-1/(n : ℝ))..Real.log (1+1/(n : ℝ)), g (x+windowContourAngle n*I) := by
     apply intervalIntegral.integral_congr
     intro x hx
-    rw [uIcc_of_le windowContour_real_order.le] at hx
+    rw [uIcc_of_le (windowContour_real_order hn).le] at hx
     exact hfg _ (windowBoundary_top hn hx)
   have hr : (∫ y : ℝ in -windowContourAngle n..windowContourAngle n,
-      f (Real.log (3/2 : ℝ)+y*I)) =
-    ∫ y : ℝ in -windowContourAngle n..windowContourAngle n, g (Real.log (3/2 : ℝ)+y*I) := by
+      f (Real.log (1+1/(n : ℝ))+y*I)) =
+    ∫ y : ℝ in -windowContourAngle n..windowContourAngle n, g (Real.log (1+1/(n : ℝ))+y*I) := by
     apply intervalIntegral.integral_congr
     intro y hy
     rw [uIcc_of_le (by linarith : -windowContourAngle n ≤ windowContourAngle n)] at hy
-    exact hfg _ (windowBoundary_right hy)
+    exact hfg _ (windowBoundary_right hn hy)
   have hl : (∫ y : ℝ in -windowContourAngle n..windowContourAngle n,
-      f (Real.log (1/2 : ℝ)+y*I)) =
-    ∫ y : ℝ in -windowContourAngle n..windowContourAngle n, g (Real.log (1/2 : ℝ)+y*I) := by
+      f (Real.log (1-1/(n : ℝ))+y*I)) =
+    ∫ y : ℝ in -windowContourAngle n..windowContourAngle n, g (Real.log (1-1/(n : ℝ))+y*I) := by
     apply intervalIntegral.integral_congr
     intro y hy
     rw [uIcc_of_le (by linarith : -windowContourAngle n ≤ windowContourAngle n)] at hy
-    exact hfg _ (windowBoundary_left hy)
+    exact hfg _ (windowBoundary_left hn hy)
   dsimp only [rectangleIntegral,windowContourLower,windowContourUpper]
   simp only [Complex.ofReal_neg]
   rw [hb,ht,hr,hl]
@@ -119,7 +119,7 @@ distinctness assumption on the coordinate frequencies. -/
 theorem exists_window_interpolation_coefficients {n : ℕ} (hn : 2 ≤ n)
     (frequency : Fin n → ℝ) (hfrequency : ∀ j, |frequency j| ≤ Real.pi-Real.pi/(n : ℝ))
     {t : ℝ} (ht0 : 0 ≤ t) (htn : t≤n) :
-    ∃ a : Fin n → ℂ, (∑ k, ‖a k‖) ≤ 3*(3*(n : ℝ))^n ∧
+    ∃ a : Fin n → ℂ, (∑ k, ‖a k‖) ≤ 2*(2*(n : ℝ)+2)^n ∧
       ∀ j, Complex.exp (I*((t*frequency j : ℝ) : ℂ)) =
         ∑ k, a k*Complex.exp (I*(((k.val : ℝ)*frequency j : ℝ) : ℂ)) := by
   let p := newtonPolynomial n (windowNodes frequency) (windowNewtonCoefficient frequency t)

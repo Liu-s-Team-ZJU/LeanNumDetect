@@ -30,16 +30,18 @@ theorem windowBoundary_ne_pole {n : ℕ} (hn : 2 ≤ n) {y : ℝ}
     (hy : |y| ≤ Real.pi - Real.pi / (n : ℝ)) {w : ℂ}
     (hw : WindowBoundary n w) : w ≠ I * (y : ℂ) := by
   intro heq
-  have hr : w.re = 0 := by rw [heq]; simp
+  have hwre : w.re = 0 := by rw [heq]; simp
   have hi : w.im = y := by rw [heq]; simp
   have hyinside := window_node_inside_contour hn hy
-  have hlo : Real.log (1 / 2 : ℝ) < 0 := Real.log_neg (by norm_num) (by norm_num)
-  have hhi : 0 < Real.log (3 / 2 : ℝ) := Real.log_pos (by norm_num)
+  have hr := windowContourRadii_bounds hn
+  have hr0 : 0 < 1-1/(n : ℝ) := by linarith [hr.1]
+  have hlo : Real.log (1-1/(n : ℝ)) < 0 := Real.log_neg hr0 hr.2.1
+  have hhi : 0 < Real.log (1+1/(n : ℝ)) := Real.log_pos hr.2.2.1
   rcases hw.2.2.2.2 with hleft | hright | hbottom | htop
-  · rw [hleft] at hr
-    exact hlo.ne hr
-  · rw [hright] at hr
-    exact hhi.ne' hr
+  · rw [hleft] at hwre
+    exact hlo.ne hwre
+  · rw [hright] at hwre
+    exact hhi.ne' hwre
   · rw [hbottom] at hi
     exact hyinside.1.ne hi
   · rw [htop] at hi
@@ -65,11 +67,13 @@ theorem windowPullback_cauchy {n : ℕ} (hn : 2 ≤ n) {y : ℝ}
     apply windowPullbackRegular_analyticAt t a w ha
     simp only [windowContourLower, windowContourUpper, mem_reProdIm, mem_Icc] at hw
     constructor <;> linarith [hw.2.1, hw.2.2]
+  have hr := windowContourRadii_bounds hn
+  have hr0 : 0 < 1-1/(n : ℝ) := by linarith [hr.1]
   have hleft₀ : (windowContourLower n).re < a.re := by
     simpa [windowContourLower, a] using
-      (Real.log_neg (by norm_num : (0 : ℝ) < 1 / 2) (by norm_num : (1 / 2 : ℝ) < 1))
+      (Real.log_neg hr0 hr.2.1)
   have hright₀ : a.re < (windowContourUpper n).re := by
-    simpa [windowContourUpper, a] using Real.log_pos (by norm_num : (1 : ℝ) < 3 / 2)
+    simpa [windowContourUpper, a] using Real.log_pos hr.2.2.1
   have hbottom₀ : (windowContourLower n).im < a.im := by
     simpa [windowContourLower, a] using hyinside.1
   have htop₀ : a.im < (windowContourUpper n).im := by
@@ -82,7 +86,7 @@ theorem windowPullback_cauchy {n : ℕ} (hn : 2 ≤ n) {y : ℝ}
         f w / (w - a) := by
     exact (windowPullbackRegular_div_sub t a w (windowBoundary_ne_pole hn hy hw)).symm
   have hab : (windowContourLower n).re ≤ (windowContourUpper n).re :=
-    windowContour_real_order.le
+    (windowContour_real_order hn).le
   have habim : (windowContourLower n).im ≤ (windowContourUpper n).im := by
     dsimp [windowContourLower, windowContourUpper]
     linarith
@@ -116,7 +120,7 @@ theorem windowPullback_cauchy {n : ℕ} (hn : 2 ≤ n) {y : ℝ}
     apply intervalIntegral.integral_congr
     intro z hz
     rw [uIcc_of_le habim] at hz
-    exact hpoint _ (windowBoundary_right hz)
+    exact hpoint _ (windowBoundary_right hn hz)
   have hleft : (∫ z : ℝ in (windowContourLower n).im..(windowContourUpper n).im,
       Complex.exp ((t : ℂ) * ((windowContourLower n).re + z * I)) *
         Complex.exp ((windowContourLower n).re + z * I) /
@@ -126,7 +130,7 @@ theorem windowPullback_cauchy {n : ℕ} (hn : 2 ≤ n) {y : ℝ}
     apply intervalIntegral.integral_congr
     intro z hz
     rw [uIcc_of_le habim] at hz
-    exact hpoint _ (windowBoundary_left hz)
+    exact hpoint _ (windowBoundary_left hn hz)
   calc
     _ = rectangleIntegral (fun w => f w / (w - a))
         (windowContourLower n) (windowContourUpper n) := by

@@ -18,7 +18,7 @@ namespace LeanNumDetect.MultiTuran.ConsecutiveWindow
 noncomputable section
 
 theorem singleClump_lower_of_norming {d n : ℕ} (G : SegmentedGrid d)
-    (Y : Fin n → Point d) (hn : 0 < n) (hN : 2 * n ≤ G.minAperture)
+    (Y : Fin n → Point d) (hn : 0 < n) (hN : n ≤ G.minAperture)
     {η : ℝ} (hη : 0 ≤ η) (hnorming : ContinuousNorming G Y η)
     (hshort : ((G.minAperture / n : ℕ) : ℝ) * nodeDiameter Y ≤ Real.pi) :
     Real.sqrt η / Real.sqrt (n : ℝ) * (2 / (Real.pi * n)) ^ d * G.rhoL *
@@ -81,7 +81,6 @@ theorem singleClump_lower_of_long_consecutive_blocks {d n : ℕ}
     (G : SegmentedGrid d) (Y : Fin n → Point d)
     (hY : ∃ center : Point d, ∀ j,
       InOpenCube (2 * Real.pi / (G.omega : ℝ)) center (Y j))
-    (hN : 2 * n ≤ G.minAperture)
     (hblocks : ∀ q (m : G.Block q), n ≤ G.thickLength q m) (hn : 4 ≤ n) :
     Real.sqrt (windowNormingConstant d n) / Real.sqrt (n : ℝ) *
       (2 / (Real.pi * n)) ^ d * G.rhoL *
@@ -89,6 +88,14 @@ theorem singleClump_lower_of_long_consecutive_blocks {d n : ℕ}
       ((G.minAperture : ℝ) / (2 * n)) ^ ((d : ℝ) / 2) *
       ((G.minAperture : ℝ) * nodeSeparation Y / (2 * Real.pi * n)) ^ (n - 1) ≤
         matrixSingularValue (generalizedVandermonde G Y) (n - 1) := by
+  have hN : n ≤ G.minAperture := by
+    unfold SegmentedGrid.minAperture
+    apply Finset.le_inf'
+    intro q _
+    have h := hblocks q (G.lastBlock q)
+    unfold SegmentedGrid.thickLength at h
+    unfold SegmentedGrid.aperture
+    omega
   obtain ⟨localizedCenter, hlocalized⟩ := hY
   have hshort := G.noWrap_of_nodes_in_open_cube Y localizedCenter hn hlocalized
   obtain ⟨center, winding, hchart⟩ := exists_translated_short_chart (by omega : 2 ≤ n) Y
@@ -113,7 +120,6 @@ theorem singleClump_minimumSingularValue_lower {d n : ℕ}
     (G : SegmentedGrid d) (Y : Fin n → Point d)
     (hY : ∃ center : Point d, ∀ j,
       InOpenCube (2 * Real.pi / (G.omega : ℝ)) center (Y j))
-    (hN : 2 * n ≤ G.minAperture)
     (hblocks : ∀ q (m : G.Block q), n - 1 ≤ G.length q m) (hn : 4 ≤ n) :
     Real.sqrt (windowNormingConstant d n) / Real.sqrt (n : ℝ) *
       (2 / (Real.pi * n)) ^ d * G.rhoL *
@@ -121,7 +127,7 @@ theorem singleClump_minimumSingularValue_lower {d n : ℕ}
       ((G.minAperture : ℝ) / (2 * n)) ^ ((d : ℝ) / 2) *
       ((G.minAperture : ℝ) * nodeSeparation Y / (2 * Real.pi * n)) ^ (n - 1) ≤
         matrixSingularValue (generalizedVandermonde G Y) (n - 1) := by
-  apply singleClump_lower_of_long_consecutive_blocks G Y hY hN _ hn
+  apply singleClump_lower_of_long_consecutive_blocks G Y hY _ hn
   intro q m
   have h := hblocks q m
   simp only [SegmentedGrid.thickLength]

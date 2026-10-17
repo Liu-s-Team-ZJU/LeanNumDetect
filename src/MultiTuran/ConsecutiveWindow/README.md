@@ -56,13 +56,13 @@ These are `H.minAperture`, `enclosingFillingRatio G H`, and `enclosingLongBlockF
 The multi-clump public theorem assumes $d\ge2$, $n\ge2$, the distinct-node partition setting above, and
 
 $$
-L_{q,\min}\ge n\quad\text{for every }q,\qquad N_{\min}\ge\max\{16n,32d^2n^\star\}.
+L_{q,\min}\ge n\quad\text{for every }q,\qquad N_{\min}\ge10n^\star.
 $$
 
 Its cross-clump condition is
 
 $$
-\|\boldsymbol y_i-\boldsymbol y_j\|_{\mathbb T,\infty}>\frac{16\pi dn^\star}{N_{\min}}\qquad(\boldsymbol y_i\in C_a,\ \boldsymbol y_j\in C_b,\ a\ne b).
+\|\boldsymbol y_i-\boldsymbol y_j\|_{\mathbb T,\infty}>\frac{10\pi dn^\star}{N_{\min}}\qquad(\boldsymbol y_i\in C_a,\ \boldsymbol y_j\in C_b,\ a\ne b).
 $$
 
 Within-clump diameters are unrestricted. The final theorem constructs its chart, interpolation polynomials, and norming inequality from these hypotheses; it has no $B_d$, clump-diameter, interpolation, norming, derivative, or cube-bound premise.
@@ -70,13 +70,13 @@ Within-clump diameters are unrestricted. The final theorem constructs its chart,
 `windowNormingLoss d n` and `windowNormingConstant d n` distinguish the energy loss from its reciprocal:
 
 $$
-\operatorname{windowNormingLoss}(d,n)=\bigl[18n(3n)^{2n}\bigr]^d,\qquad \eta_0=\operatorname{windowNormingConstant}(d,n)=\bigl[18n(3n)^{2n}\bigr]^{-d}.
+\operatorname{windowNormingLoss}(d,n)=\bigl[8n(2n+2)^{2n}\bigr]^d,\qquad \eta_0=\operatorname{windowNormingConstant}(d,n)=\bigl[8n(2n+2)^{2n}\bigr]^{-d}.
 $$
 
 The final coefficient is `consecutiveWindowProductArrayLowerBound G H Y nStar`:
 
 $$
-\sigma_{\min}(\mathcal V_1)\ge\sqrt{\frac{\eta_0}{n8^{n^\star}}}\left(\frac2{\pi n}\right)^d\rho_L\left(\frac{\rho_{\boldsymbol\Lambda}}{C_{\mathrm T}d}\right)^{n-1}\left(\frac{N_{\min}}{6n^\star}\right)^{d/2}\min\left\{1,\frac{N_{\min}\theta_{\min}}{8\pi n^\star}\right\}^{n^\star-1}.
+\sigma_{\min}(\mathcal V_1)\ge\sqrt{\frac{\eta_0}{n6^{n^\star}}}\left(\frac2{\pi n}\right)^d\rho_L\left(\frac{\rho_{\boldsymbol\Lambda}}{C_{\mathrm T}d}\right)^{n-1}\left(\frac{N_{\min}}{3n^\star}\right)^{d/2}\min\left\{1,\frac{N_{\min}\theta_{\min}}{5\pi n^\star}\right\}^{n^\star-1}.
 $$
 
 Here $C_{\mathrm T}$ is the existing proved absolute `multidimensionalTuranConstant`. The Riemann supplement in [MultiClump/](../MultiClump/README.md) has its own norming coefficient, $B_d$ condition, and $L_*$ separation scale; its constants are documented in that guide.
@@ -85,22 +85,22 @@ Here $C_{\mathrm T}$ is the existing proved absolute `multidimensionalTuranConst
 
 [ChartIntervals.lean](ChartIntervals.lean) proves the largest-gap chart construction, including repeated coordinate values. [Chart.lean](Chart.lean) combines the coordinate charts and proves integer-frequency singular-value and torus-distance invariance. The chosen representatives satisfy $|y_{j,q}|\le\pi-\pi/n$.
 
-The analytic construction uses the sector angle $\pi-\pi/(4n)$. [InterpolationGeometry.lean](InterpolationGeometry.lean) proves wrapped angle at least $3\pi/(4n)$, unit-circle chord at least $3/(2n)$, and radial distance at least $1/n$. [InterpolationContourData.lean](InterpolationContourData.lean) combines this with the circular reverse-triangle bound and proves the actual Newton kernels are continuous and boundary integrable.
+The analytic construction uses radii $1-1/n$ and $1+1/n$ and the sector angle $\pi-\pi/(4n)$. [InterpolationGeometry.lean](InterpolationGeometry.lean) proves wrapped angle at least $3\pi/(4n)$, unit-circle chord at least $3/(2n)$, and radial distance at least $1/n$. [InterpolationContourData.lean](InterpolationContourData.lean) combines this with the circular reverse-triangle bound and proves the actual Newton kernels are continuous and boundary integrable.
 
-[RectangleCauchy.lean](RectangleCauchy.lean) proves Cauchy's formula for an axis-parallel rectangle. [InterpolationKernel.lean](InterpolationKernel.lean) constructs the analytic divided-slope regularization; [InterpolationPullback.lean](InterpolationPullback.lean) uses it to reproduce the value at each node. The pullback retains the Jacobian $\exp w$. [InterpolationCoefficientBounds.lean](InterpolationCoefficientBounds.lean) bounds the weighted boundary contribution by $3\log3+4(\pi-\pi/(4n))\le6\pi$ and obtains the exact Newton coefficient bound.
+[RectangleCauchy.lean](RectangleCauchy.lean) proves Cauchy's formula for an axis-parallel rectangle. [InterpolationKernel.lean](InterpolationKernel.lean) constructs the analytic divided-slope regularization; [InterpolationPullback.lean](InterpolationPullback.lean) uses it to reproduce the value at each node. The pullback retains the Jacobian $\exp w$. [InterpolationCoefficientBounds.lean](InterpolationCoefficientBounds.lean) bounds the weighted boundary contribution by $2(1+1/n)\log((1+1/n)/(1-1/n))+4(\pi-\pi/(4n))\le6+4\pi<6\pi$. It obtains the Newton coefficient bound $3(1+1/n)^n n^{j+1}$; the finite geometric ratio $n/(2n-1)\le2/3$ gives the displayed interpolation mass.
 
 [InterpolationAlgebra.lean](InterpolationAlgebra.lean) proves the finite resolvent identity with its general evaluation variable and remainder, the polynomial mass bounds, and the coefficient-to-exponential conversion. [Interpolation.lean](Interpolation.lean) specializes the resolvent to each node and combines it with the proved Cauchy formula. A repeated node causes no division by a node difference. The formal proof directly establishes the node reproduction used by norming, in place of first packaging the manuscript's stronger general-$z$ integral remainder as a standalone declaration.
 
 The resulting public interpolation interface is
 
 $$
-P(t)=\sum_{k=0}^{n-1}a_kP(k),\qquad \sum_{k=0}^{n-1}|a_k|\le3(3n)^n\qquad(0\le t\le n).
+P(t)=\sum_{k=0}^{n-1}a_kP(k),\qquad \sum_{k=0}^{n-1}|a_k|\le2(2n+2)^n\qquad(0\le t\le n).
 $$
 
-For a block with $L=b-a+1\ge n$, the cell at $k$ uses the first sample $a_k=\min\{k,b-n+1\}$. [WindowCounting.lean](WindowCounting.lean) implements the relative start as `min k (L-n)` and proves the complete weighted overlap and explicit multiplicity bound $2n-1$, including the repeated rightmost window. [BlockNorming.lean](BlockNorming.lean) translates only the source coefficients, bounds the cell energy by $9(3n)^{2n}$ times its window energy, and integrates every cell:
+For a block with $L=b-a+1\ge n$, the cell at $k$ uses the first sample $a_k=\min\{k,b-n+1\}$. [WindowCounting.lean](WindowCounting.lean) implements the relative start as `min k (L-n)` and proves the complete weighted overlap and explicit multiplicity bound $2n-1$, including the repeated rightmost window. [BlockNorming.lean](BlockNorming.lean) translates only the source coefficients, bounds the cell energy by $4(2n+2)^{2n}$ times its window energy, and integrates every cell:
 
 $$
-\int_a^{b+1}|P(t)|^2\,dt\le9(3n)^{2n}(2n-1)\sum_{m=a}^b|P(m)|^2\le18n(3n)^{2n}\sum_{m=a}^b|P(m)|^2.
+\int_a^{b+1}|P(t)|^2\,dt\le4(2n+2)^{2n}(2n-1)\sum_{m=a}^b|P(m)|^2\le8n(2n+2)^{2n}\sum_{m=a}^b|P(m)|^2.
 $$
 
 The block interface `scalar_grid_block_energy_le` uses the original measured integer block. `scalar_coordinate_energy_le` sums all coordinate blocks and preserves exactly their original finite row set. [ProductNorming.lean](ProductNorming.lean) proves Tonelli tensorization with finite sampling, then applies it to the actual energies. This yields `continuousEnergy_le_windowNormingLoss` and the coefficient-uniform `continuousNorming_of_long_consecutive_blocks`.
@@ -111,9 +111,9 @@ The block interface `scalar_grid_block_energy_le` uses the original measured int
 
 [CubeWithinClump.lean](CubeWithinClump.lean) takes $T=M/n^\star$ and spacing $\Delta/2$. At most $n^\star-1$ factors fit within degree $M-\lfloor M/n^\star\rfloor$. [CubeInterpolation.lean](CubeInterpolation.lean) combines these factors with the existing color-frame localization polynomial and smoothing bandwidth to obtain the exact total degree $2M=s$.
 
-The shared [NumDetect/Random/CubeClumpBounds.lean](../../NumDetect/Random/CubeClumpBounds.lean) interfaces `liCubeClump_raw_ratio_of_interpolation` and `liCubeClump_raw_coefficient_le_of_ratio` perform the original interpolation-to-singular-value and coefficient conversions. Their inputs concern genuine cardinal polynomials, their coefficient masses, and the corresponding actual matrix; they do not prescribe how the within-clump factors were constructed. This preserves the original cube SVD argument and all its constants.
+The raw interpolation construction requires $M\ge2n^\star$. The shared [NumDetect/Random/CubeClumpBounds.lean](../../NumDetect/Random/CubeClumpBounds.lean) interfaces `liCubeClump_raw_ratio_of_interpolation` and `liCubeClump_raw_coefficient_le_of_ratio` perform the original interpolation-to-singular-value and coefficient conversions. Their inputs concern genuine cardinal polynomials, their coefficient masses, and the corresponding actual matrix; they do not prescribe how the within-clump factors were constructed. This reuses the original cube SVD argument; the explicit numerical estimates are proved in this directory.
 
-[CubeBounds.lean](CubeBounds.lean) sets $\Delta=\min\{\theta_{\min},4\pi n^\star/s\}$, so the raw spacing factor is exactly $\min\{1,s\theta_{\min}/(4\pi n^\star)\}$. It then chooses $s=2\lfloor(N_{\min}-1)/2\rfloor$, uses $N_{\min}\le2s$, and derives the displayed aperture factor and minimum with scale $8\pi n^\star$. The required gap satisfies $8\pi dn^\star/s\le16\pi dn^\star/N_{\min}$. [Aperture.lean](Aperture.lean) constructs the actual largest-clump capacity from the supplied partition.
+[CubeBounds.lean](CubeBounds.lean) sets $\Delta=\min\{\theta_{\min},4\pi n^\star/s\}$, so the raw spacing factor is exactly $\min\{1,s\theta_{\min}/(4\pi n^\star)\}$. It then chooses $s=2\lfloor(N_{\min}-1)/2\rfloor$, proves $s\ge4N_{\min}/5$ and $s\ge8n^\star$, and obtains the packet count $2\lfloor s/(4n^\star)\rfloor+1\ge N_{\min}/(3n^\star)$. The bound $\exp(1/2)\le119/72<5/3$ gives the prefactor $1/\sqrt{n6^{n^\star}}$, and the clipped spacing is at least $\min\{1,N_{\min}\theta_{\min}/(5\pi n^\star)\}$. The required gap satisfies $8\pi dn^\star/s\le10\pi dn^\star/N_{\min}$. [Aperture.lean](Aperture.lean) constructs the actual largest-clump capacity from the supplied partition.
 
 [Restriction.lean](Restriction.lean) reuses the proved enclosing-box restriction and full-aperture machinery from [MultiClump/GeneralProduct.lean](../MultiClump/GeneralProduct.lean) and [FullAperture/FullAperture.lean](../FullAperture/FullAperture.lean). [BoundFormula.lean](BoundFormula.lean) assembles the coefficient with the window norming constant. [Main.lean](Main.lean) constructs the chart and both analytic inputs internally and transports the resulting integer-frequency singular value back to the original nodes.
 
@@ -127,7 +127,7 @@ All local names in the following tables are in `LeanNumDetect.MultiTuran.Consecu
 | `prop:norming` | [Norming.lean](Norming.lean): `exists_chart_continuousNorming`; [ProductNorming.lean](ProductNorming.lean): `continuousNorming_of_long_consecutive_blocks` | Constructs the chart and proves actual norming with the exact $\eta_0$. |
 | `lem:restriction` | [Norming.lean](Norming.lean): `window_restriction_lower_of_norming` | Literal fixed-window-coefficient statement for every admissible pair. `window_product_restriction_lower` supplies norming from the short chart and block lengths. |
 | `lem:elementary` | [Elementary.lean](Elementary.lean): `fullCube_elementary_bound`, `fullCube_no_wrap_separation`, `fullCube_elementary_no_wrap_bound` | Direct applications of the main text's proved full-cube theorem and no-wrap identity. |
-| `cor:single-clump` | [SingleClump.lean](SingleClump.lean): `singleClump_minimumSingularValue_lower` | Literal open-cube localization, $l_{q,m}\ge n-1$, $N_{\min}\ge2n$, $n\ge4$, and the window coefficient. |
+| `cor:single-clump` | [SingleClump.lean](SingleClump.lean): `singleClump_minimumSingularValue_lower` | Literal open-cube localization, $l_{q,m}\ge n-1$, $n\ge4$, and the window coefficient. |
 | `lem:aperture` | [Aperture.lean](Aperture.lean): `fullAperture_clump_minimumSingularValue_lower` | Exact selected even cube, aperture coefficient, and unrestricted within-clump geometry. |
 
 ## Equation and intermediate-proof correspondence
@@ -151,10 +151,10 @@ All local names in the following tables are in `LeanNumDetect.MultiTuran.Consecu
 | `eq:elementary` and separation scaling | `fullCube_elementary_bound`, `fullCube_no_wrap_separation` |
 | `eq:single-clump` | `singleClump_minimumSingularValue_lower` |
 | Unrestricted neighbor factors and full-cube cardinal interpolation | `exists_quantized_torus_chord`, `torus_neighbor_factor`, `withinClumpPolynomial_unrestricted`, `liInterpolationPolynomial_unrestricted`, `cube_raw_ratio_unrestricted` |
-| Spacing clipping, selected side, and `eq:aperture` | `fullCube_unrestricted_clump_clipped_lower`, `selected_fullAperture_unrestricted_clump_lower`, `fullAperture_clump_minimumSingularValue_lower`; shared `fullApertureCubeSide_properties`, `fullApertureCubeSide_large` |
+| Spacing clipping, selected side, and `eq:aperture` | `fullCube_unrestricted_clump_clipped_lower`, `selected_fullAperture_unrestricted_clump_lower`, `fullAperture_clump_minimumSingularValue_lower`; `windowCube_prefactor_lower`, `windowCube_packetCount_lower`, and shared `fullApertureCubeSide_properties` |
 | `eq:product-bound` and final assembly | `window_product_restriction_lower`, `consecutiveWindowProductArrayLowerBound_le_of_norming_cube`, `consecutiveWindowArray_minimumSingularValue_lower` |
 
-The helper restriction and interpolation transfer theorems accept their mathematical inputs explicitly. The public final theorems construct those inputs and retain only the supplement's sampling, partition, distinct-node, aperture, and cross-clump hypotheses.
+The single-clump corollary derives $N_{\min}\ge n$ from the block lengths; it needs no additional aperture hypothesis. The floor estimate uses $M_0\ge1$ and $N_{\min}/n<M_0+1\le2M_0$. The helper restriction and interpolation transfer theorems accept their mathematical inputs explicitly. The public final theorems construct those inputs and retain only the supplement's sampling, partition, distinct-node, aperture, and cross-clump hypotheses.
 
 ## Verification
 

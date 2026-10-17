@@ -83,7 +83,7 @@ theorem cube_raw_ratio_unrestricted
     (hd : 0 < d) (hn : 0 < n) (hs : 0 < nStar) (hsize : nStar ≤ n)
     (hcube : ∀ j, InAngularCube (Y j))
     (hcross : ∀ i j, C.label i ≠ C.label j → η < torusLInfDistance (Y i) (Y j))
-    (hM : 4 * n ≤ M) (hβ : 1 / (2 * Real.log 2) < β)
+    (hM : 2 * nStar ≤ M) (hβ : 1 / (2 * Real.log 2) < β)
     (hη : 4 * Real.pi * β * d * nStar / M ≤ η) (hΔ : 0 < Δ)
     (hmin : ∀ i j, i ≠ j → Δ ≤ torusLInfDistance (Y i) (Y j))
     (hscale : Δ ≤ 2 * Real.pi * nStar / M) :

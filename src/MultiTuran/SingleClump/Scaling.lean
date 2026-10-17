@@ -14,8 +14,8 @@ set_option autoImplicit false
 namespace LeanNumDetect.MultiTuran
 noncomputable section
 
-/-- At aperture at least twice the source count, decimation loses at most two. -/
-theorem aperture_quotient_lower (N n : ℕ) (hn : 0 < n) (hN : 2 * n ≤ N) :
+/-- At aperture at least the source count, decimation loses at most two. -/
+theorem aperture_quotient_lower (N n : ℕ) (hn : 0 < n) (hN : n ≤ N) :
     (N : ℝ) / (2 * n) ≤ ((N / n : ℕ) : ℝ) := by
   have hnR : (0 : ℝ) < n := by exact_mod_cast hn
   have hnN : n ≤ N := by omega
@@ -28,7 +28,7 @@ theorem aperture_quotient_lower (N n : ℕ) (hn : 0 < n) (hN : 2 * n ≤ N) :
 
 /-- The dimension half-power respects the explicit decimation estimate. -/
 theorem aperture_half_power_lower (d N n : ℕ) (hn : 0 < n)
-    (hN : 2 * n ≤ N) :
+    (hN : n ≤ N) :
     ((N : ℝ) / (2 * n)) ^ ((d : ℝ) / 2) ≤
       (((N / n : ℕ) : ℝ)) ^ ((d : ℝ) / 2) :=
   Real.rpow_le_rpow (by positivity) (aperture_quotient_lower N n hn hN) (by positivity)
@@ -41,7 +41,7 @@ theorem half_norming_sqrt_normalization (n : ℝ) :
 
 /-- Both aperture factors can be replaced at once in the final lower bound. -/
 theorem aperture_scaled_factors_lower (d N n : ℕ) (hn : 0 < n)
-    (hN : 2 * n ≤ N) {θ : ℝ} (hθ : 0 ≤ θ) :
+    (hN : n ≤ N) {θ : ℝ} (hθ : 0 ≤ θ) :
     ((N : ℝ) / (2 * n)) ^ ((d : ℝ) / 2) *
         ((N : ℝ) * θ / (2 * Real.pi * n)) ^ (n - 1) ≤
       (((N / n : ℕ) : ℝ)) ^ ((d : ℝ) / 2) *

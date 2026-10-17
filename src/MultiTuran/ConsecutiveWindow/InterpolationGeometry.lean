@@ -37,6 +37,17 @@ theorem windowContourAngle_bounds {n : ℕ} (hn : 2 ≤ n) :
   unfold windowContourAngle
   constructor <;> linarith
 
+theorem windowContourRadii_bounds {n : ℕ} (hn : 2 ≤ n) :
+    (1/2 : ℝ) ≤ 1-1/(n : ℝ) ∧ 1-1/(n : ℝ) < 1 ∧
+      1 < 1+1/(n : ℝ) ∧ 1+1/(n : ℝ) ≤ 3/2 := by
+  have hnR : (2 : ℝ) ≤ n := by exact_mod_cast hn
+  have hn0 : (0 : ℝ) < n := by linarith
+  have hinv : 1/(n : ℝ) ≤ 1/2 := by
+    apply (div_le_iff₀ hn0).mpr
+    linarith
+  have hpos : 0 < 1/(n : ℝ) := by positivity
+  refine ⟨?_,?_,?_,?_⟩ <;> linarith
+
 private theorem torusCoordinateDistance_lower_of_between (x y δ : ℝ)
     (hlo : δ ≤ x-y) (hhi : x-y ≤ 2*Real.pi-δ) :
     δ ≤ torusCoordinateDistance x y := by
@@ -127,12 +138,14 @@ theorem exp_eq_radial_phase (w : ℂ) :
 /-- Every point on either radial side is at least `1/n` from every node. -/
 theorem window_log_radial_distance_lower {n : ℕ} (hn : 2 ≤ n) {y : ℝ}
     (hy : |y| ≤ Real.pi-Real.pi/(n : ℝ)) {w : ℂ}
-    (hre : Real.log (1/2 : ℝ) ≤ w.re)
+    (hre : Real.log (1-1/(n : ℝ)) ≤ w.re)
     (him : w.im=windowContourAngle n ∨ w.im= -windowContourAngle n) :
     1/(n : ℝ) ≤ ‖Complex.exp w-angularPhase y‖ := by
   rw [exp_eq_radial_phase]
   apply window_radial_distance_lower hn hy _ him
-  exact (Real.exp_log (by norm_num : (0 : ℝ) < 1/2)).symm.trans_le (Real.exp_le_exp.mpr hre)
+  have hr := (windowContourRadii_bounds hn).1
+  have hr0 : 0 < 1-1/(n : ℝ) := by linarith
+  exact hr.trans ((Real.exp_log hr0).symm.trans_le (Real.exp_le_exp.mpr hre))
 
 end
 end LeanNumDetect.MultiTuran.ConsecutiveWindow
