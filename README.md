@@ -14,7 +14,8 @@ Import `MultiTuran.Main` for the convex-body Turán theorem and single-clump
 block-sampling bound, and `MultiTuran.MultiClump.Results` for the multi-clump
 product-row theorem with the Riemann block condition. Import
 `MultiTuran.ConsecutiveWindow.Results` for consecutive-window norming and
-multi-clump bounds with aperture-scale separation and unrestricted clump diameters.
+multi-clump bounds with aperture-scale separation, a stated upper bound on minimum
+node spacing, and unrestricted clump diameters.
 
 ## Main theoretical results
 

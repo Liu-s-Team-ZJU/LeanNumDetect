@@ -22,7 +22,7 @@ def consecutiveWindowProductArrayLowerBound {d n : ℕ} (G H : SegmentedGrid d)
     (2/(Real.pi*n))^d * enclosingLongBlockFactor G H *
     (enclosingFillingRatio G H/(multidimensionalTuranConstant*d))^(n-1) *
     ((H.minAperture : ℝ)/(3*nStar))^((d : ℝ)/2) *
-    min 1 ((H.minAperture : ℝ)*nodeSeparation Y/(5*Real.pi*nStar))^(nStar-1)
+    ((H.minAperture : ℝ)*nodeSeparation Y/(5*Real.pi*nStar))^(nStar-1)
 
 @[simp] theorem consecutiveWindowProductArrayLowerBound_chartNodes {d n : ℕ}
     (G H : SegmentedGrid d) (Y : Fin n → Point d) (center : Point d)
@@ -38,7 +38,7 @@ theorem consecutiveWindowProductArrayLowerBound_le_of_norming_cube
     (hfull : s+1 ≤ H.minAperture)
     (hcube : 1/Real.sqrt ((n : ℝ)*6^nStar) *
       ((H.minAperture : ℝ)/(3*nStar))^((d : ℝ)/2) *
-      min 1 ((H.minAperture : ℝ)*nodeSeparation Y/(5*Real.pi*nStar))^(nStar-1) ≤
+      ((H.minAperture : ℝ)*nodeSeparation Y/(5*Real.pi*nStar))^(nStar-1) ≤
       matrixSingularValue (fullCubeVandermonde 1 s Y) (n-1)) :
     consecutiveWindowProductArrayLowerBound G H Y nStar ≤
       matrixSingularValue (generalizedVandermonde G Y) (n-1) := by
@@ -46,7 +46,7 @@ theorem consecutiveWindowProductArrayLowerBound_le_of_norming_cube
   have h := singularValue_lower_of_enclosing_norming_and_cube G H Y houter hn hη
     (show 0 ≤ 1/Real.sqrt ((n : ℝ)*6^nStar) *
       ((H.minAperture : ℝ)/(3*nStar))^((d : ℝ)/2) *
-      min 1 ((H.minAperture : ℝ)*nodeSeparation Y/(5*Real.pi*nStar))^(nStar-1) by
+      ((H.minAperture : ℝ)*nodeSeparation Y/(5*Real.pi*nStar))^(nStar-1) by
         have hθ := nodeSeparation_nonneg Y
         positivity)
     hnorming hfull hcube

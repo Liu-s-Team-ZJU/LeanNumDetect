@@ -17,7 +17,7 @@ The declaration namespace is `LeanNumDetect.MultiTuran.ConsecutiveWindow`. The s
 - `window_restriction_lower_of_norming` is the literal restriction lemma with the supplement's fixed norming coefficient and arbitrary admissible $(M,s)$.
 - `fullCube_elementary_bound` and `fullCube_no_wrap_separation` are the elementary full-cube estimate and no-wrap identity.
 - `singleClump_minimumSingularValue_lower` is the supplement's localized single-clump corollary.
-- `fullAperture_clump_minimumSingularValue_lower` is its unrestricted-clump full-cube lemma.
+- `fullAperture_clump_minimumSingularValue_lower` is its full-cube lemma with the minimum-spacing upper bound and no clump-diameter restriction.
 
 ## Sampling model and parameters
 
@@ -56,7 +56,7 @@ These are `H.minAperture`, `enclosingFillingRatio G H`, and `enclosingLongBlockF
 The multi-clump public theorem assumes $d\ge2$, $n\ge2$, the distinct-node partition setting above, and
 
 $$
-L_{q,\min}\ge n\quad\text{for every }q,\qquad N_{\min}\ge10n^\star.
+L_{q,\min}\ge n\quad\text{for every }q,\qquad N_{\min}\ge10n^\star,\qquad \theta_{\min}\le\frac{5\pi n^\star}{N_{\min}}.
 $$
 
 Its cross-clump condition is
@@ -65,7 +65,7 @@ $$
 \|\boldsymbol y_i-\boldsymbol y_j\|_{\mathbb T,\infty}>\frac{10\pi dn^\star}{N_{\min}}\qquad(\boldsymbol y_i\in C_a,\ \boldsymbol y_j\in C_b,\ a\ne b).
 $$
 
-Within-clump diameters are unrestricted. The final theorem constructs its chart, interpolation polynomials, and norming inequality from these hypotheses; it has no $B_d$, clump-diameter, interpolation, norming, derivative, or cube-bound premise.
+Within-clump diameters are unrestricted. The minimum-spacing upper bound is the `hθupper` parameter in the public multi-clump interfaces. The final theorem constructs its chart, interpolation polynomials, and norming inequality from these hypotheses; it has no $B_d$, clump-diameter, interpolation, norming, derivative, or cube-bound premise.
 
 `windowNormingLoss d n` and `windowNormingConstant d n` distinguish the energy loss from its reciprocal:
 
@@ -76,7 +76,7 @@ $$
 The final coefficient is `consecutiveWindowProductArrayLowerBound G H Y nStar`:
 
 $$
-\sigma_{\min}(\mathcal V_1)\ge\sqrt{\frac{\eta_0}{n6^{n^\star}}}\left(\frac2{\pi n}\right)^d\rho_L\left(\frac{\rho_{\boldsymbol\Lambda}}{C_{\mathrm T}d}\right)^{n-1}\left(\frac{N_{\min}}{3n^\star}\right)^{d/2}\min\left\{1,\frac{N_{\min}\theta_{\min}}{5\pi n^\star}\right\}^{n^\star-1}.
+\sigma_{\min}(\mathcal V_1)\ge\sqrt{\frac{\eta_0}{n6^{n^\star}}}\left(\frac2{\pi n}\right)^d\rho_L\left(\frac{\rho_{\boldsymbol\Lambda}}{C_{\mathrm T}d}\right)^{n-1}\left(\frac{N_{\min}}{3n^\star}\right)^{d/2}\left(\frac{N_{\min}\theta_{\min}}{5\pi n^\star}\right)^{n^\star-1}.
 $$
 
 Here $C_{\mathrm T}$ is the existing proved absolute `multidimensionalTuranConstant`. The Riemann supplement in [MultiClump/](../MultiClump/README.md) has its own norming coefficient, $B_d$ condition, and $L_*$ separation scale; its constants are documented in that guide.
@@ -113,7 +113,7 @@ The block interface `scalar_grid_block_energy_le` uses the original measured int
 
 The raw interpolation construction requires $M\ge2n^\star$. The shared [NumDetect/Random/CubeClumpBounds.lean](../../NumDetect/Random/CubeClumpBounds.lean) interfaces `liCubeClump_raw_ratio_of_interpolation` and `liCubeClump_raw_coefficient_le_of_ratio` perform the original interpolation-to-singular-value and coefficient conversions. Their inputs concern genuine cardinal polynomials, their coefficient masses, and the corresponding actual matrix; they do not prescribe how the within-clump factors were constructed. This reuses the original cube SVD argument; the explicit numerical estimates are proved in this directory.
 
-[CubeBounds.lean](CubeBounds.lean) sets $\Delta=\min\{\theta_{\min},4\pi n^\star/s\}$, so the raw spacing factor is exactly $\min\{1,s\theta_{\min}/(4\pi n^\star)\}$. It then chooses $s=2\lfloor(N_{\min}-1)/2\rfloor$, proves $s\ge4N_{\min}/5$ and $s\ge8n^\star$, and obtains the packet count $2\lfloor s/(4n^\star)\rfloor+1\ge N_{\min}/(3n^\star)$. The bound $\exp(1/2)\le119/72<5/3$ gives the prefactor $1/\sqrt{n6^{n^\star}}$, and the clipped spacing is at least $\min\{1,N_{\min}\theta_{\min}/(5\pi n^\star)\}$. The required gap satisfies $8\pi dn^\star/s\le10\pi dn^\star/N_{\min}$. [Aperture.lean](Aperture.lean) constructs the actual largest-clump capacity from the supplied partition.
+[CubeBounds.lean](CubeBounds.lean) sets $\Delta=\min\{\theta_{\min},4\pi n^\star/s\}$, so the raw spacing factor is exactly $\min\{1,s\theta_{\min}/(4\pi n^\star)\}$. It then chooses $s=2\lfloor(N_{\min}-1)/2\rfloor$, proves $s\ge4N_{\min}/5$ and $s\ge8n^\star$, and obtains the packet count $2\lfloor s/(4n^\star)\rfloor+1\ge N_{\min}/(3n^\star)$. The bound $\exp(1/2)\le119/72<5/3$ gives the prefactor $1/\sqrt{n6^{n^\star}}$. The minimum-spacing hypothesis gives $N_{\min}\theta_{\min}/(5\pi n^\star)\le1$; combined with $s\ge4N_{\min}/5$, this bounds the raw spacing factor below by $N_{\min}\theta_{\min}/(5\pi n^\star)$ and yields the displayed power. The required gap satisfies $8\pi dn^\star/s\le10\pi dn^\star/N_{\min}$. [Aperture.lean](Aperture.lean) constructs the actual largest-clump capacity from the supplied partition.
 
 [Restriction.lean](Restriction.lean) reuses the proved enclosing-box restriction and full-aperture machinery from [MultiClump/GeneralProduct.lean](../MultiClump/GeneralProduct.lean) and [FullAperture/FullAperture.lean](../FullAperture/FullAperture.lean). [BoundFormula.lean](BoundFormula.lean) assembles the coefficient with the window norming constant. [Main.lean](Main.lean) constructs the chart and both analytic inputs internally and transports the resulting integer-frequency singular value back to the original nodes.
 
@@ -128,13 +128,13 @@ All local names in the following tables are in `LeanNumDetect.MultiTuran.Consecu
 | `lem:restriction` | [Norming.lean](Norming.lean): `window_restriction_lower_of_norming` | Literal fixed-window-coefficient statement for every admissible pair. `window_product_restriction_lower` supplies norming from the short chart and block lengths. |
 | `lem:elementary` | [Elementary.lean](Elementary.lean): `fullCube_elementary_bound`, `fullCube_no_wrap_separation`, `fullCube_elementary_no_wrap_bound` | Direct applications of the main text's proved full-cube theorem and no-wrap identity. |
 | `cor:single-clump` | [SingleClump.lean](SingleClump.lean): `singleClump_minimumSingularValue_lower` | Literal open-cube localization, $l_{q,m}\ge n-1$, $n\ge4$, and the window coefficient. |
-| `lem:aperture` | [Aperture.lean](Aperture.lean): `fullAperture_clump_minimumSingularValue_lower` | Exact selected even cube, aperture coefficient, and unrestricted within-clump geometry. |
+| `lem:aperture` | [Aperture.lean](Aperture.lean): `fullAperture_clump_minimumSingularValue_lower` | Exact selected even cube, aperture coefficient, minimum-spacing upper bound, and unrestricted within-clump diameters. |
 
 ## Equation and intermediate-proof correspondence
 
 | Manuscript equation or step | Proved interface |
 | --- | --- |
-| `eq:main-hyp`, `eq:clump-gap` | The `hblocks`, `hN`, and `hcross` parameters in the public `Main` and `Aperture` statements |
+| `eq:main-hyp`, `eq:clump-gap` | The `hblocks`, `hN`, `hθupper`, and `hcross` parameters in the public `Main` statements; the aperture lemma uses `hN`, `hθupper`, and `hcross` |
 | `eq:main` | `consecutiveWindowArray_minimumSingularValue_lower`; `consecutiveWindowProductArrayLowerBound` stores the same complete coefficient |
 | `eq:eta-choice` | `windowNormingLoss`, `windowNormingConstant`, and their positive-constant lemmas |
 | `eq:chart` and integer-phase invariance | `exists_short_chart_of_ordered_points`, `exists_translated_short_chart`, `matrixSingularValue_chartNodes`, `torusLInfDistance_chartNodes`, `nodeSeparation_chartNodes` |
@@ -151,10 +151,10 @@ All local names in the following tables are in `LeanNumDetect.MultiTuran.Consecu
 | `eq:elementary` and separation scaling | `fullCube_elementary_bound`, `fullCube_no_wrap_separation` |
 | `eq:single-clump` | `singleClump_minimumSingularValue_lower` |
 | Unrestricted neighbor factors and full-cube cardinal interpolation | `exists_quantized_torus_chord`, `torus_neighbor_factor`, `withinClumpPolynomial_unrestricted`, `liInterpolationPolynomial_unrestricted`, `cube_raw_ratio_unrestricted` |
-| Spacing clipping, selected side, and `eq:aperture` | `fullCube_unrestricted_clump_clipped_lower`, `selected_fullAperture_unrestricted_clump_lower`, `fullAperture_clump_minimumSingularValue_lower`; `windowCube_prefactor_lower`, `windowCube_packetCount_lower`, and shared `fullApertureCubeSide_properties` |
+| Spacing clipping, selected side, minimum-spacing upper bound, and `eq:aperture` | `fullCube_unrestricted_clump_clipped_lower`, `selected_fullAperture_unrestricted_clump_lower`, `selected_multiClumpCubeLowerBound_le`, `fullAperture_clump_minimumSingularValue_lower`; `windowCube_prefactor_lower`, `windowCube_packetCount_lower`, and shared `fullApertureCubeSide_properties` |
 | `eq:product-bound` and final assembly | `window_product_restriction_lower`, `consecutiveWindowProductArrayLowerBound_le_of_norming_cube`, `consecutiveWindowArray_minimumSingularValue_lower` |
 
-The single-clump corollary derives $N_{\min}\ge n$ from the block lengths; it needs no additional aperture hypothesis. The floor estimate uses $M_0\ge1$ and $N_{\min}/n<M_0+1\le2M_0$. The helper restriction and interpolation transfer theorems accept their mathematical inputs explicitly. The public final theorems construct those inputs and retain only the supplement's sampling, partition, distinct-node, aperture, and cross-clump hypotheses.
+The single-clump corollary derives $N_{\min}\ge n$ from the block lengths; it needs no additional aperture hypothesis. The floor estimate uses $M_0\ge1$ and $N_{\min}/n<M_0+1\le2M_0$. The helper restriction and interpolation transfer theorems accept their mathematical inputs explicitly. The public final theorems construct those inputs and retain only the supplement's sampling, partition, distinct-node, aperture, minimum-spacing upper bound, and cross-clump hypotheses.
 
 ## Verification
 

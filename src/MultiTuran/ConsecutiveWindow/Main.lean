@@ -29,7 +29,8 @@ theorem consecutiveWindowProductArrayLowerBound_le_minimumSingularValue_of_slots
     (hblocks : ∀ q, n ≤ G.coordinateMinLength q)
     (hN : 10*nStar ≤ H.minAperture)
     (hcross : ∀ i j, C.label i ≠ C.label j →
-      10*Real.pi*d*nStar/H.minAperture < torusLInfDistance (Y i) (Y j)) :
+      10*Real.pi*d*nStar/H.minAperture < torusLInfDistance (Y i) (Y j))
+    (hθupper : nodeSeparation Y ≤ 5*Real.pi*nStar/H.minAperture) :
     consecutiveWindowProductArrayLowerBound G H Y nStar ≤
       matrixSingularValue (generalizedVandermonde G Y) (n-1) := by
   obtain ⟨center,winding,_hchart,hnorming⟩ :=
@@ -42,7 +43,10 @@ theorem consecutiveWindowProductArrayLowerBound_le_minimumSingularValue_of_slots
     simpa only [Z,torusLInfDistance_chartNodes] using hcross i j hij
   have hsepZ : 0 < nodeSeparation Z := by
     simpa only [Z,nodeSeparation_chartNodes] using hsep
-  have hcube := selected_multiClumpCubeLowerBound_le H Z C' hd hn hs hsize hN hcrossZ hsepZ
+  have hθupperZ : nodeSeparation Z ≤ 5*Real.pi*nStar/H.minAperture := by
+    simpa only [Z,nodeSeparation_chartNodes] using hθupper
+  have hcube := selected_multiClumpCubeLowerBound_le H Z C' hd hn hs hsize hN hcrossZ
+    hsepZ hθupperZ
   have hN4 : 4 ≤ H.minAperture := by
     omega
   have hfull := (fullApertureCubeSide_properties hN4).2.1
@@ -62,12 +66,13 @@ theorem consecutiveWindowProductArray_minimumSingularValue_lower
     (hblocks : ∀ q, n ≤ G.coordinateMinLength q)
     (hN : 10*largestClumpSize label ≤ H.minAperture)
     (hcross : ∀ i j, label i ≠ label j →
-      10*Real.pi*d*largestClumpSize label/H.minAperture < torusLInfDistance (Y i) (Y j)) :
+      10*Real.pi*d*largestClumpSize label/H.minAperture < torusLInfDistance (Y i) (Y j))
+    (hθupper : nodeSeparation Y ≤ 5*Real.pi*largestClumpSize label/H.minAperture) :
     Real.sqrt (windowNormingConstant d n/((n : ℝ)*6^largestClumpSize label)) *
       (2/(Real.pi*n))^d * enclosingLongBlockFactor G H *
       (enclosingFillingRatio G H/(multidimensionalTuranConstant*d))^(n-1) *
       ((H.minAperture : ℝ)/(3*largestClumpSize label))^((d : ℝ)/2) *
-      min 1 ((H.minAperture : ℝ)*nodeSeparation Y/(5*Real.pi*largestClumpSize label))^
+      ((H.minAperture : ℝ)*nodeSeparation Y/(5*Real.pi*largestClumpSize label))^
         (largestClumpSize label-1) ≤
       matrixSingularValue (generalizedVandermonde G Y) (n-1) := by
   obtain ⟨C,hC⟩ := NumDetect.exists_clumpSlots (x := Y) label
@@ -79,7 +84,7 @@ theorem consecutiveWindowProductArray_minimumSingularValue_lower
   exact consecutiveWindowProductArrayLowerBound_le_minimumSingularValue_of_slots
     G H Y C houter hd hn (largestClumpSize_pos label (by omega))
     (largestClumpSize_le_sourceCount label)
-    (nodeSeparation_pos_of_pairwise_torusDistance_pos Y hn hpair) hblocks hN hcrossC
+    (nodeSeparation_pos_of_pairwise_torusDistance_pos Y hn hpair) hblocks hN hcrossC hθupper
 
 /-- Literal same-aperture version of `thm:main`, including the original
 long-block and filling-ratio factors. -/
@@ -91,17 +96,18 @@ theorem consecutiveWindowArray_minimumSingularValue_lower
     (hblocks : ∀ q, n ≤ G.coordinateMinLength q)
     (hN : 10*largestClumpSize label ≤ G.minAperture)
     (hcross : ∀ i j, label i ≠ label j →
-      10*Real.pi*d*largestClumpSize label/G.minAperture < torusLInfDistance (Y i) (Y j)) :
+      10*Real.pi*d*largestClumpSize label/G.minAperture < torusLInfDistance (Y i) (Y j))
+    (hθupper : nodeSeparation Y ≤ 5*Real.pi*largestClumpSize label/G.minAperture) :
     Real.sqrt (windowNormingConstant d n/((n : ℝ)*6^largestClumpSize label)) *
       (2/(Real.pi*n))^d * G.rhoL *
       (G.fillingRatio/(multidimensionalTuranConstant*d))^(n-1) *
       ((G.minAperture : ℝ)/(3*largestClumpSize label))^((d : ℝ)/2) *
-      min 1 ((G.minAperture : ℝ)*nodeSeparation Y/(5*Real.pi*largestClumpSize label))^
+      ((G.minAperture : ℝ)*nodeSeparation Y/(5*Real.pi*largestClumpSize label))^
         (largestClumpSize label-1) ≤
       matrixSingularValue (generalizedVandermonde G Y) (n-1) := by
   simpa only [enclosingLongBlockFactor_self,enclosingFillingRatio_self] using
     consecutiveWindowProductArray_minimumSingularValue_lower G G Y label
-      (fun _ => le_rfl) hd hn hsurj hpair hblocks hN hcross
+      (fun _ => le_rfl) hd hn hsurj hpair hblocks hN hcross hθupper
 
 /-- Actual blocks with arbitrary starting positions and an arbitrary
 enclosing box. Normalizing the starts preserves every measured row and
@@ -121,7 +127,9 @@ theorem consecutiveWindowRawProduct_minimumSingularValue_lower
     (hcross : ∀ i j, label i ≠ label j →
       10*Real.pi*d*largestClumpSize label/
         (enclosingBoxGrid (by omega : 0 < d) N hNpos).minAperture <
-          torusLInfDistance (Y i) (Y j)) :
+          torusLInfDistance (Y i) (Y j))
+    (hθupper : nodeSeparation Y ≤ 5*Real.pi*largestClumpSize label/
+      (enclosingBoxGrid (by omega : 0 < d) N hNpos).minAperture) :
     let G := normalizedProductGrid (by omega : 0 < d) r a l hseparated
     let H := enclosingBoxGrid (by omega : 0 < d) N hNpos
     consecutiveWindowProductArrayLowerBound G H Y (largestClumpSize label) ≤
@@ -137,7 +145,7 @@ theorem consecutiveWindowRawProduct_minimumSingularValue_lower
     omega
   have hbound := consecutiveWindowProductArray_minimumSingularValue_lower G H Y label
     (normalizedProductGrid_le_enclosingBoxGrid (by omega) r a l hseparated N hNpos hlast)
-    hd hn hsurj hpair hlong hN hcross
+    hd hn hsurj hpair hlong hN hcross hθupper
   dsimp only
   rw [generalizedVandermonde_rowShift_minimumSingularValue G Y (by omega)]
   exact hbound

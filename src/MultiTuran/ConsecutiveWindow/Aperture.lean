@@ -4,7 +4,7 @@ import MultiTuran.MultiClump.DistinctNodes
 /-! # Literal unrestricted-clump full-aperture lemma
 
 Correspondence: `lem:aperture`. The partition interface uses the actual
-maximum fiber cardinality and imposes no within-clump diameter bound.
+maximum fiber cardinality and the normalized spacing upper bound.
 -/
 
 set_option autoImplicit false
@@ -20,10 +20,11 @@ theorem fullAperture_clump_minimumSingularValue_lower
     (hpair : ∀ i j, i ≠ j → 0 < torusLInfDistance (Y i) (Y j))
     (hN : 10*largestClumpSize label ≤ N)
     (hcross : ∀ i j, label i ≠ label j →
-      10*Real.pi*d*largestClumpSize label/N < torusLInfDistance (Y i) (Y j)) :
+      10*Real.pi*d*largestClumpSize label/N < torusLInfDistance (Y i) (Y j))
+    (hθupper : nodeSeparation Y ≤ 5*Real.pi*largestClumpSize label/N) :
     1/Real.sqrt ((n : ℝ)*6^largestClumpSize label) *
       ((N : ℝ)/(3*largestClumpSize label))^((d : ℝ)/2) *
-      min 1 ((N : ℝ)*nodeSeparation Y/(5*Real.pi*largestClumpSize label))^
+      ((N : ℝ)*nodeSeparation Y/(5*Real.pi*largestClumpSize label))^
         (largestClumpSize label-1) ≤
       matrixSingularValue (fullCubeVandermonde 1 (fullApertureCubeSide N) Y) (n-1) := by
   obtain ⟨C,hC⟩ := NumDetect.exists_clumpSlots (x := Y) label
@@ -42,7 +43,9 @@ theorem fullAperture_clump_minimumSingularValue_lower
       (by positivity : 0 ≤ (N : ℝ)/(3*largestClumpSize label)) d (1/2 : ℝ)]
     congr 1
     ring
-  rw [hpower] at h
+  have hs := largestClumpSize_pos label (by omega : 0 < n)
+  have hquot := aperture_spacing_quotient_le_one (by omega : 0 < N) hs hθupper
+  rw [hpower,min_eq_right hquot] at h
   exact h
 
 end

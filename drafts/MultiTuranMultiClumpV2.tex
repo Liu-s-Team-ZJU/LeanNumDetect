@@ -25,7 +25,7 @@ We work in the product row-set setting of the main text and use its notation and
 \begin{theorem}[Multi-clump bound for product blocks]\label{thm:main}
 Let $\X=\bigsqcup_{a=1}^r C_a$ be a partition into nonempty clumps, and set $n^\star:=\max_a|C_a|$. Assume
 \begin{equation}\label{eq:main-hyp}
-L_{q,\min}\ge n\quad(q=1,\ldots,d),\qquad N_{\min}\ge10n^\star,
+L_{q,\min}\ge n\quad(q=1,\ldots,d),\qquad N_{\min}\ge10n^\star,\qquad \theta_{\min}\le\frac{5\pi n^\star}{N_{\min}},
 \end{equation}
 and
 \begin{equation}\label{eq:clump-gap}
@@ -33,7 +33,7 @@ and
 \end{equation}
 Then
 \begin{equation}\label{eq:main}
-\sigma_{\min}(\V_1)\ge\sqrt{\frac{\eta_0}{n\,6^{n^\star}}}\left(\frac{2}{\pi n}\right)^d\rho_L\left(\frac{\rho_{\bm\Lambda}}{C_{\mathrm T}d}\right)^{n-1}\left(\frac{N_{\min}}{3n^\star}\right)^{d/2}\min\left\{1,\frac{N_{\min}\theta_{\min}}{5\pi n^\star}\right\}^{n^\star-1},
+\sigma_{\min}(\V_1)\ge\sqrt{\frac{\eta_0}{n\,6^{n^\star}}}\left(\frac{2}{\pi n}\right)^d\rho_L\left(\frac{\rho_{\bm\Lambda}}{C_{\mathrm T}d}\right)^{n-1}\left(\frac{N_{\min}}{3n^\star}\right)^{d/2}\left(\frac{N_{\min}\theta_{\min}}{5\pi n^\star}\right)^{n^\star-1},
 \end{equation}
 where $C_{\mathrm T}\ge1$ is the absolute Tur\'an constant of the main text and
 \begin{equation}\label{eq:eta-choice}
@@ -212,13 +212,13 @@ This is \eqref{eq:single-clump}.
 \end{proof}
 
 \begin{lemma}[Multi-clump full-cube bound]\label{lem:aperture}
-Under the aperture and clump-gap assumptions of Theorem~\ref{thm:main}, choose
+Under the aperture, minimum-separation, and clump-gap assumptions of Theorem~\ref{thm:main}, choose
 \[
 M=1,\qquad s:=2\left\lfloor\frac{N_{\min}-1}{2}\right\rfloor.
 \]
 Then $(M,s)$ is full-aperture admissible, $h_{1,s}=1$, and
 \begin{equation}\label{eq:aperture}
-\sigma_{\min}(A_{1,s}(\X))\ge\frac{1}{\sqrt{n\,6^{n^\star}}}\left(\frac{N_{\min}}{3n^\star}\right)^{d/2}\min\left\{1,\frac{N_{\min}\theta_{\min}}{5\pi n^\star}\right\}^{n^\star-1}.
+\sigma_{\min}(A_{1,s}(\X))\ge\frac{1}{\sqrt{n\,6^{n^\star}}}\left(\frac{N_{\min}}{3n^\star}\right)^{d/2}\left(\frac{N_{\min}\theta_{\min}}{5\pi n^\star}\right)^{n^\star-1}.
 \end{equation}
 \end{lemma}
 \begin{proof}
@@ -251,9 +251,13 @@ For the packet count,
 N_{\min}&\le\frac54s<5n^\star\left(\left\lfloor\frac{s}{4n^\star}\right\rfloor+1\right)\le3n^\star\left(2\left\lfloor\frac{s}{4n^\star}\right\rfloor+1\right),\\
 \frac{N_{\min}}{3n^\star}&\le2\left\lfloor\frac{s}{4n^\star}\right\rfloor+1.
 \end{align*}
-Finally,
+The minimum-separation assumption and $s\ge4N_{\min}/5$ give
 \[
-\frac{N_{\min}\theta_{\min}}{5\pi n^\star}\le\frac{s\theta_{\min}}{4\pi n^\star},\qquad \min\left\{1,\frac{N_{\min}\theta_{\min}}{5\pi n^\star}\right\}\le\min\left\{1,\frac{s\theta_{\min}}{4\pi n^\star}\right\}.
+0<\frac{N_{\min}\theta_{\min}}{5\pi n^\star}\le1,\qquad \frac{N_{\min}\theta_{\min}}{5\pi n^\star}\le\frac{s\theta_{\min}}{4\pi n^\star}.
+\]
+Hence
+\[
+\left(\frac{N_{\min}\theta_{\min}}{5\pi n^\star}\right)^{n^\star-1}\le\min\left\{1,\frac{s\theta_{\min}}{4\pi n^\star}\right\}^{n^\star-1}.
 \]
 Substitution in the preceding lower bound proves \eqref{eq:aperture}.
 \end{proof}

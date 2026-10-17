@@ -40,8 +40,10 @@ run_cmd do
       ``LeanNumDetect.MultiTuran.ConsecutiveWindow.fullCube_elementary_no_wrap_bound,
       ``LeanNumDetect.MultiTuran.ConsecutiveWindow.windowCube_prefactor_lower,
       ``LeanNumDetect.MultiTuran.ConsecutiveWindow.windowCube_packetCount_lower,
+      ``LeanNumDetect.MultiTuran.ConsecutiveWindow.selected_multiClumpCubeLowerBound_le,
       ``LeanNumDetect.MultiTuran.ConsecutiveWindow.fullAperture_clump_minimumSingularValue_lower,
       ``LeanNumDetect.MultiTuran.ConsecutiveWindow.singleClump_minimumSingularValue_lower,
+      ``LeanNumDetect.MultiTuran.ConsecutiveWindow.consecutiveWindowProductArrayLowerBound_le_minimumSingularValue_of_slots,
       ``LeanNumDetect.MultiTuran.ConsecutiveWindow.consecutiveWindowArray_minimumSingularValue_lower,
       ``LeanNumDetect.MultiTuran.ConsecutiveWindow.consecutiveWindowProductArray_minimumSingularValue_lower,
       ``LeanNumDetect.MultiTuran.ConsecutiveWindow.consecutiveWindowRawProduct_minimumSingularValue_lower] do

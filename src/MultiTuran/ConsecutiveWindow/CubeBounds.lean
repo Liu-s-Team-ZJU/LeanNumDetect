@@ -4,7 +4,8 @@ import MultiTuran.MultiClump.BlockParameters
 /-! # Full-aperture cube bounds with unrestricted clump geometry
 
 Correspondence: `lem:aperture` in the consecutive-window supplement. The
-cross-clump gap and maximum fiber cardinality are the only clump conditions.
+cardinal polynomials use the cross-clump gap and maximum fiber cardinality.
+A spacing upper bound gives the untruncated aperture coefficient.
 -/
 
 set_option autoImplicit false
@@ -241,8 +242,18 @@ theorem selected_fullAperture_unrestricted_clump_lower
   exact fullCube_unrestricted_clump_fullAperture_lower C (by omega) hn0 hs hsize
     hcross hprops.1 hlarge hNs hgap hθ hmin
 
-/-- The selected-aperture bound using the manuscript's measured aperture
-and actual minimum periodic node spacing. -/
+/-- The aperture spacing upper bound makes the normalized spacing at most one. -/
+theorem aperture_spacing_quotient_le_one {N nStar : ℕ}
+    (hN : 0 < N) (hs : 0 < nStar) {θ : ℝ}
+    (hθupper : θ ≤ 5 * Real.pi * nStar / N) :
+    (N : ℝ) * θ / (5 * Real.pi * nStar) ≤ 1 := by
+  have hNreal : (0 : ℝ) < N := by exact_mod_cast hN
+  apply (div_le_one (by positivity : (0 : ℝ) < 5 * Real.pi * nStar)).2
+  have h := (le_div_iff₀ hNreal).1 hθupper
+  nlinarith only [h]
+
+/-- The selected-aperture coefficient at the actual minimum periodic node
+spacing, within its normalized spacing range. -/
 theorem selected_multiClumpCubeLowerBound_le {d n A nStar : ℕ}
     (H : SegmentedGrid d) (Y : Fin n → Point d)
     (C : ClumpSlots (A := A) (nStar := nStar) Y)
@@ -250,10 +261,11 @@ theorem selected_multiClumpCubeLowerBound_le {d n A nStar : ℕ}
     (hN : 10 * nStar ≤ H.minAperture)
     (hcross : ∀ i j, C.label i ≠ C.label j →
       10 * Real.pi * d * nStar / H.minAperture < torusLInfDistance (Y i) (Y j))
-    (hsep : 0 < nodeSeparation Y) :
+    (hsep : 0 < nodeSeparation Y)
+    (hθupper : nodeSeparation Y ≤ 5 * Real.pi * nStar / H.minAperture) :
     1 / Real.sqrt ((n : ℝ) * 6 ^ nStar) *
       ((H.minAperture : ℝ) / (3 * nStar)) ^ ((d : ℝ) / 2) *
-      min 1 ((H.minAperture : ℝ) * nodeSeparation Y / (5 * Real.pi * nStar)) ^ (nStar - 1) ≤
+      ((H.minAperture : ℝ) * nodeSeparation Y / (5 * Real.pi * nStar)) ^ (nStar - 1) ≤
       matrixSingularValue
         (fullCubeVandermonde 1 (MultiClump.fullApertureCubeSide H.minAperture) Y) (n - 1) := by
   have h := selected_fullAperture_unrestricted_clump_lower C hd hn hs hsize hN
@@ -264,7 +276,8 @@ theorem selected_multiClumpCubeLowerBound_le {d n A nStar : ℕ}
       (by positivity : 0 ≤ (H.minAperture : ℝ) / (3 * nStar)) d (1 / 2 : ℝ)]
     congr 1
     ring
-  rw [hpower] at h
+  have hquot := aperture_spacing_quotient_le_one (by omega : 0 < H.minAperture) hs hθupper
+  rw [hpower,min_eq_right hquot] at h
   exact h
 
 end
